@@ -1,0 +1,9 @@
+config.json
+*.txt
+*.log
+*.map
+log/
+node_modules/
+imageSrc/
+python/data/
+python/__pycache__/

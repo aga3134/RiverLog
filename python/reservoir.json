@@ -1,0 +1,659 @@
+[
+  {
+    "id": "10201",
+    "name": "石門水庫",
+    "lat": 24.809959,
+    "lng": 121.2610972,
+    "DeadStorageLevel": "195",
+    "EffectiveCapacity": "19912.4",
+    "FullWaterLevel": "245"
+  },
+  {
+    "id": "10203",
+    "name": "西勢水庫",
+    "lat": 25.0853998,
+    "lng": 121.7333787,
+    "DeadStorageLevel": "64.73",
+    "EffectiveCapacity": "43.69",
+    "FullWaterLevel": "72.08"
+  },
+  {
+    "id": "10204",
+    "name": "新山水庫",
+    "lat": 25.1334462,
+    "lng": 121.7047161,
+    "DeadStorageLevel": "45",
+    "EffectiveCapacity": "1002",
+    "FullWaterLevel": "86"
+  },
+  {
+    "id": "10205",
+    "name": "翡翠水庫",
+    "lat": 24.9089989,
+    "lng": 121.5775775,
+    "DeadStorageLevel": "110",
+    "EffectiveCapacity": "33550.5",
+    "FullWaterLevel": "170"
+  },
+  {
+    "id": "10206",
+    "name": "榮華壩",
+    "lat": 24.7369489,
+    "lng": 121.3486443,
+    "DeadStorageLevel": "0",
+    "EffectiveCapacity": "62858",
+    "FullWaterLevel": "413"
+  },
+  {
+    "id": "10207",
+    "name": "鳶山堰",
+    "lat": 24.9303937,
+    "lng": 121.3400665,
+    "DeadStorageLevel": "47.2",
+    "EffectiveCapacity": "439",
+    "FullWaterLevel": "51.5"
+  },
+  {
+    "id": "10210",
+    "name": "三峽攔河堰",
+    "lat": "",
+    "lng": "",
+    "DeadStorageLevel": "56",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": "59"
+  },
+  {
+    "id": "10211",
+    "name": "青潭堰",
+    "lat": 24.9435716,
+    "lng": 121.5427384,
+    "DeadStorageLevel": "17",
+    "EffectiveCapacity": "71.89",
+    "FullWaterLevel": "22.6"
+  },
+  {
+    "id": "10212",
+    "name": "直潭壩",
+    "lat": 24.9266851,
+    "lng": 121.5297935,
+    "DeadStorageLevel": "41",
+    "EffectiveCapacity": "191.89",
+    "FullWaterLevel": "44.7"
+  },
+  {
+    "id": "10401",
+    "name": "寶山水庫",
+    "lat": 24.7503904,
+    "lng": 121.0422657,
+    "DeadStorageLevel": "122",
+    "EffectiveCapacity": "538",
+    "FullWaterLevel": "141.6"
+  },
+  {
+    "id": "10404",
+    "name": "隆恩堰",
+    "lat": 24.7983997,
+    "lng": 121.0267908,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": "44"
+  },
+  {
+    "id": "10405",
+    "name": "寶山第二水庫",
+    "lat": 24.7193572,
+    "lng": 121.0416507,
+    "DeadStorageLevel": "110",
+    "EffectiveCapacity": "3147.18",
+    "FullWaterLevel": "150"
+  },
+  {
+    "id": "10501",
+    "name": "永和山水庫",
+    "lat": 24.6603666,
+    "lng": 120.9210166,
+    "DeadStorageLevel": "50",
+    "EffectiveCapacity": "2998.94",
+    "FullWaterLevel": "85"
+  },
+  {
+    "id": "10503",
+    "name": "大埔水庫",
+    "lat": 24.6770803,
+    "lng": 120.9829165,
+    "DeadStorageLevel": "60.4",
+    "EffectiveCapacity": "529.9",
+    "FullWaterLevel": "69.6"
+  },
+  {
+    "id": "10601",
+    "name": "明德水庫",
+    "lat": 24.5845909,
+    "lng": 120.8845903,
+    "DeadStorageLevel": "42.5",
+    "EffectiveCapacity": "1276",
+    "FullWaterLevel": "61"
+  },
+  {
+    "id": "20101",
+    "name": "鯉魚潭水庫",
+    "lat": 24.3433099,
+    "lng": 120.7760477,
+    "DeadStorageLevel": "243.2",
+    "EffectiveCapacity": "11448.69",
+    "FullWaterLevel": "300"
+  },
+  {
+    "id": "20201",
+    "name": "德基水庫",
+    "lat": 24.2552829,
+    "lng": 121.1653113,
+    "DeadStorageLevel": "1350",
+    "EffectiveCapacity": "15082.2",
+    "FullWaterLevel": "1408"
+  },
+  {
+    "id": "",
+    "name": "尖山埤水庫",
+    "lat": 23.2597342,
+    "lng": 120.3871361,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": ""
+  },
+  {
+    "id": "20202",
+    "name": "石岡壩",
+    "lat": 24.2813101,
+    "lng": 120.7673051,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "145.07",
+    "FullWaterLevel": "274.5"
+  },
+  {
+    "id": "20405",
+    "name": "士林堰",
+    "lat": 24.3440958,
+    "lng": 120.934416,
+    "DeadStorageLevel": "593",
+    "EffectiveCapacity": "70.4",
+    "FullWaterLevel": "604.5"
+  },
+  {
+    "id": "20501",
+    "name": "霧社水庫",
+    "lat": 23.9808379,
+    "lng": 121.1369783,
+    "DeadStorageLevel": "978",
+    "EffectiveCapacity": "4366.03",
+    "FullWaterLevel": "1005"
+  },
+  {
+    "id": "20502",
+    "name": "日月潭水庫",
+    "lat": 23.8523767,
+    "lng": 120.8834325,
+    "DeadStorageLevel": "727.27",
+    "EffectiveCapacity": "12928.67",
+    "FullWaterLevel": "748.48"
+  },
+  {
+    "id": "20503",
+    "name": "集集攔河堰",
+    "lat": 23.8196596,
+    "lng": 120.7620643,
+    "DeadStorageLevel": "210.96",
+    "EffectiveCapacity": "411.13",
+    "FullWaterLevel": "214.75"
+  },
+  {
+    "id": "20508",
+    "name": "明湖下池",
+    "lat": 23.8544489,
+    "lng": 120.8680893,
+    "DeadStorageLevel": "345",
+    "EffectiveCapacity": "1110",
+    "FullWaterLevel": "373"
+  },
+  {
+    "id": "20509",
+    "name": "湖山水庫",
+    "lat": 23.6877524,
+    "lng": 120.6299319,
+    "DeadStorageLevel": "165",
+    "EffectiveCapacity": "5085",
+    "FullWaterLevel": "211.5"
+  },
+  {
+    "id": "30301",
+    "name": "仁義潭水庫",
+    "lat": 23.4676764,
+    "lng": 120.485747,
+    "DeadStorageLevel": "89",
+    "EffectiveCapacity": "2531.9",
+    "FullWaterLevel": "105"
+  },
+  {
+    "id": "30302",
+    "name": "蘭潭水庫",
+    "lat": 23.4722635,
+    "lng": 120.4764949,
+    "DeadStorageLevel": "57.3",
+    "EffectiveCapacity": "925.8",
+    "FullWaterLevel": "75.38"
+  },
+  {
+    "id": "30306",
+    "name": "內埔子",
+    "lat": 23.5339763,
+    "lng": 120.4901847,
+    "DeadStorageLevel": "50",
+    "EffectiveCapacity": "68.0659",
+    "FullWaterLevel": "60"
+  },
+  {
+    "id": "30401",
+    "name": "白河水庫",
+    "lat": 23.3620923,
+    "lng": 120.4748386,
+    "DeadStorageLevel": "104.58",
+    "EffectiveCapacity": "691.0324",
+    "FullWaterLevel": "109"
+  },
+  {
+    "id": "30403",
+    "name": "德元埤水庫",
+    "lat": 23.2591742,
+    "lng": 120.3356602,
+    "DeadStorageLevel": "11.2",
+    "EffectiveCapacity": "178.8487",
+    "FullWaterLevel": "14.2"
+  },
+  {
+    "id": "30501",
+    "name": "烏山頭水庫",
+    "lat": 23.1970028,
+    "lng": 120.3729471,
+    "DeadStorageLevel": "34.88",
+    "EffectiveCapacity": "7828",
+    "FullWaterLevel": "58.18"
+  },
+  {
+    "id": "30502",
+    "name": "曾文水庫",
+    "lat": 23.279924,
+    "lng": 120.567291,
+    "DeadStorageLevel": "171",
+    "EffectiveCapacity": "51068",
+    "FullWaterLevel": "230.09"
+  },
+  {
+    "id": "30503",
+    "name": "南化水庫",
+    "lat": 23.089895,
+    "lng": 120.54545,
+    "DeadStorageLevel": "131",
+    "EffectiveCapacity": "9338.1",
+    "FullWaterLevel": "180"
+  },
+  {
+    "id": "30504",
+    "name": "鏡面水庫",
+    "lat": 23.0596373,
+    "lng": 120.488786,
+    "DeadStorageLevel": "130",
+    "EffectiveCapacity": "103",
+    "FullWaterLevel": "143"
+  },
+  {
+    "id": "30601",
+    "name": "虎頭埤水庫",
+    "lat": 23.02741,
+    "lng": 120.340218,
+    "DeadStorageLevel": "30.7",
+    "EffectiveCapacity": "107.2531",
+    "FullWaterLevel": "37"
+  },
+  {
+    "id": "30602",
+    "name": "鹽水埤水庫",
+    "lat": 23.0286532,
+    "lng": 120.3233093,
+    "DeadStorageLevel": "27.5",
+    "EffectiveCapacity": "50.8142",
+    "FullWaterLevel": "31"
+  },
+  {
+    "id": "30801",
+    "name": "澄清湖水庫",
+    "lat": 22.6601845,
+    "lng": 120.3345404,
+    "DeadStorageLevel": "15",
+    "EffectiveCapacity": "262.95",
+    "FullWaterLevel": "17.8"
+  },
+  {
+    "id": "30802",
+    "name": "阿公店水庫",
+    "lat": 22.812007,
+    "lng": 120.349914,
+    "DeadStorageLevel": "27",
+    "EffectiveCapacity": "1588.67",
+    "FullWaterLevel": "37"
+  },
+  {
+    "id": "30803",
+    "name": "鳳山水庫",
+    "lat": 22.538246,
+    "lng": 120.388387,
+    "DeadStorageLevel": "29.56",
+    "EffectiveCapacity": "751.17",
+    "FullWaterLevel": "50"
+  },
+  {
+    "id": "30901",
+    "name": "高屏溪攔河堰",
+    "lat": 22.6311033,
+    "lng": 120.2991394,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": ""
+  },
+  {
+    "id": "31002",
+    "name": "甲仙攔河堰",
+    "lat": 23.084694,
+    "lng": 120.5809751,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": ""
+  },
+  {
+    "id": "31201",
+    "name": "牡丹水庫",
+    "lat": 22.1427322,
+    "lng": 120.7652605,
+    "DeadStorageLevel": "100.2",
+    "EffectiveCapacity": "2632.91",
+    "FullWaterLevel": "142"
+  },
+  {
+    "id": "31202",
+    "name": "龍鑾潭水庫",
+    "lat": 21.97725,
+    "lng": 120.7345683,
+    "DeadStorageLevel": "",
+    "EffectiveCapacity": "",
+    "FullWaterLevel": ""
+  },
+  {
+    "id": "31301",
+    "name": "成功水庫",
+    "lat": 23.5746969,
+    "lng": 119.6203743,
+    "DeadStorageLevel": "2",
+    "EffectiveCapacity": "104",
+    "FullWaterLevel": "9"
+  },
+  {
+    "id": "50102",
+    "name": "興仁水庫",
+    "lat": 23.5509336,
+    "lng": 119.6053692,
+    "DeadStorageLevel": "3",
+    "EffectiveCapacity": "63.7",
+    "FullWaterLevel": "11"
+  },
+  {
+    "id": "50103",
+    "name": "東衛水庫",
+    "lat": 23.566866,
+    "lng": 119.5950993,
+    "DeadStorageLevel": "0.5",
+    "EffectiveCapacity": "18.5",
+    "FullWaterLevel": "6.5"
+  },
+  {
+    "id": "50104",
+    "name": "赤崁地下水庫",
+    "lat": 23.659167,
+    "lng": 119.596667,
+    "DeadStorageLevel": "0",
+    "EffectiveCapacity": "25.45",
+    "FullWaterLevel": "3"
+  },
+  {
+    "id": "50105",
+    "name": "西安水庫",
+    "lat": 23.3651901,
+    "lng": 119.4952388,
+    "DeadStorageLevel": "4",
+    "EffectiveCapacity": "24",
+    "FullWaterLevel": "12.5"
+  },
+  {
+    "id": "50106",
+    "name": "七美水庫",
+    "lat": 23.2117205,
+    "lng": 119.4321673,
+    "DeadStorageLevel": "16",
+    "EffectiveCapacity": "22.84",
+    "FullWaterLevel": "24"
+  },
+  {
+    "id": "50108",
+    "name": "小池水庫",
+    "lat": 23.6102314,
+    "lng": 119.5073639,
+    "DeadStorageLevel": "3",
+    "EffectiveCapacity": "20.57",
+    "FullWaterLevel": "13.4"
+  },
+  {
+    "id": "50109",
+    "name": "烏溝蓄水塘",
+    "lat": 23.3664871,
+    "lng": 119.5341541,
+    "DeadStorageLevel": "2",
+    "EffectiveCapacity": "3.54",
+    "FullWaterLevel": "8"
+  },
+  {
+    "id": "50201",
+    "name": "太湖水庫",
+    "lat": 26.4572433,
+    "lng": 117.5861312,
+    "DeadStorageLevel": "13.2",
+    "EffectiveCapacity": "168.9",
+    "FullWaterLevel": "18.96"
+  },
+  {
+    "id": "50202",
+    "name": "田埔水庫",
+    "lat": 24.4764265,
+    "lng": 118.4388792,
+    "DeadStorageLevel": "2.5",
+    "EffectiveCapacity": "67.79",
+    "FullWaterLevel": "6.55"
+  },
+  {
+    "id": "50203",
+    "name": "陽明湖水庫",
+    "lat": 24.4600462,
+    "lng": 118.4290944,
+    "DeadStorageLevel": "35",
+    "EffectiveCapacity": "30.8",
+    "FullWaterLevel": "41.9"
+  },
+  {
+    "id": "50204",
+    "name": "山西蓄水塘",
+    "lat": 24.505722,
+    "lng": 118.427794,
+    "DeadStorageLevel": "22.1",
+    "EffectiveCapacity": "22",
+    "FullWaterLevel": "28"
+  },
+  {
+    "id": "50205",
+    "name": "榮湖水庫",
+    "lat": 24.4861994,
+    "lng": 118.4082215,
+    "DeadStorageLevel": "1.25",
+    "EffectiveCapacity": "45.2",
+    "FullWaterLevel": "4.05"
+  },
+  {
+    "id": "50206",
+    "name": "擎天水庫",
+    "lat": 24.4587942,
+    "lng": 118.3902364,
+    "DeadStorageLevel": "16",
+    "EffectiveCapacity": "23.8",
+    "FullWaterLevel": "31.06"
+  },
+  {
+    "id": "50207",
+    "name": "金沙水庫",
+    "lat": 24.4910395,
+    "lng": 118.3996152,
+    "DeadStorageLevel": "0.55",
+    "EffectiveCapacity": "57",
+    "FullWaterLevel": "4.1"
+  },
+  {
+    "id": "50208",
+    "name": "蓮湖水庫",
+    "lat": 24.4495208,
+    "lng": 118.2477142,
+    "DeadStorageLevel": "3.5",
+    "EffectiveCapacity": "8.5",
+    "FullWaterLevel": "5.8"
+  },
+  {
+    "id": "50209",
+    "name": "菱湖水庫",
+    "lat": 24.4470219,
+    "lng": 118.2420009,
+    "DeadStorageLevel": "6.6",
+    "EffectiveCapacity": "9",
+    "FullWaterLevel": "12.9"
+  },
+  {
+    "id": "50210",
+    "name": "西湖水庫",
+    "lat": 24.4361008,
+    "lng": 118.2287073,
+    "DeadStorageLevel": "0",
+    "EffectiveCapacity": "48.6",
+    "FullWaterLevel": "2.96"
+  },
+  {
+    "id": "50213",
+    "name": "瓊林水庫",
+    "lat": 24.4492423,
+    "lng": 118.3695668,
+    "DeadStorageLevel": "21.8",
+    "EffectiveCapacity": "30.9",
+    "FullWaterLevel": "26.5"
+  },
+  {
+    "id": "50214",
+    "name": "蘭湖",
+    "lat": 24.4523003,
+    "lng": 118.3797623,
+    "DeadStorageLevel": "0",
+    "EffectiveCapacity": "37",
+    "FullWaterLevel": "27.5"
+  },
+  {
+    "id": "50301",
+    "name": "勝利水庫",
+    "lat": 26.1517949,
+    "lng": 119.9332086,
+    "DeadStorageLevel": "1",
+    "EffectiveCapacity": "18.1842",
+    "FullWaterLevel": "16"
+  },
+  {
+    "id": "50302",
+    "name": "邱桂山水庫",
+    "lat": 24.9028007,
+    "lng": 121.5592952,
+    "DeadStorageLevel": "2.1",
+    "EffectiveCapacity": "3.1539",
+    "FullWaterLevel": "12.5"
+  },
+  {
+    "id": "50303",
+    "name": "珠螺水壩",
+    "lat": 24.8719726,
+    "lng": 121.5440785,
+    "DeadStorageLevel": "2.5",
+    "EffectiveCapacity": "0.3845",
+    "FullWaterLevel": "3.9"
+  },
+  {
+    "id": "50304",
+    "name": "儲水沃上壩",
+    "lat": 26.1537557,
+    "lng": 119.9180046,
+    "DeadStorageLevel": "2.2",
+    "EffectiveCapacity": "2.32",
+    "FullWaterLevel": "9.1"
+  },
+  {
+    "id": "50305",
+    "name": "儲水沃水庫",
+    "lat": 26.153413,
+    "lng": 119.9150624,
+    "DeadStorageLevel": "1.6",
+    "EffectiveCapacity": "4.1792",
+    "FullWaterLevel": "19.2"
+  },
+  {
+    "id": "50306",
+    "name": "津沙水庫",
+    "lat": 26.1448387,
+    "lng": 119.9135387,
+    "DeadStorageLevel": "2.5",
+    "EffectiveCapacity": "4.5806",
+    "FullWaterLevel": "19"
+  },
+  {
+    "id": "50307",
+    "name": "津沙1號壩",
+    "lat": 26.1442708,
+    "lng": 119.9112843,
+    "DeadStorageLevel": "2.5",
+    "EffectiveCapacity": "1.2625",
+    "FullWaterLevel": "12.1"
+  },
+  {
+    "id": "50308",
+    "name": "坂里水庫",
+    "lat": 26.2209458,
+    "lng": 119.9720943,
+    "DeadStorageLevel": "7",
+    "EffectiveCapacity": "14.1115",
+    "FullWaterLevel": "18.62"
+  },
+  {
+    "id": "50309",
+    "name": "東湧水庫",
+    "lat": 26.3693107,
+    "lng": 120.4903756,
+    "DeadStorageLevel": "7",
+    "EffectiveCapacity": "8.5047",
+    "FullWaterLevel": "18.8"
+  },
+  {
+    "id": "50310",
+    "name": "后沃水庫",
+    "lat": 26.1606273,
+    "lng": 119.9035718,
+    "DeadStorageLevel": "2",
+    "EffectiveCapacity": "41.6251",
+    "FullWaterLevel": "16"
+  }
+]

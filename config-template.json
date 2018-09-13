@@ -1,0 +1,7 @@
+{
+	"hostname": "YourHostName",
+	"desc": "在水龍頭打開就會有水的時代，人與河川的距離越來越遠。但你知道山河的一舉一動仍深深影響著你的命運嗎?「山河事件簿」集結與水相關的開放資料，帶你來看人與水互動之間所刻下的一道道歷史印記。",
+	"serverPort": 8001,
+	"version": "1.0.0",
+	"weatherAPIKey":"YourAPIKey"
+}
