@@ -28,14 +28,22 @@ if __name__ == "__main__":
     if "init" in args:
         weather.Init()
         water.Init()
+        alert.Init()
+        
     if "collect10min" in args:
         weather.CollectData10min()
         water.CollectData10min()
-    if "collect1Hour" in args:
+        alert.CollectData10min()
+        
+    if "collect1hour" in args:
         weather.CollectData1hour()
         water.CollectData1hour()
-    if "collect1Day" in args:
+        alert.CollectData1hour()
+        
+    if "collect1day" in args:
         weather.CollectData1day()
         water.CollectData1day()
+        alert.CollectData1day()
+        
     if "processHistory" in args:
         pass

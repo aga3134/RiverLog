@@ -25,13 +25,11 @@ class WeatherData:
         pass
     
     def CollectData10min(self):
-        pass
-    
-    def CollectData1hour(self):
         try:
-            print("collect rain data")
+            print("collect rain data 10min")
             now = datetime.datetime.now()
-            t = now.strftime("%Y-%m-%d_%H")
+            now = now.replace(minute=(now.minute-now.minute%10))
+            t = now.strftime("%Y-%m-%d_%H-%M")
             #rain data
             url = "http://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key
             folder = "data/rain/"
@@ -43,11 +41,15 @@ class WeatherData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+    
+    def CollectData1hour(self):
+        pass
             
     def CollectData1day(self):
         pass
     
     def ProcessRain(self,file):
+        print("process file %s" % file)
         try:
             with open(file,"r",encoding="utf8") as f:
                 data = f.read()

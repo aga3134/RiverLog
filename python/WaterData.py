@@ -26,7 +26,8 @@ class WaterData:
         try:
             print("collect water data 10min")
             now = datetime.datetime.now()
-            t = now.strftime("%Y-%m-%d_%H-M")
+            now = now.replace(minute=(now.minute-now.minute%10))
+            t = now.strftime("%Y-%m-%d_%H-%M")
             #water level
             url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=2D09DB8B-6A1B-485E-88B5-923A462F475C"
             folder = "data/waterLevel/"
@@ -132,6 +133,7 @@ class WaterData:
             traceback.print_exc()
     
     def ProcessWaterLevel(self,file):
+        print("process file %s" % file)
         try:
             #map site info from id
             attr = {"BasinIdentifier":1,"lat":1,"lon":1,"AlertLevel1":1,"AlertLevel2":1,"AlertLevel3":1}
@@ -152,7 +154,7 @@ class WaterData:
                     
                         #計算北中南平均警戒程度
                         if w["StationIdentifier"] not in siteHash:
-                            print("water level site %s not found" % w["StationIdentifier"])
+                            #print("water level site %s not found" % w["StationIdentifier"])
                             continue
                         inc = {}
                         loc = siteHash[w["StationIdentifier"]]
@@ -173,6 +175,7 @@ class WaterData:
             traceback.print_exc()
             
     def ProcessReservoir(self,file):
+        print("process file %s" % file)
         try:
             #map site info from id
             attr = {"id":1,"lat":1,"lng":1,"EffectiveCapacity":1}
@@ -198,7 +201,7 @@ class WaterData:
                         
                         #計算北中南蓄水百分比
                         if r["ReservoirIdentifier"] not in siteHash:
-                            print("reservoir %s not found" % r["ReservoirIdentifier"])
+                            #print("reservoir %s not found" % r["ReservoirIdentifier"])
                             continue
                         
                         inc = {}
