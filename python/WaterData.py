@@ -13,6 +13,7 @@ import datetime
 import urllib.request
 import util
 import os
+import gc
 
 class WaterData:
     def __init__(self, db):
@@ -236,10 +237,17 @@ class WaterData:
             traceback.print_exc()
             
     def ProcessHistory(self):
+        batchNum = 32
         folder = "data/waterLevel/"
-        for filename in os.listdir(folder):
+        for i,filename in enumerate(os.listdir(folder)):
             self.ProcessWaterLevel(folder+filename)
+            if i % batchNum == 0:
+                print("garbage collection")
+                gc.collect()
         
         folder = "data/reservoir/"
-        for filename in os.listdir(folder):
+        for i,filename in enumerate(os.listdir(folder)):
             self.ProcessReservoir(folder+filename)
+            if i % batchNum == 0:
+                print("garbage collection")
+                gc.collect()

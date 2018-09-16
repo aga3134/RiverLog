@@ -14,6 +14,7 @@ import urllib.request
 import datetime
 import util
 import os
+import gc
 
 class WeatherData:
     def __init__(self, db):
@@ -122,6 +123,10 @@ class WeatherData:
             traceback.print_exc()
             
     def ProcessHistory(self):
+        batchNum = 32
         folder = "data/rain/"
-        for filename in os.listdir(folder):
+        for i,filename in enumerate(os.listdir(folder)):
             self.ProcessRain(folder+filename)
+            if i % batchNum == 0:
+                print("garbage collection")
+                gc.collect()

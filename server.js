@@ -10,7 +10,7 @@ app.port = Config.serverPort;
 app.host = "0.0.0.0";
 app.use('/static',express.static(__dirname + '/static'));
 
-route(app);
+app.use("/", route);
 app.listen(app.port, app.host);
 console.log("Server started");
 
