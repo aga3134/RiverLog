@@ -66,11 +66,11 @@ class WeatherData:
                     dateStr = location.find(ns+"time").find(ns+"obsTime").text
                     dateStr = ''.join(dateStr.rsplit(':', 1))   #去掉時區的:
                     dateObj = datetime.datetime.strptime(dateStr, "%Y-%m-%dT%H:%M:%S%z")
-                    data["time"] = dateObj.strftime('%Y-%m-%d %H:%M:%S')
+                    data["time"] = dateObj
                     sID = location.find(ns+"stationId").text
                     sName = location.find(ns+"locationName").text
-                    lat = float(location.find(ns+"lat").text)
-                    lon = float(location.find(ns+"lon").text)
+                    lat = util.ToFloat(location.find(ns+"lat").text)
+                    lon = util.ToFloat(location.find(ns+"lon").text)
                     data["stationID"] = sID
                     station["stationID"] = sID
                     station["name"] = sName
@@ -80,11 +80,11 @@ class WeatherData:
                     
                     for elem in location.findall(ns+"weatherElement"):
                         if(elem[0].text == "HOUR_12"):
-                            data["hour12"] = float(elem[1][0].text)
+                            data["hour12"] = util.ToFloat(elem[1][0].text)
                         elif(elem[0].text == "HOUR_24"):
-                            data["hour24"] = float(elem[1][0].text)
+                            data["hour24"] = util.ToFloat(elem[1][0].text)
                         elif(elem[0].text == "NOW"):
-                            data["now"] = float(elem[1][0].text)
+                            data["now"] = util.ToFloat(elem[1][0].text)
                             
                     for param in location.findall(ns+"parameter"):
                         if(param[0].text == "CITY"):
@@ -97,23 +97,31 @@ class WeatherData:
                     
                 #print(dataArr)
                 #print(stationArr)
-                day = dateObj.strftime('%Y%m%d')
                 for s in stationArr:
                     key = {"stationID":s["stationID"]}
                     self.db["rainStation"].update(key,s,upsert=True)
                     
                 for d in dataArr:
+                    dayStr = d["time"].strftime('%Y%m%d')
                     key = {"stationID":d["stationID"],"time":d["time"]}
-                    query = self.db["rain"+day].find_one(key)
+                    query = self.db["rain"+dayStr].find_one(key)
                     if query is None:
-                        self.db["rain"+day].insert_one(d)
+                        self.db["rain"+dayStr].insert_one(d)
                         inc = {}
                         loc = locHash[d["stationID"]]
                         area = util.LatToArea(loc["lat"])
                         inc[area+"Sum"] = d["now"]
                         inc[area+"Num"] = 1
-                        self.db["rainDailySum"].update({"time":day},{"$inc":inc},upsert=True)
+                        tday = d["time"].replace(hour=0,minute=0,second=0)
+                        t10min = d["time"].replace(minute=(d["time"].minute-d["time"].minute%10),second=0)
+                        self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
+                        self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                 
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+            
+    def ProcessHistory(self):
+        folder = "data/rain/"
+        for filename in os.listdir(folder):
+            self.ProcessRain(folder+filename)

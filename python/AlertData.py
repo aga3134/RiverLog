@@ -157,3 +157,6 @@ class AlertData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+            
+    def ProcessHistory(self):
+        pass

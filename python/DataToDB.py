@@ -46,4 +46,6 @@ if __name__ == "__main__":
         alert.CollectData1day()
         
     if "processHistory" in args:
-        pass
+        weather.ProcessHistory()
+        water.ProcessHistory()
+        alert.ProcessHistory()

@@ -7,6 +7,12 @@ Created on Sun Sep  2 17:17:28 2018
 
 from math import sin,cos,tan,pow,pi
 
+def ToFloat(s):
+    try:
+        return float(s)
+    except ValueError:
+        return float('NaN')
+
 def LatToArea(lat):
     if(lat < 23.5):
         return "south"

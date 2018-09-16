@@ -76,9 +76,9 @@ class WaterData:
                     site["AffiliatedBasin"] = d["AffiliatedBasin"]
                     site["AffiliatedSubsidiaryBasin"] = d["AffiliatedSubsidiaryBasin"]
                     site["AffiliatedSubSubsidiaryBasin"] = d["AffiliatedSubSubsidiaryBasin"]
-                    site["AlertLevel1"] = d["AlertLevel1"]
-                    site["AlertLevel2"] = d["AlertLevel2"]
-                    site["AlertLevel3"] = d["AlertLevel3"]
+                    site["AlertLevel1"] = util.ToFloat(d["AlertLevel1"])
+                    site["AlertLevel2"] = util.ToFloat(d["AlertLevel2"])
+                    site["AlertLevel3"] = util.ToFloat(d["AlertLevel3"])
                     site["LocationAddress"] = d["LocationAddress"]
                     loc = d["LocationByTWD97_XY"].split(" ")
                     lat,lon = util.TW97ToLatLng(float(loc[0]),float(loc[1]))
@@ -86,7 +86,6 @@ class WaterData:
                     site["lon"] = lon
                     site["ObservatoryName"] = d["ObservatoryName"].strip()
                     site["RiverName"] = d["RiverName"]
-                    site["Town"] = d["Town"]
                     site["TownIdentifier"] = d["TownIdentifier"]
                     
                     key = {"BasinIdentifier":d["BasinIdentifier"]}
@@ -119,12 +118,21 @@ class WaterData:
                         print("reservoir %s not found" % r["ReservoirName"] )
                         continue
                     s = siteHash[r["ReservoirName"]]
+                    r["CatchmentArea"] = util.ToFloat(r["CatchmentArea"])
+                    r["CurruntCapacity"] = util.ToFloat(r["CurruntCapacity"])
+                    r["CurruntEffectiveCapacity"] = util.ToFloat(r["CurruntEffectiveCapacity"])
+                    r["DesignedCapacity"] = util.ToFloat(r["DesignedCapacity"])
+                    r["DesignedEffectiveCapacity"] = util.ToFloat(r["DesignedEffectiveCapacity"])
+                    r["FullWaterLevelArea"] = util.ToFloat(r["FullWaterLevelArea"])
+                    r["Height"] = util.ToFloat(r["Height"])
+                    r["Length"] = util.ToFloat(r["Length"])
+                    r["Year"] = util.ToFloat(r["Year"])
                     r["id"] = s["id"]
-                    r["lat"] = s["lat"]
-                    r["lng"] = s["lng"]
-                    r["DeadStorageLevel"] = s["DeadStorageLevel"]
-                    r["EffectiveCapacity"] = s["EffectiveCapacity"]
-                    r["FullWaterLevel"] = s["FullWaterLevel"]
+                    r["lat"] = util.ToFloat(s["lat"])
+                    r["lng"] = util.ToFloat(s["lng"])
+                    r["DeadStorageLevel"] = util.ToFloat(s["DeadStorageLevel"])
+                    r["EffectiveCapacity"] = util.ToFloat(s["EffectiveCapacity"])
+                    r["FullWaterLevel"] = util.ToFloat(s["FullWaterLevel"])
                     key = {"ReservoirName":r["ReservoirName"],"Year":r["Year"]}
                     self.db["reservoirInfo"].update(key,r,upsert=True)
                     
@@ -147,7 +155,10 @@ class WaterData:
                 waterLevel = json.loads(data)
                 for w in waterLevel["RealtimeWaterLevel_OPENDATA"]:
                     day = (w["RecordTime"].split("T")[0]).replace("-","")
-                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":w["RecordTime"]}
+                    t = datetime.datetime.strptime(w["RecordTime"], "%Y-%m-%dT%H:%M:%S")
+                    w["RecordTime"] = t
+                    w["WaterLevel"] = util.ToFloat(w["WaterLevel"])
+                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t}
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
                         self.db["waterLevel"+day].insert_one(w)
@@ -160,15 +171,19 @@ class WaterData:
                         loc = siteHash[w["StationIdentifier"]]
                         area = util.LatToArea(loc["lat"])
                         v = 0
-                        if loc["AlertLevel3"] != "" and w["WaterLevel"] > loc["AlertLevel3"]:
+                        if w["WaterLevel"] > loc["AlertLevel3"]:
                             v = 1
-                        if loc["AlertLevel2"] != "" and w["WaterLevel"] > loc["AlertLevel2"]:
+                        if w["WaterLevel"] > loc["AlertLevel2"]:
                             v = 2
-                        if loc["AlertLevel1"] != "" and w["WaterLevel"] > loc["AlertLevel1"]:
+                        if w["WaterLevel"] > loc["AlertLevel1"]:
                             v = 3
                         inc[area+"Sum"] = v
                         inc[area+"Num"] = 1
-                        self.db["waterLevelDailySum"].update({"time":day},{"$inc":inc},upsert=True)
+                        
+                        tday = datetime.datetime.strptime(day, "%Y%m%d")
+                        t10min = w["RecordTime"].replace(minute=(w["RecordTime"].minute-w["RecordTime"].minute%10),second=0)
+                        self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
+                        self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                     
         except:
             print(sys.exc_info()[0])
@@ -194,9 +209,10 @@ class WaterData:
                     if query is None:
                         data = {}
                         data["ReservoirIdentifier"] = r["ReservoirIdentifier"]
-                        data["WaterLevel"] = r["WaterLevel"]
-                        data["ObservationTime"] = r["ObservationTime"]
-                        data["EffectiveWaterStorageCapacity"] = r["EffectiveWaterStorageCapacity"]
+                        data["WaterLevel"] = util.ToFloat(r["WaterLevel"])
+                        t = datetime.datetime.strptime(r["ObservationTime"], "%Y-%m-%dT%H:%M:%S")
+                        data["ObservationTime"] = t
+                        data["EffectiveWaterStorageCapacity"] = util.ToFloat(r["EffectiveWaterStorageCapacity"])
                         self.db["reservoir"+day].insert_one(data)
                         
                         #計算北中南蓄水百分比
@@ -209,9 +225,21 @@ class WaterData:
                         area = util.LatToArea(loc["lat"])
                         if data["EffectiveWaterStorageCapacity"] == "" or loc["EffectiveCapacity"] == "":
                             continue
-                        inc[area+"Sum"] = float(data["EffectiveWaterStorageCapacity"])
-                        inc[area+"Num"] = float(loc["EffectiveCapacity"])
-                        self.db["reservoirDailySum"].update({"time":day},{"$inc":inc},upsert=True)
+                        inc[area+"Sum"] = util.ToFloat(data["EffectiveWaterStorageCapacity"])
+                        inc[area+"Num"] = util.ToFloat(loc["EffectiveCapacity"])
+                        tday = datetime.datetime.strptime(day, "%Y%m%d")
+                        t10min = t.replace(minute=(t.minute-t.minute%10),second=0)
+                        self.db["reservoirDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
+                        self.db["reservoirHourSum"].update({"time":t10min},{"$inc":inc},upsert=True)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+            
+    def ProcessHistory(self):
+        folder = "data/waterLevel/"
+        for filename in os.listdir(folder):
+            self.ProcessWaterLevel(folder+filename)
+        
+        folder = "data/reservoir/"
+        for filename in os.listdir(folder):
+            self.ProcessReservoir(folder+filename)
