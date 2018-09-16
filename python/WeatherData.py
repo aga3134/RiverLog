@@ -123,7 +123,7 @@ class WeatherData:
             traceback.print_exc()
             
     def ProcessHistory(self):
-        batchNum = 32
+        batchNum = 16
         folder = "data/rain/"
         for i,filename in enumerate(os.listdir(folder)):
             self.ProcessRain(folder+filename)

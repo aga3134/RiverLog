@@ -237,7 +237,7 @@ class WaterData:
             traceback.print_exc()
             
     def ProcessHistory(self):
-        batchNum = 32
+        batchNum = 16
         folder = "data/waterLevel/"
         for i,filename in enumerate(os.listdir(folder)):
             self.ProcessWaterLevel(folder+filename)
