@@ -1,7 +1,7 @@
 var express = require("express");
 var ejs = require("ejs");
 var router = express.Router();
-var Config = require("../config.json");
+var Config = require("../../config.json");
 
 var meta = {};
 meta.version = Config.version;
