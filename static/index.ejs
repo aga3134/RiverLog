@@ -27,9 +27,60 @@
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
 		<div id="app" class="riverlog">
-			
+			<div class="topbar">
+				<img class="logo" src="/static/Image/logo.png">
+				<select>
+					<option value="">即時水地圖</option>
+					<option value="">年統計地圖</option>
+				</select>
+			</div>
+			<div class="main-content">
+				<div class="icon-container">
+					<img class="icon" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="openDateSelect=true;">
+					<img class="icon" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="openOption=true;">
+					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
+				</div>
+				<div id="map"></div>
+			</div>
+			<div class="playbar">
+				<div class="h-scroll">
+					<div class="timebar">
+						<div v-for="t in timebar" class="element" v-bind:style="{left:t.x+'px', background:'linear-gradient('+t.north+','+t.center+','+t.south+')'}"></div>
+					</div>
+				</div>
+				<div class="play-control">
+					<div class="time-label">{{timeStr}}</div>
+					<img class="icon" src="/static/Image/icon-prev.png">
+					<img class="icon" src="/static/Image/icon-play.png">
+					<img class="icon" src="/static/Image/icon-next.png">
+				</div>
+			</div>
+
+			<div class="side-panel" v-bind:class="{open: openDateSelect}">
+				<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openDateSelect=false;">
+				<select v-model="curYear">
+					<option value="2018">2018年</option>
+				</select>
+				<select v-model="curItem">
+					<option value="rain">雨量</option>
+					<option value="reservoir">水庫水位</option>
+					<option value="waterLevel">河川水位</option>
+				</select>
+			</div>
+
+			<div class="side-panel" v-bind:class="{open: openOption}">
+				<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
+			</div>
+
+			<transition name="fade">
+				<div class="full-panel" v-if="openAbout">
+					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openAbout=false;">
+					<div class="content-area"></div>
+				</div>
+			</transition>
 		</div>
 
+		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>
 		<script src="/static/main.js?v=<%=meta.version%>"></script>
 	</body>
 </html>

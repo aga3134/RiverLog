@@ -1,0 +1,158 @@
+@charset "UTF-8";
+::-webkit-scrollbar {
+  height: 8px;
+  background-color: #c19797; }
+
+::-webkit-scrollbar-track {
+  border-radius: 3px; }
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: #9a8250; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0; }
+
+a {
+  color: #6464c8;
+  text-decoration: none; }
+  a:hover {
+    color: #c89696; }
+
+* {
+  box-sizing: border-box;
+  font-family: "微軟正黑體", "Microsoft JhengHei"; }
+
+.center {
+  display: block;
+  margin: auto;
+  clear: both;
+  text-align: center; }
+
+.h-scroll {
+  margin: 0px;
+  width: 100%;
+  overflow-x: auto; }
+
+.riverlog {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #e3c68e; }
+  .riverlog select {
+    padding: 3px;
+    border-radius: 3px;
+    margin: 5px; }
+  .riverlog .main-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 100%; }
+    .riverlog .main-content .icon-container {
+      width: 50px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-right: 1px solid #c19797; }
+      .riverlog .main-content .icon-container .icon {
+        width: 35px;
+        height: 35px;
+        margin: 10px;
+        cursor: pointer; }
+    .riverlog .main-content #map {
+      width: calc(100% - 50px);
+      height: 100%; }
+  .riverlog .topbar {
+    width: 100%;
+    padding: 5px 10px;
+    border-bottom: 1px solid #c19797;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 1.5em;
+    flex-wrap: wrap; }
+    .riverlog .topbar .logo {
+      height: 40px; }
+  .riverlog .playbar {
+    width: 100%;
+    border-top: 1px solid #c19797;
+    padding: 5px; }
+    .riverlog .playbar .timebar {
+      position: relative;
+      margin: auto;
+      width: 1152px;
+      height: 20px; }
+      .riverlog .playbar .timebar .element {
+        position: absolute;
+        width: 8px;
+        height: 20px;
+        cursor: pointer; }
+    .riverlog .playbar .play-control {
+      display: flex;
+      justify-content: center;
+      align-items: center; }
+      .riverlog .playbar .play-control .time-label {
+        margin: 0px 5px; }
+      .riverlog .playbar .play-control .icon {
+        width: 30px;
+        height: 30px;
+        cursor: pointer; }
+  .riverlog .close-bt {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px; }
+    .riverlog .close-bt:hover {
+      width: 32px;
+      height: 32px; }
+  .riverlog .side-panel {
+    position: fixed;
+    left: -300px;
+    top: 0px;
+    z-index: 2;
+    width: 300px;
+    max-width: 100%;
+    height: 100%;
+    padding: 10px;
+    background-color: #e3c68e;
+    box-shadow: 5px 0px 15px #8b6951;
+    -webkit-transition: left 0.5s ease;
+    transition: left 0.5s ease; }
+    .riverlog .side-panel.open {
+      left: 0px; }
+  .riverlog .full-panel {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    padding: 40px 20px;
+    background-color: #e3c68e;
+    overflow-x: hidden;
+    overflow-y: auto; }
+    .riverlog .full-panel .content-area {
+      background-color: #ffedb9;
+      border-radius: 5px;
+      width: 100%;
+      height: 100%; }
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s; }
+
+.fade-enter, .fade-leave-to {
+  opacity: 0; }
+
+.create-enter-active {
+  transition: opacity 0.5s; }
+
+.create-enter {
+  opacity: 0; }
