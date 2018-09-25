@@ -9,6 +9,6 @@ var ReservoirDailySumSchema = new mongoose.Schema({
 	centralNum: Number,	//中部總容量
 	southSum: Number,	//南部總水量
 	southNum: Number,	//南部總容量
-});
+}, {collection: "reservoirDailySum"});
 
 module.exports = mongoose.model('reservoirDailySum', ReservoirDailySumSchema);

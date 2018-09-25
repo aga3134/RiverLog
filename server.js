@@ -1,11 +1,16 @@
 var express = require("express");
 var ejs = require("ejs");
-var Config = require('./config');
+var mongoose = require("mongoose");
+var Config = require("./config");
 
 var ViewRoute = require("./app/route/viewRoute.js");
 var RainRoute = require("./app/route/rainRoute.js");
 var ReservoirRoute = require("./app/route/reservoirRoute.js");
 var WaterLevelRoute = require("./app/route/waterLevelRoute.js");
+
+mongoose.connect("mongodb://localhost/RiverLog", { useNewUrlParser: true });
+mongoose.Promise = global.Promise;
+mongoose.pluralize(null);
 
 var app = express();
 app.set('view engine', 'ejs');
@@ -18,6 +23,10 @@ app.use("/", ViewRoute);
 app.use("/rain", RainRoute);
 app.use("/reservoir", ReservoirRoute);
 app.use("/waterLevel", WaterLevelRoute);
+
+process.on('exit',function(code){
+	mongoose.disconnect();
+});
 
 app.listen(app.port, app.host);
 console.log("Server started");

@@ -9,6 +9,6 @@ var RainDailySumSchema = new mongoose.Schema({
 	centralNum: Number,	//中部資料數
 	southSum: Number,	//南部總雨量
 	southNum: Number,	//南部資料數
-});
+}, {collection: "rainDailySum"});
 
 module.exports = mongoose.model('rainDailySum', RainDailySumSchema);

@@ -23,6 +23,6 @@ var ReservoirInfoSchema = new mongoose.Schema({
 	DeadStorageLevel: Number,	//呆水位
 	EffectiveCapacity: Number,	//有效容量(從每日營運狀況取得)
 	FullWaterLevel: Number,		//滿水位
-});
+}, {collection: "reservoirInfo"});
 
 module.exports = mongoose.model('reservoirInfo', ReservoirInfoSchema);

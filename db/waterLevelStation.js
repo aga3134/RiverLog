@@ -16,6 +16,6 @@ var WaterLevelStationSchema = new mongoose.Schema({
 	RiverName: String,			//所屬河川名稱
 	Town: Number,				//鄉鎮名稱
 	TownIdentifier: String,		//鄉鎮代碼
-});
+}, {collection: "waterLevelStation"});
 
 module.exports = mongoose.model('waterLevelStation', WaterLevelStationSchema);

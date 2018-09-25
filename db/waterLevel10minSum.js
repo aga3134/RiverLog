@@ -9,6 +9,6 @@ var WaterLevel10minSumSchema = new mongoose.Schema({
 	centralNum: Number,	//中部測站數
 	southSum: Number,	//南部警戒程度
 	southNum: Number,	//南部測站數
-});
+}, {collection: "waterLevel10minSum"});
 
 module.exports = mongoose.model('waterLevel10minSum', WaterLevel10minSumSchema);

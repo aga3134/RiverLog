@@ -18,6 +18,21 @@ var g_APP = new Vue({
       bt.south = "#ffffff";
       this.timebar.push(bt);
     }
+    $.get("/rain/station",function(data){
+      console.log(data);
+    });
+    $.get("/rain/extremeDate",function(data){
+      console.log(data);
+    });
+    $.get("/rain/rainData?date=2018-09-16",function(data){
+      console.log(data);
+    });
+    $.get("/rain/10minSum?date=2018-09-16",function(data){
+      console.log(data);
+    });
+    $.get("/rain/dailySum?year=2018",function(data){
+      console.log(data);
+    });
     google.maps.event.addDomListener(window, 'load', this.InitMap);
   },
   methods: {
