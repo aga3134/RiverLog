@@ -1,7 +1,7 @@
 @charset "UTF-8";
 ::-webkit-scrollbar {
   height: 8px;
-  background-color: #c19797; }
+  background-color: #c9995d; }
 
 ::-webkit-scrollbar-track {
   border-radius: 3px; }
@@ -93,7 +93,8 @@ a {
         position: absolute;
         width: 8px;
         height: 20px;
-        cursor: pointer; }
+        cursor: pointer;
+        background-color: #b4a17c; }
     .riverlog .playbar .play-control {
       display: flex;
       justify-content: center;
@@ -116,19 +117,35 @@ a {
       height: 32px; }
   .riverlog .side-panel {
     position: fixed;
-    left: -300px;
+    left: -250px;
     top: 0px;
     z-index: 2;
-    width: 300px;
+    width: 250px;
     max-width: 100%;
     height: 100%;
     padding: 10px;
+    overflow-y: auto;
     background-color: #e3c68e;
     box-shadow: 5px 0px 15px #8b6951;
     -webkit-transition: left 0.5s ease;
     transition: left 0.5s ease; }
     .riverlog .side-panel.open {
       left: 0px; }
+    .riverlog .side-panel .date-selection {
+      position: relative;
+      width: 100%;
+      min-height: 100%; }
+      .riverlog .side-panel .date-selection .week-label {
+        position: absolute; }
+      .riverlog .side-panel .date-selection .month-label {
+        position: absolute;
+        writing-mode: tb;
+        height: 60px; }
+      .riverlog .side-panel .date-selection .date-bt {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: 1px solid #9c9c9c; }
   .riverlog .full-panel {
     position: fixed;
     top: 0px;

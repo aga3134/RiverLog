@@ -16,18 +16,18 @@ util.DateToString = function (date,dateSep="-",timeSep=":"){
 	return yyyy+dateSep+mm+dateSep+dd+" "+HH+timeSep+MM+timeSep+SS;
 }
 
-util.DateToTimeString = function(date,dateSep="-"){
-	var HH = util.PadLeft(date.getHours(),2);
-	var MM = util.PadLeft(date.getMinutes(),2);
-	var SS = util.PadLeft(date.getSeconds(),2);
-	return HH+dateSep+MM+dateSep+SS;
-}
-
-util.DateToDateString = function(date,timeSep=":"){
+util.DateToDateString = function(date,dateSep="-"){
 	var yyyy = date.getFullYear();
 	var mm = util.PadLeft(date.getMonth()+1,2);
 	var dd = util.PadLeft(date.getDate(),2);
-	return yyyy+timeSep+mm+timeSep+dd;
+	return yyyy+dateSep+mm+dateSep+dd;
+}
+
+util.DateToTimeString = function(date,timeSep=":"){
+	var HH = util.PadLeft(date.getHours(),2);
+	var MM = util.PadLeft(date.getMinutes(),2);
+	var SS = util.PadLeft(date.getSeconds(),2);
+	return HH+timeSep+MM+timeSep+SS;
 }
 
 module.exports = util;
