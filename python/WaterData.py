@@ -70,7 +70,7 @@ class WaterData:
             print("add water level sites")
             #water level sites
             url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=28E06316-FE39-40E2-8C35-7BF070FD8697"
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 data = json.loads(r.text)
@@ -85,6 +85,8 @@ class WaterData:
                     site["AlertLevel3"] = util.ToFloat(d["AlertLevel3"])
                     site["LocationAddress"] = d["LocationAddress"]
                     loc = d["LocationByTWD97_XY"].split(" ")
+                    if len(loc) < 2:
+                        continue
                     lat,lon = util.TW97ToLatLng(float(loc[0]),float(loc[1]))
                     site["lat"] = lat
                     site["lon"] = lon
@@ -159,7 +161,7 @@ class WaterData:
                 waterLevel = json.loads(data)
                 for w in waterLevel["RealtimeWaterLevel_OPENDATA"]:
                     day = (w["RecordTime"].split("T")[0]).replace("-","")
-                    t = datetime.datetime.strptime(w["RecordTime"], "%Y-%m-%dT%H:%M:%S")
+                    t = datetime.datetime.strptime(w["RecordTime"]+"+0800", "%Y-%m-%dT%H:%M:%S%z")
                     w["RecordTime"] = t
                     w["WaterLevel"] = util.ToFloat(w["WaterLevel"])
                     key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t}
@@ -214,7 +216,7 @@ class WaterData:
                         data = {}
                         data["ReservoirIdentifier"] = r["ReservoirIdentifier"]
                         data["WaterLevel"] = util.ToFloat(r["WaterLevel"])
-                        t = datetime.datetime.strptime(r["ObservationTime"], "%Y-%m-%dT%H:%M:%S")
+                        t = datetime.datetime.strptime(r["ObservationTime"]+"+0800", "%Y-%m-%dT%H:%M:%S%z")
                         data["ObservationTime"] = t
                         data["EffectiveWaterStorageCapacity"] = util.ToFloat(r["EffectiveWaterStorageCapacity"])
                         self.db["reservoir"+day].insert_one(data)

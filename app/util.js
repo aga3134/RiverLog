@@ -1,5 +1,7 @@
+var moment = require('moment-timezone');
 
 var util = {};
+var timeZone = "Asia/Taipei";
 
 util.PadLeft = function(val, totalLen, ch){
 	var  len = (totalLen - String(val).length)+1;
@@ -7,26 +9,32 @@ util.PadLeft = function(val, totalLen, ch){
 }
 
 util.DateToString = function (date,dateSep="-",timeSep=":"){
-	var yyyy = date.getFullYear();
-	var mm = util.PadLeft(date.getMonth()+1,2);
-	var dd = util.PadLeft(date.getDate(),2);
-	var HH = util.PadLeft(date.getHours(),2);
-	var MM = util.PadLeft(date.getMinutes(),2);
-	var SS = util.PadLeft(date.getSeconds(),2);
+	var t = moment(date).tz(timeZone);
+	var yyyy = date.get("year");
+	var mm = util.PadLeft(t.get("month")+1,2);
+	var dd = util.PadLeft(t.get("date"),2);
+	var HH = util.PadLeft(t.get("hour"),2);
+	var MM = util.PadLeft(t.get("minute"),2);
+	var SS = util.PadLeft(t.get("second"),2);
+	//console.log(yyyy+dateSep+mm+dateSep+dd+" "+HH+timeSep+MM+timeSep+SS);
 	return yyyy+dateSep+mm+dateSep+dd+" "+HH+timeSep+MM+timeSep+SS;
 }
 
 util.DateToDateString = function(date,dateSep="-"){
-	var yyyy = date.getFullYear();
-	var mm = util.PadLeft(date.getMonth()+1,2);
-	var dd = util.PadLeft(date.getDate(),2);
+	var t = moment(date).tz(timeZone);
+	var yyyy = t.get("year");
+	var mm = util.PadLeft(t.get("month")+1,2);
+	var dd = util.PadLeft(t.get("date"),2);
+	//console.log(yyyy+dateSep+mm+dateSep+dd);
 	return yyyy+dateSep+mm+dateSep+dd;
 }
 
 util.DateToTimeString = function(date,timeSep=":"){
-	var HH = util.PadLeft(date.getHours(),2);
-	var MM = util.PadLeft(date.getMinutes(),2);
-	var SS = util.PadLeft(date.getSeconds(),2);
+	var t = moment(date).tz(timeZone);
+	var HH = util.PadLeft(t.get("hour"),2);
+	var MM = util.PadLeft(t.get("minute"),2);
+	var SS = util.PadLeft(t.get("second"),2);
+	console.log(HH+timeSep+MM+timeSep+SS);
 	return HH+timeSep+MM+timeSep+SS;
 }
 

@@ -33,23 +33,32 @@ var g_APP = new Vue({
   },
   created: function () {
     this.InitColor();
-    $.get("/rain/extremeDate",function(result){
-      if(result.status != "ok"){
-        return console.log(result.err);
-      }
-      var maxT = result.data.maxDate.split("-");
-      var minT = result.data.minDate.split("-");
-      var minYear = parseInt(minT[0]);
-      var maxYear = parseInt(maxT[0]);
-      this.yearArr = [];
-      for(var i=minYear;i<=maxYear;i++){
-        this.yearArr.push(i);
-      }
-      this.curYear = maxYear;
-      this.curDate = maxT[1]+"-"+maxT[2];
-      this.curTime = "0:0";
 
-      $.get("/rain/station",function(result){
+    //load init data synchronously
+    $.ajax({
+      url:"/rain/extremeDate",
+      success: function(result){
+        if(result.status != "ok"){
+          return console.log(result.err);
+        }
+        var maxT = result.data.maxDate.split("-");
+        var minT = result.data.minDate.split("-");
+        var minYear = parseInt(minT[0]);
+        var maxYear = parseInt(maxT[0]);
+        this.yearArr = [];
+        for(var i=minYear;i<=maxYear;i++){
+          this.yearArr.push(i);
+        }
+        this.curYear = maxYear;
+        this.curDate = maxT[1]+"-"+maxT[2];
+        this.curTime = "00:00";
+      }.bind(this)
+    });
+
+    $.ajax({
+      url:"/rain/station",
+      async: false,
+      success:function(result){
         if(result.status != "ok"){
           return console.log(result.err);
         }
@@ -58,11 +67,26 @@ var g_APP = new Vue({
           stationHash[result.data[i].stationID] = result.data[i];
         }
         this.rainData.station = stationHash;
-        this.ChangeYear(this.curYear);
-      }.bind(this));
 
-    }.bind(this));
-    
+      }.bind(this)
+    });
+
+    $.ajax({
+      url:"/waterLevel/station",
+      async: false,
+      success: function(result){
+        if(result.status != "ok"){
+          return console.log(result.err);
+        }
+        var stationHash = {};
+        for(var i=0;i<result.data.length;i++){
+          stationHash[result.data[i].BasinIdentifier] = result.data[i];
+        }
+        this.waterLevelData.station = stationHash;
+      }.bind(this)
+    });
+
+    this.ChangeYear(this.curYear);
     google.maps.event.addDomListener(window, 'load', this.InitMap);
   },
   methods: {
@@ -70,7 +94,7 @@ var g_APP = new Vue({
       this.color.rain = d3.scale.linear()
         .domain([0,1,2,6,10,15,20,30,40,50,70,90,110,130,150,200,300])
         .range(["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
-              "#33ff00","#ff0","#fc0","#fe9900","#fe0000","#cc0000",
+              "#33ff00","#ff0","#fc0","#ff9900","#ff0000","#cc0000",
               "#990000","#990099","#cc00cc","#ff00ff","#ffccff"]);
     },
     InitMap: function(){
@@ -131,6 +155,8 @@ var g_APP = new Vue({
           this.rainData.timeAvg[d.time] = d;
         }
         this.UpdateTimebar();
+        this.ChangeTime("00:00");
+
         $.get("/rain/rainData?date="+this.curYear+"-"+this.curDate,function(result){
           if(result.status != "ok"){
             return console.log(result.err);
@@ -138,8 +164,20 @@ var g_APP = new Vue({
           this.rainData.data = d3.nest()
             .key(function(d){return d.time;})
             .map(result.data);
-          this.ChangeTime("00:00");
+          this.UpdateMapRain();
         }.bind(this));
+
+        $.get("/waterLevel/waterLevelData?date="+this.curYear+"-"+this.curDate,function(result){
+          if(result.status != "ok"){
+            return console.log(result.err);
+          }
+          this.waterLevelData.data = d3.nest()
+            .key(function(d){return d.RecordTime;})
+            .map(result.data);
+          this.UpdateMapWaterLevel();
+        }.bind(this));
+
+
       }.bind(this));
     },
     ChangeTime: function(time){
@@ -303,6 +341,7 @@ var g_APP = new Vue({
     },
     UpdateMap: function(){
       this.UpdateMapRain();
+      this.UpdateMapWaterLevel();
     },
     UpdateMapRain: function(){
       var rainData = this.rainData.data[this.curTime+":00"];
@@ -331,6 +370,7 @@ var g_APP = new Vue({
 
       for(var i=0;i<rainData.length;i++){
         var station = this.rainData.station[rainData[i].stationID];
+        if(!station) continue;
         var rectW = 0.01;
         var rectH = 0.0005;
         if(this.layerRain[station.stationID]){
@@ -361,6 +401,70 @@ var g_APP = new Vue({
           });
           rect.addListener('click', clickFn(rainData,i));
           this.layerRain[station.stationID] = rect;
+        }
+      }
+    },
+    UpdateMapWaterLevel: function(){
+      var waterLevelData = this.waterLevelData.data[this.curTime+":00"];
+      if(!waterLevelData) return;
+
+      var UpdateInfoWaterLevel = function(d){
+        var s = this.waterLevelData.station[d.StationIdentifier];
+        var str = "<p>"+s.ObservatoryName+"</p>";
+        str += "<p>溪流 "+s.RiverName+"</p>";
+        str += "<p>水位 "+d.WaterLevel+" m</p>";
+        str += "<p>警戒水位(3 / 2 / 1):</p>";
+        str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+"</p>";
+        var loc = new google.maps.LatLng(s.lat+0.01, s.lon);
+        this.infoWaterLevel.setOptions({content: str, position: loc});
+      }.bind(this);
+
+      var clickFn = function(data,i){ 
+        return function() {
+          UpdateInfoWaterLevel(data[i]);
+          this.infoWaterLevel.open(this.map);
+          this.infoWaterLevelIndex = i;
+        }.bind(this);
+      }.bind(this);
+
+      //info window有打開，更新資訊
+      if(this.infoWaterLevel.getMap()){
+        UpdateInfoWaterLevel(waterLevelData[this.infoWaterLevelIndex]);
+      }
+      for(var i=0;i<waterLevelData.length;i++){
+        var station = this.waterLevelData.station[waterLevelData[i].StationIdentifier];
+        if(!station) continue;
+        var radius = 2000;
+        var base = 1000;
+        if(station.AlertLevel3) base = station.AlertLevel3;
+        else if(station.AlertLevel2) base = station.AlertLevel2;
+        else if(station.AlertLevel1) base = station.AlertLevel1;
+
+        var value = waterLevelData[i].WaterLevel/base;
+        var color = "#0cf";
+        if(waterLevelData[i].WaterLevel > station.AlertLevel3) color = "#ff0";
+        if(waterLevelData[i].WaterLevel > station.AlertLevel2) color = "#fc0";
+        if(waterLevelData[i].WaterLevel > station.AlertLevel1) color = "#f00";
+
+        if(this.layerWaterLevel[station.BasinIdentifier]){
+          this.layerWaterLevel[station.BasinIdentifier].setOptions({
+            fillColor: color,
+            radius: value*radius
+          });
+        }
+        else{
+          var circle = new google.maps.Circle({
+            strokeWeight: 1,
+            strokeColor: '#ffffff',
+            strokeOpacity: 0.8,
+            fillColor: color,
+            fillOpacity: 0.8,
+            map: this.map,
+            center: {lat: station.lat, lng: station.lon},
+            radius: value*radius
+          });
+          circle.addListener('click', clickFn(waterLevelData,i));
+          this.layerWaterLevel[station.BasinIdentifier] = circle;
         }
       }
     },
