@@ -45,14 +45,15 @@
 			<div class="playbar">
 				<div class="h-scroll">
 					<div class="timebar">
-						<div v-for="t in timebar" class="element" v-bind:style="t.style"></div>
+						<div v-for="t in timebar" class="element" v-bind:style="t.style" v-on:click="ChangeTime(t.time);"></div>
+						<div class="select-element"></div>
 					</div>
 				</div>
 				<div class="play-control">
-					<div class="time-label">{{timeStr}}</div>
-					<img class="icon" src="/static/Image/icon-prev.png">
-					<img class="icon" src="/static/Image/icon-play.png">
-					<img class="icon" src="/static/Image/icon-next.png">
+					<div class="time-label" v-on:click="openDateSelect=true;">{{timeStr}}</div>
+					<img class="icon" src="/static/Image/icon-prev.png" v-on:click="PrevTime();">
+					<img class="icon" v-bind:src="playIcon" v-on:click="TogglePlay();">
+					<img class="icon" src="/static/Image/icon-next.png" v-on:click="NextTime();">
 				</div>
 			</div>
 

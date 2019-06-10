@@ -99,12 +99,22 @@ a {
         height: 20px;
         cursor: pointer;
         background-color: #b4a17c; }
+      .riverlog .playbar .timebar .select-element {
+        position: absolute;
+        width: 8px;
+        height: 20px;
+        cursor: pointer;
+        border: 2px solid #8c4e4e; }
     .riverlog .playbar .play-control {
       display: flex;
       justify-content: center;
       align-items: center; }
       .riverlog .playbar .play-control .time-label {
-        margin: 0px 5px; }
+        padding: 0px 3px;
+        margin: 0px 5px;
+        cursor: pointer; }
+        .riverlog .playbar .play-control .time-label:hover {
+          border: 1px solid #ff0000; }
       .riverlog .playbar .play-control .icon {
         width: 30px;
         height: 30px;

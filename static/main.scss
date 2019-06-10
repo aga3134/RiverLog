@@ -147,6 +147,13 @@ a{
 				cursor: pointer;
 				background-color: #b4a17c;
 			}
+			.select-element{
+				position: absolute;
+				width: 8px;
+				height: 20px;
+				cursor: pointer;
+				border: 2px solid #8c4e4e;
+			}
 		}
 
 		.play-control{
@@ -154,7 +161,12 @@ a{
 			justify-content: center;
 			align-items: center;
 			.time-label{
+				padding: 0px 3px;
 				margin: 0px 5px;
+				cursor: pointer;
+				&:hover{
+					border: 1px solid #ff0000;
+				}
 			}
 			.icon{
 				width: 30px;

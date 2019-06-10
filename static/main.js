@@ -14,10 +14,22 @@ var g_APP = new Vue({
     dailySum: [],
     weekLabel: [],
     monthLabel: [],
-    rainData: {station:{},dayAvg:{},timeAvg:{}},
-    reservoirData: {station:{},dayAvg:{},timeAvg:{}},
-    waterLevelData: {station:{},dayAvg:{},timeAvg:{}},
-    color: {}
+    rainData: {station:{},dayAvg:{},timeAvg:{},data:{}},
+    reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}},
+    waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}},
+    color: {},
+    playTimer: null,
+    playIcon: "/static/Image/icon-play.png",
+    map: null,
+    layerRain: {},
+    layerReservoir: {},
+    layerWaterLevel: {},
+    infoRain: null,
+    infoReservoir: null,
+    infoWaterLevel: null,
+    infoRainIndex: -1,
+    infoReservoirIndex: -1,
+    infoWaterLevelIndex: -1
   },
   created: function () {
     this.InitColor();
@@ -41,7 +53,11 @@ var g_APP = new Vue({
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this.rainData.station = result.data;
+        var stationHash = {};
+        for(var i=0;i<result.data.length;i++){
+          stationHash[result.data[i].stationID] = result.data[i];
+        }
+        this.rainData.station = stationHash;
         this.ChangeYear(this.curYear);
       }.bind(this));
 
@@ -52,16 +68,17 @@ var g_APP = new Vue({
   methods: {
     InitColor: function(){
       this.color.rain = d3.scale.linear()
-        .domain([0, 11, 23, 35, 41, 47, 53, 58, 64, 70])
-        .range(["#9CFF9C", "#31FF00", "#31CF00", "#FFFF00", "#FFCF00", 
-              "#FF9A00", "#FF6464", "#FF0000", "#990000", "#CE30FF"]);
+        .domain([0,1,2,6,10,15,20,30,40,50,70,90,110,130,150,200,300])
+        .range(["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
+              "#33ff00","#ff0","#fc0","#fe9900","#fe0000","#cc0000",
+              "#990000","#990099","#cc00cc","#ff00ff","#ffccff"]);
     },
     InitMap: function(){
       var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
       var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
       $.get("/static/mapStyle.json",function(style){
-        map = new google.maps.Map(document.getElementById('map'), {
+        this.map = new google.maps.Map(document.getElementById('map'), {
           center: taiwan,
           zoom: loc.zoom,
           scaleControl: true,
@@ -74,15 +91,18 @@ var g_APP = new Vue({
 
         });
 
-        map.addListener('dragend', function() {
+        this.map.addListener('dragend', function() {
 
         });
 
-        map.addListener('zoom_changed', function() {
+        this.map.addListener('zoom_changed', function() {
 
         });
       }.bind(this));
       
+      this.infoRain = new google.maps.InfoWindow();
+      this.infoReservoir = new google.maps.InfoWindow();
+      this.infoWaterLevel = new google.maps.InfoWindow();
     },
     ChangeYear: function(year){
       this.curYear = year;
@@ -115,14 +135,62 @@ var g_APP = new Vue({
           if(result.status != "ok"){
             return console.log(result.err);
           }
-          this.ChangeTime("0:0");
+          this.rainData.data = d3.nest()
+            .key(function(d){return d.time;})
+            .map(result.data);
+          this.ChangeTime("00:00");
         }.bind(this));
       }.bind(this));
     },
     ChangeTime: function(time){
       this.curTime = time;
       this.timeStr = this.curYear+"-"+this.curDate+" "+this.curTime;
+      var selectElement = $(".select-element");
+      var x = this.TimeToOffset(time)*parseInt(selectElement.css("width"));
+      selectElement.css("left",x+"px");
       this.UpdateMap();
+    },
+    TimeToOffset: function(time){
+      var t = time.split(":");
+      var h = parseInt(t[0]);
+      var m = parseInt(t[1]);
+      return h*6+parseInt(m/10);
+    },
+    OffsetToTime: function(offset){
+      var h = parseInt(offset/6);
+      var m = offset%6;
+      return g_Util.PadLeft(h,2)+":"+g_Util.PadLeft(m*10,2);
+    },
+    PrevTime: function(){
+      var offset = this.TimeToOffset(this.curTime);
+      offset -= 1;
+      if(offset < 0) offset = 0;
+      this.ChangeTime(this.OffsetToTime(offset));
+      return offset != 0;
+    },
+    NextTime: function(){
+      var offset = this.TimeToOffset(this.curTime);
+      offset += 1;
+      var maxT = 23*6+5;
+      if(offset > maxT) offset = maxT;
+      this.ChangeTime(this.OffsetToTime(offset));
+      return offset != maxT;
+    },
+    TogglePlay: function(){
+      if(this.playTimer){
+        clearInterval(this.playTimer);
+        this.playTimer = null;
+        this.playIcon = "/static/Image/icon-play.png";
+      }
+      else{
+        this.playTimer = setInterval(function(){
+          if(!this.NextTime()){
+            clearInterval(this.playTimer);
+            this.playTimer = null;
+          }
+        }.bind(this),300);
+        this.playIcon = "/static/Image/icon-pause.png";
+      }
     },
     UpdateDailySum: function(){
       Date.prototype.incDate = function() {
@@ -167,7 +235,7 @@ var g_APP = new Vue({
         var nl = AddDate(d,-1), nr = AddDate(d,1);
         var nt = AddDate(d,-7), nb = AddDate(d,7);
 
-        var borderStyle = "1px solid blue";
+        var borderStyle = "1px solid #333333";
         if(weekDay == 6 || (nr.getMonth() != m)) bt.br=1;
         if(nt.getMonth() != m) bt.bt=1;
         if(weekDay == 0 || (nl.getMonth() != m && m == 0)) bt.bl=1;
@@ -215,10 +283,11 @@ var g_APP = new Vue({
       for(var i=0;i<24*numPerHour;i++){
         var h = Math.floor(i/numPerHour);
         var m = 10*(i%numPerHour);
-        var t = g_Util.PadLeft(h,2)+":"+g_Util.PadLeft(m,2)+":00";
-        var avg = this.rainData.timeAvg[t];
+        var t = g_Util.PadLeft(h,2)+":"+g_Util.PadLeft(m,2);
+        var avg = this.rainData.timeAvg[t+":00"];
         var bt = {};
         bt.x = i*cellW;
+        bt.time = t;
         if(avg){
           if(avg.northNum) bt.north = this.color.rain(avg.northSum/avg.northNum);
           if(avg.centralNum) bt.center = this.color.rain(avg.centralSum/avg.centralNum);
@@ -233,7 +302,76 @@ var g_APP = new Vue({
       }
     },
     UpdateMap: function(){
+      this.UpdateMapRain();
+    },
+    UpdateMapRain: function(){
+      var rainData = this.rainData.data[this.curTime+":00"];
+      if(!rainData) return;
 
+      var UpdateInfoRain = function(d){
+        var s = this.rainData.station[d.stationID];
+        var str = "<p>"+s.name+"</p>";
+        str += "<p>累積雨量 "+d.now+" mm</p>";
+        var loc = new google.maps.LatLng(s.lat+0.01, s.lon);
+        this.infoRain.setOptions({content: str, position: loc});
+      }.bind(this);
+
+      var clickFn = function(data,i){ 
+        return function() {
+          UpdateInfoRain(data[i]);
+          this.infoRain.open(this.map);
+          this.infoRainIndex = i;
+        }.bind(this);
+      }.bind(this);
+
+      //info window有打開，更新資訊
+      if(this.infoRain.getMap()){
+        UpdateInfoRain(rainData[this.infoRainIndex]);
+      }
+
+      for(var i=0;i<rainData.length;i++){
+        var station = this.rainData.station[rainData[i].stationID];
+        var rectW = 0.01;
+        var rectH = 0.0005;
+        if(this.layerRain[station.stationID]){
+          this.layerRain[station.stationID].setOptions({
+            fillColor: this.color.rain(rainData[i].now),
+            bounds: {
+              north: station.lat+rainData[i].now*rectH,
+              south: station.lat,
+              east: station.lon+rectW,
+              west: station.lon-rectW
+            }
+          });
+        }
+        else{
+          var rect = new google.maps.Rectangle({
+            strokeWeight: 0,
+            strokeColor: '#ffffff',
+            strokeOpacity: 0.8,
+            fillColor: this.color.rain(rainData[i].now),
+            fillOpacity: 0.8,
+            map: this.map,
+            bounds: {
+              north: station.lat+rainData[i].now*rectH,
+              south: station.lat,
+              east: station.lon+rectW,
+              west: station.lon-rectW
+            }
+          });
+          rect.addListener('click', clickFn(rainData,i));
+          this.layerRain[station.stationID] = rect;
+        }
+      }
+    },
+    ClearMap: function(){
+      this.ClearMapRain();
+    },
+    ClearMapRain: function(){
+      for(var key in this.layerRain){
+        this.layerRain[key].setMap(null);
+      }
+      this.layerRain = {};
     }
   }
 });
