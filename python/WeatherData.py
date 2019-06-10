@@ -32,7 +32,7 @@ class WeatherData:
             now = now.replace(minute=(now.minute-now.minute%10))
             t = now.strftime("%Y-%m-%d_%H-%M")
             #rain data
-            url = "http://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key
+            url = "https://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key
             folder = "data/rain/"
             if not os.path.exists(folder):
                 os.makedirs(folder)

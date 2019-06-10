@@ -1,14 +1,14 @@
 @charset "UTF-8";
 ::-webkit-scrollbar {
   height: 8px;
-  background-color: #c9995d; }
+  background-color: #ccbe95; }
 
 ::-webkit-scrollbar-track {
   border-radius: 3px; }
 
 ::-webkit-scrollbar-thumb {
   border-radius: 3px;
-  background-color: #9a8250; }
+  background-color: #8d7950; }
 
 html, body {
   height: 100%;
@@ -41,7 +41,7 @@ a {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #e3c68e; }
+  background-color: #e1cbaa; }
   .riverlog select {
     padding: 3px;
     border-radius: 3px;
@@ -60,7 +60,7 @@ a {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      border-right: 1px solid #c19797; }
+      border-right: 1px solid #c0b492; }
       .riverlog .main-content .icon-container .icon {
         width: 35px;
         height: 35px;
@@ -72,17 +72,21 @@ a {
   .riverlog .topbar {
     width: 100%;
     padding: 5px 10px;
-    border-bottom: 1px solid #c19797;
+    border-bottom: 1px solid #c0b492;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     font-size: 1.5em;
     flex-wrap: wrap; }
     .riverlog .topbar .logo {
+      display: none;
       height: 40px; }
+      @media only screen and (min-width: 640px) {
+        .riverlog .topbar .logo {
+          display: block; } }
   .riverlog .playbar {
     width: 100%;
-    border-top: 1px solid #c19797;
+    border-top: 1px solid #c0b492;
     padding: 5px; }
     .riverlog .playbar .timebar {
       position: relative;
@@ -114,7 +118,8 @@ a {
     height: 30px; }
     .riverlog .close-bt:hover {
       width: 32px;
-      height: 32px; }
+      height: 32px;
+      filter: contrast(0.5); }
   .riverlog .side-panel {
     position: fixed;
     left: -250px;
@@ -125,12 +130,20 @@ a {
     height: 100%;
     padding: 10px;
     overflow-y: auto;
-    background-color: #e3c68e;
+    background-color: #e1cbaa;
     box-shadow: 5px 0px 15px #8b6951;
     -webkit-transition: left 0.5s ease;
     transition: left 0.5s ease; }
+    .riverlog .side-panel .close-bt {
+      position: fixed;
+      left: -50px;
+      -webkit-transition: left 0.5s ease;
+      transition: left 0.5s ease;
+      z-index: 5; }
     .riverlog .side-panel.open {
       left: 0px; }
+      .riverlog .side-panel.open .close-bt {
+        left: 200px; }
     .riverlog .side-panel .date-selection {
       position: relative;
       width: 100%;
@@ -152,12 +165,12 @@ a {
     left: 0px;
     width: 100%;
     height: 100%;
-    padding: 40px 20px;
-    background-color: #e3c68e;
+    padding: 40px 20px 20px 20px;
+    background-color: #e1cbaa;
     overflow-x: hidden;
     overflow-y: auto; }
     .riverlog .full-panel .content-area {
-      background-color: #ffedb9;
+      background-color: #e6e3d9;
       border-radius: 5px;
       width: 100%;
       height: 100%; }

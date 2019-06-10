@@ -14,6 +14,9 @@ import urllib.request
 import util
 import os
 import gc
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 class WaterData:
     def __init__(self, db):

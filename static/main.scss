@@ -3,20 +3,32 @@ $link-hover-color: rgb(200,150,150);
 $action-fg-color: #ff5555;
 $action-bg-color: #ffffff;
 $action-hover-color: #ff8888;
-$theme-bg: #e3c68e;
+$theme-bg: #e1cbaa;
 $trans-time: 0.5s;
 
 //==============Responsive================
 $pc-media: 1024px;
+$pad-media: 640px;
+$mobile-media: 360px;
 @mixin pc-width() {
     @media only screen and (min-width: $pc-media) {
+        @content;
+    }
+}
+@mixin pad-width() {
+    @media only screen and (min-width: $pad-media) {
+        @content;
+    }
+}
+@mixin mobile-width() {
+    @media only screen and (min-width: $mobile-media) {
         @content;
     }
 }
 //===================General======================
 ::-webkit-scrollbar {
     height: 8px;
-    background-color: #c9995d;
+    background-color: #ccbe95;
 }
  
 ::-webkit-scrollbar-track {
@@ -25,7 +37,7 @@ $pc-media: 1024px;
  
 ::-webkit-scrollbar-thumb {
     border-radius: 3px;
-    background-color: #9a8250;
+    background-color: #8d7950;
 }
 
 html, body { 
@@ -85,7 +97,7 @@ a{
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
-			border-right: 1px solid #c19797;
+			border-right: 1px solid #c0b492;
 			.icon{
 				width: 35px;
 				height: 35px;
@@ -102,7 +114,7 @@ a{
 	.topbar{
 		width: 100%;
 		padding: 5px 10px;
-		border-bottom: 1px solid #c19797;
+		border-bottom: 1px solid #c0b492;
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
@@ -110,13 +122,17 @@ a{
 		flex-wrap: wrap;
 
 		.logo{
+			display: none;
+			@include pad-width(){
+				display: block;
+			}
 			height: 40px;
 		}
 	}
 
 	.playbar{
 		width: 100%;
-		border-top: 1px solid #c19797;
+		border-top: 1px solid #c0b492;
 		padding: 5px;
 
 		.timebar{
@@ -158,6 +174,7 @@ a{
 		&:hover{
 			width: 32px;
 			height: 32px;
+			filter: contrast(0.5);
 		}
 	}
 
@@ -176,8 +193,19 @@ a{
 		-webkit-transition: left $trans-time ease;
 		transition: left $trans-time ease;
 
+		.close-bt{
+			position: fixed;
+			left: -50px;
+			-webkit-transition: left $trans-time ease;
+			transition: left $trans-time ease;
+			z-index: 5;
+		}
+
 		&.open{
 			left: 0px;
+			.close-bt{
+				left: 200px;
+			}
 		}
 
 		.date-selection{
@@ -207,13 +235,13 @@ a{
 		left: 0px;
 		width: 100%;
 		height: 100%;
-		padding: 40px 20px;
+		padding: 40px 20px 20px 20px;
 		background-color: $theme-bg;
 		overflow-x: hidden;
 		overflow-y: auto;
 
 		.content-area{
-			background-color: #ffedb9;
+			background-color: #e6e3d9;
 			border-radius: 5px;
 			width: 100%;
 			height: 100%;
