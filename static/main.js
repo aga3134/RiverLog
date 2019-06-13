@@ -27,9 +27,9 @@ var g_APP = new Vue({
     infoRain: null,
     infoReservoir: null,
     infoWaterLevel: null,
-    infoRainIndex: -1,
-    infoReservoirIndex: -1,
-    infoWaterLevelIndex: -1
+    infoRainID: "",
+    infoReservoirID: "",
+    infoWaterLevelID: ""
   },
   created: function () {
     this.InitColor();
@@ -86,6 +86,22 @@ var g_APP = new Vue({
       }.bind(this)
     });
 
+    $.ajax({
+      url:"/reservoir/info",
+      async: false,
+      success: function(result){
+        if(result.status != "ok"){
+          return console.log(result.err);
+        }
+        console.log(result);
+        var stationHash = {};
+        for(var i=0;i<result.data.length;i++){
+          stationHash[result.data[i].id] = result.data[i];
+        }
+        this.reservoirData.station = stationHash;
+      }.bind(this)
+    });
+
     this.ChangeYear(this.curYear);
     google.maps.event.addDomListener(window, 'load', this.InitMap);
   },
@@ -111,8 +127,8 @@ var g_APP = new Vue({
           mapTypeControl: false
         });
 
-        google.maps.event.addListener(map, 'click', function(event) {
-
+        google.maps.event.addListener(this.map, 'click', function(event) {
+          
         });
 
         this.map.addListener('dragend', function() {
@@ -120,13 +136,15 @@ var g_APP = new Vue({
         });
 
         this.map.addListener('zoom_changed', function() {
-
+          
         });
+
       }.bind(this));
       
       this.infoRain = new google.maps.InfoWindow();
       this.infoReservoir = new google.maps.InfoWindow();
       this.infoWaterLevel = new google.maps.InfoWindow();
+
     },
     ChangeYear: function(year){
       this.curYear = year;
@@ -175,6 +193,17 @@ var g_APP = new Vue({
             .key(function(d){return d.RecordTime;})
             .map(result.data);
           this.UpdateMapWaterLevel();
+        }.bind(this));
+
+        $.get("/reservoir/reservoirData?date="+this.curYear+"-"+this.curDate,function(result){
+          if(result.status != "ok"){
+            return console.log(result.err);
+          }
+          console.log(result);
+          this.reservoirData.data = d3.nest()
+            .key(function(d){return d.ObservationTime;})
+            .map(result.data);
+          this.UpdateMapReservoir();
         }.bind(this));
 
 
@@ -226,7 +255,7 @@ var g_APP = new Vue({
             clearInterval(this.playTimer);
             this.playTimer = null;
           }
-        }.bind(this),300);
+        }.bind(this),200);
         this.playIcon = "/static/Image/icon-pause.png";
       }
     },
@@ -342,6 +371,7 @@ var g_APP = new Vue({
     UpdateMap: function(){
       this.UpdateMapRain();
       this.UpdateMapWaterLevel();
+      this.UpdateMapReservoir();
     },
     UpdateMapRain: function(){
       var rainData = this.rainData.data[this.curTime+":00"];
@@ -351,6 +381,7 @@ var g_APP = new Vue({
         var s = this.rainData.station[d.stationID];
         var str = "<p>"+s.name+"</p>";
         str += "<p>累積雨量 "+d.now+" mm</p>";
+        str += "<p>時間 "+d.time+" </p>";
         var loc = new google.maps.LatLng(s.lat+0.01, s.lon);
         this.infoRain.setOptions({content: str, position: loc});
       }.bind(this);
@@ -359,18 +390,17 @@ var g_APP = new Vue({
         return function() {
           UpdateInfoRain(data[i]);
           this.infoRain.open(this.map);
-          this.infoRainIndex = i;
+          this.infoRainID = data[i].stationID;
         }.bind(this);
       }.bind(this);
-
-      //info window有打開，更新資訊
-      if(this.infoRain.getMap()){
-        UpdateInfoRain(rainData[this.infoRainIndex]);
-      }
 
       for(var i=0;i<rainData.length;i++){
         var station = this.rainData.station[rainData[i].stationID];
         if(!station) continue;
+        //info window有打開，更新資訊
+        if(this.infoRain.getMap() && this.infoRainID == station.stationID){
+          UpdateInfoRain(rainData[i]);
+        }
         var rectW = 0.01;
         var rectH = 0.0005;
         if(this.layerRain[station.stationID]){
@@ -392,6 +422,7 @@ var g_APP = new Vue({
             fillColor: this.color.rain(rainData[i].now),
             fillOpacity: 0.8,
             map: this.map,
+            zIndex: 1,
             bounds: {
               north: station.lat+rainData[i].now*rectH,
               south: station.lat,
@@ -413,8 +444,9 @@ var g_APP = new Vue({
         var str = "<p>"+s.ObservatoryName+"</p>";
         str += "<p>溪流 "+s.RiverName+"</p>";
         str += "<p>水位 "+d.WaterLevel+" m</p>";
-        str += "<p>警戒水位(3 / 2 / 1):</p>";
-        str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+"</p>";
+        str += "<p>警戒水位(三級/二級/一級):</p>";
+        str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
+        str += "<p>時間 "+d.RecordTime+" </p>";
         var loc = new google.maps.LatLng(s.lat+0.01, s.lon);
         this.infoWaterLevel.setOptions({content: str, position: loc});
       }.bind(this);
@@ -423,17 +455,17 @@ var g_APP = new Vue({
         return function() {
           UpdateInfoWaterLevel(data[i]);
           this.infoWaterLevel.open(this.map);
-          this.infoWaterLevelIndex = i;
+          this.infoWaterLevelID = data[i].StationIdentifier;
         }.bind(this);
       }.bind(this);
 
-      //info window有打開，更新資訊
-      if(this.infoWaterLevel.getMap()){
-        UpdateInfoWaterLevel(waterLevelData[this.infoWaterLevelIndex]);
-      }
       for(var i=0;i<waterLevelData.length;i++){
         var station = this.waterLevelData.station[waterLevelData[i].StationIdentifier];
         if(!station) continue;
+        //info window有打開，更新資訊
+        if(this.infoWaterLevel.getMap() && this.infoWaterLevelID == station.BasinIdentifier){
+          UpdateInfoWaterLevel(waterLevelData[i]);
+        }
         var radius = 2000;
         var base = 1000;
         if(station.AlertLevel3) base = station.AlertLevel3;
@@ -456,15 +488,86 @@ var g_APP = new Vue({
           var circle = new google.maps.Circle({
             strokeWeight: 1,
             strokeColor: '#ffffff',
-            strokeOpacity: 0.8,
+            strokeOpacity: 0.5,
             fillColor: color,
-            fillOpacity: 0.8,
+            fillOpacity: 0.5,
             map: this.map,
+            zIndex: 2,
             center: {lat: station.lat, lng: station.lon},
             radius: value*radius
           });
           circle.addListener('click', clickFn(waterLevelData,i));
           this.layerWaterLevel[station.BasinIdentifier] = circle;
+        }
+      }
+    },
+    UpdateMapReservoir: function(){
+      var reservoirData = this.reservoirData.data[this.curTime+":00"];
+      if(!reservoirData) return;
+
+      var UpdateInfoReservoir = function(d){
+        var s = this.reservoirData.station[d.ReservoirIdentifier];
+        var percent = (100*d.EffectiveWaterStorageCapacity/s.CurruntEffectiveCapacity).toFixed(2);
+        var str = "<p>"+s.ReservoirName+"</p>";
+        str += "<p>蓄水百分比 "+percent+" %</p>";
+        str += "<p>水位/滿水位/死水位: </p>"
+        str += d.WaterLevel+" / "+s.FullWaterLevel+" / "+s.DeadStorageLevel+" m</p>";
+        str += "<p>有效總容量 "+s.CurruntEffectiveCapacity+" m3</p>";
+        str += "<p>時間 "+d.ObservationTime+" </p>";
+        var loc = new google.maps.LatLng(s.lat+0.01, s.lng);
+        this.infoReservoir.setOptions({content: str, position: loc});
+      }.bind(this);
+
+      var clickFn = function(data,i){ 
+        return function() {
+          UpdateInfoReservoir(data[i]);
+          this.infoReservoir.open(this.map);
+          this.infoReservoirID = data[i].ReservoirIdentifier;
+        }.bind(this);
+      }.bind(this);
+
+      for(var i=0;i<reservoirData.length;i++){
+        var station = this.reservoirData.station[reservoirData[i].ReservoirIdentifier];
+        if(!station) continue;
+        //info window有打開，更新資訊
+        if(this.infoReservoir.getMap() && this.infoReservoirID == station.id){
+          UpdateInfoReservoir(reservoirData[i]);
+        }
+
+        var baseSize = 0.0005;
+        var d = reservoirData[i];
+        var percent = (100*d.EffectiveWaterStorageCapacity/station.CurruntEffectiveCapacity).toFixed(2);
+
+        if(this.layerReservoir[station.id]){
+          /*this.layerReservoir[station.id].setOptions({
+            fillColor: "#333333",
+            radius: station.CurruntEffectiveCapacity*radius
+          });*/
+        }
+        else{
+          var overlay = new SvgOverlay({
+            map: this.map,
+            lat: station.lat,
+            lng: station.lng,
+            size: station.CurruntEffectiveCapacity*baseSize,
+            svgID: "svg_"+station.id
+          });
+          
+          overlay.addListener('click', clickFn(reservoirData,i));
+          this.layerReservoir[station.id] = overlay;
+          /*var circle = new google.maps.Circle({
+            strokeWeight: 1,
+            strokeColor: '#ffffff',
+            strokeOpacity: 0.5,
+            fillColor: "#333333",
+            fillOpacity: 0.5,
+            map: this.map,
+            zIndex: 2,
+            center: {lat: station.lat, lng: station.lng},
+            radius: station.CurruntEffectiveCapacity*radius
+          });
+          circle.addListener('click', clickFn(reservoirData,i));
+          this.layerReservoir[station.id] = circle;*/
         }
       }
     },

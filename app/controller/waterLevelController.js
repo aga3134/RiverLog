@@ -47,7 +47,6 @@ wlc.GetData = function(param){
 	WaterLevel.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		for(var i=0;i<data.length;i++){
-			console.log(data[i].RecordTime);
 			data[i].RecordTime = Util.DateToTimeString(data[i].RecordTime);
 		}
 		param.succFunc(data);

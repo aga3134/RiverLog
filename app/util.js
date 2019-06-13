@@ -34,7 +34,7 @@ util.DateToTimeString = function(date,timeSep=":"){
 	var HH = util.PadLeft(t.get("hour"),2);
 	var MM = util.PadLeft(t.get("minute"),2);
 	var SS = util.PadLeft(t.get("second"),2);
-	console.log(HH+timeSep+MM+timeSep+SS);
+	//console.log(HH+timeSep+MM+timeSep+SS);
 	return HH+timeSep+MM+timeSep+SS;
 }
 

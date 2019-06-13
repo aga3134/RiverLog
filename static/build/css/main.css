@@ -52,7 +52,8 @@ a {
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    height: 100%; }
+    height: 100%;
+    position: relative; }
     .riverlog .main-content .icon-container {
       width: 50px;
       height: 100%;
@@ -69,6 +70,15 @@ a {
     .riverlog .main-content #map {
       width: calc(100% - 50px);
       height: 100%; }
+    .riverlog .main-content .overlay-container {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%; }
+      .riverlog .main-content .overlay-container svg {
+        width: 100%;
+        height: 100%; }
   .riverlog .topbar {
     width: 100%;
     padding: 5px 10px;
