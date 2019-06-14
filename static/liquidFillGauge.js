@@ -107,6 +107,14 @@ function loadLiquidFillGauge(elementId, value, config) {
     var gaugeGroup = gauge.append("g")
         .attr('transform','translate('+locationX+','+locationY+')');
 
+    //bg circle
+    gaugeGroup.append("circle").attr({
+        "r": gaugeCircleY(radius-circleThickness),
+        "cx": parseInt(gauge.style("width"))/2,
+        "cy": parseInt(gauge.style("width"))/2,
+        "fill": config.backgroundColor
+    });
+
     // Draw the outer circle.
     var gaugeCircleArc = d3.svg.arc()
         .startAngle(gaugeCircleX(0))
