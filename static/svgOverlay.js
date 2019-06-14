@@ -54,6 +54,7 @@ SvgOverlay.prototype.Update = function(option){
 	}
 
 	var overlayProjection = this.getProjection();
+	if(!overlayProjection) return;
 	var pos = new google.maps.LatLng(this.lat, this.lng);
 	var center = overlayProjection.fromLatLngToDivPixel(pos);
 	var halfSize = this.size*0.5;

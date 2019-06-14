@@ -15,6 +15,7 @@ import util
 import os
 import gc
 import ssl
+from bs4 import BeautifulSoup
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -40,6 +41,9 @@ class WaterData:
             file = folder+"waterLevel_"+t+".json"
             urllib.request.urlretrieve(url, file)
             self.ProcessWaterLevel(file)
+
+            #collect water level from fhy website for more real time data
+            self.ProcessWaterLevelFromWebsite()
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -191,6 +195,62 @@ class WaterData:
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                     
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWaterLevelFromWebsite(self):
+        try:
+            #map site info from name
+            attr = {"BasinIdentifier":1,"ObservatoryName":1,"lat":1,"lon":1,"AlertLevel1":1,"AlertLevel2":1,"AlertLevel3":1}
+            cursor = self.db["waterLevelStation"].find({},attr)
+            siteHash = {}
+            for site in cursor:
+                siteHash[site["ObservatoryName"]] = site
+
+            now = datetime.datetime.now()
+            utcnow = datetime.datetime.utcnow()
+            tday = datetime.datetime.strftime(utcnow, "%Y%m%d")
+            t10min = utcnow.replace(minute=(utcnow.minute-utcnow.minute%10),second=0,microsecond=0)
+
+            r = requests.post("http://fhy.wra.gov.tw/fhy/Monitor/WaterInfo")
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                soup = BeautifulSoup(r.text, 'html.parser')
+                tr = soup.find_all('tr')
+                for i in range(2,len(tr)):
+                    td = tr[i].find_all("td")
+                    name = td[2].string
+                    if name not in siteHash:
+                        continue
+                    stationID = siteHash[name]["BasinIdentifier"]
+                    w = {}
+                    w["WaterLevel"] = util.ToFloat(td[3].string)
+                    w["RecordTime"] = t10min
+                    w["StationIdentifier"] = stationID
+                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t10min}
+                    day = datetime.datetime.strftime(now, "%Y%m%d")
+
+                    query = self.db["waterLevel"+day].find_one(key)
+                    if query is None:
+                        self.db["waterLevel"+day].insert_one(w)
+                    
+                        #計算北中南平均警戒程度
+                        inc = {}
+                        loc = siteHash[name]
+                        area = util.LatToArea(loc["lat"])
+                        v = 0
+                        if w["WaterLevel"] > loc["AlertLevel3"]:
+                            v = 1
+                        if w["WaterLevel"] > loc["AlertLevel2"]:
+                            v = 2
+                        if w["WaterLevel"] > loc["AlertLevel1"]:
+                            v = 3
+                        inc[area+"Sum"] = v
+                        inc[area+"Num"] = 1
+                        
+                        self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
+                        self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

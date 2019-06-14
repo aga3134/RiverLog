@@ -93,7 +93,6 @@ var g_APP = new Vue({
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        console.log(result);
         var stationHash = {};
         for(var i=0;i<result.data.length;i++){
           stationHash[result.data[i].id] = result.data[i];
@@ -199,7 +198,6 @@ var g_APP = new Vue({
           if(result.status != "ok"){
             return console.log(result.err);
           }
-          console.log(result);
           this.reservoirData.data = d3.nest()
             .key(function(d){return d.ObservationTime;})
             .map(result.data);
@@ -475,9 +473,9 @@ var g_APP = new Vue({
         else if(station.AlertLevel1) base = station.AlertLevel1;
 
         var value = waterLevelData[i].WaterLevel/base;
-        var color = "#0033ff";
-        if(waterLevelData[i].WaterLevel > station.AlertLevel3) color = "#ffff00";
-        if(waterLevelData[i].WaterLevel > station.AlertLevel2) color = "#ffcc00";
+        var color = "#37cc00";
+        if(waterLevelData[i].WaterLevel > station.AlertLevel3) color = "#ffcc00";
+        if(waterLevelData[i].WaterLevel > station.AlertLevel2) color = "#ff6600";
         if(waterLevelData[i].WaterLevel > station.AlertLevel1) color = "#ff0000";
 
         if(this.layerWaterLevel[station.BasinIdentifier]){
@@ -489,7 +487,7 @@ var g_APP = new Vue({
         else{
           var circle = new google.maps.Circle({
             strokeWeight: 1,
-            strokeColor: '#ffffff',
+            strokeColor: '#000000',
             strokeOpacity: 0.5,
             fillColor: color,
             fillOpacity: 0.5,
