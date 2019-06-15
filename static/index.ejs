@@ -70,7 +70,7 @@
 				<div class="date-selection">
 					<div class="week-label" v-for="w in weekLabel" v-bind:style="{left:w.x+'px', top:w.y+'px'}">{{w.text}}</div>
 					<div class="month-label" v-for="m in monthLabel" v-bind:style="{left:m.x+'px', top:m.y+'px'}">{{m.text}}</div>
-					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style"></div>
+					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style" v-on:click="ChangeDate(d.date);"></div>
 				</div>
 			</div>
 

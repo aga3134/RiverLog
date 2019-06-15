@@ -86,6 +86,8 @@ class WeatherData:
                             data["hour24"] = util.ToFloat(elem[1][0].text)
                         elif(elem[0].text == "NOW"):
                             data["now"] = util.ToFloat(elem[1][0].text)
+                    if data["now"] < 0:
+                        continue
                             
                     for param in location.findall(ns+"parameter"):
                         if(param[0].text == "CITY"):

@@ -37,6 +37,7 @@ var g_APP = new Vue({
     //load init data synchronously
     $.ajax({
       url:"/rain/extremeDate",
+      async: false,
       success: function(result){
         if(result.status != "ok"){
           return console.log(result.err);
@@ -314,6 +315,7 @@ var g_APP = new Vue({
         if(bt.north && bt.center && bt.south){
           bt.style["background"] = "linear-gradient("+bt.north+","+bt.center+","+bt.south+")";
         }
+        bt.date = t.substr(5);
         this.dailySum.push(bt);
       }
 
@@ -396,6 +398,7 @@ var g_APP = new Vue({
       for(var i=0;i<rainData.length;i++){
         var station = this.rainData.station[rainData[i].stationID];
         if(!station) continue;
+        if(rainData[i].now < 0) continue;
         //info window有打開，更新資訊
         if(this.infoRain.getMap() && this.infoRainID == station.stationID){
           UpdateInfoRain(rainData[i]);

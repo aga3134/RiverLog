@@ -178,7 +178,8 @@ a {
         position: absolute;
         width: 20px;
         height: 20px;
-        border: 1px solid #9c9c9c; }
+        border: 1px solid #9c9c9c;
+        cursor: pointer; }
   .riverlog .full-panel {
     position: fixed;
     top: 0px;
