@@ -180,6 +180,12 @@ a {
         height: 20px;
         border: 1px solid #9c9c9c;
         cursor: pointer; }
+      .riverlog .side-panel .date-selection .select-date {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        border: 2px solid #0000ff; }
   .riverlog .full-panel {
     position: fixed;
     top: 0px;

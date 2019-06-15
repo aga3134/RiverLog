@@ -59,6 +59,7 @@ SvgOverlay.prototype.Update = function(option){
 	var center = overlayProjection.fromLatLngToDivPixel(pos);
 	var halfSize = this.size*0.5;
 	var div = this.div;
+	if(!this.div) return;
     div.style.left = (center.x-halfSize) + 'px';
     div.style.top = (center.y-halfSize) + 'px';
     div.style.width = this.size + 'px';

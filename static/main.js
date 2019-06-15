@@ -158,11 +158,21 @@ var g_APP = new Vue({
           this.rainData.dayAvg[d.time] = d;
         }
         this.UpdateDailySum();
-        this.ChangeDate(this.curDate);
+        Vue.nextTick(function(){
+          this.ChangeDate(this.curDate);
+        }.bind(this));
+        
       }.bind(this));
     },
     ChangeDate: function(date){
       this.curDate = date;
+      var selectDate = $(".select-date");
+      var target = $(".date-bt[data-date='"+date+"']");
+      var x = target.css("left");
+      var y = target.css("top");
+      selectDate.css("left",x);
+      selectDate.css("top",y);
+
       $.get("/rain/10minSum?date="+this.curYear+"-"+this.curDate,function(result){
         if(result.status != "ok"){
           return console.log(result.err);
