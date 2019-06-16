@@ -490,11 +490,11 @@ var g_APP = new Vue({
         if(this.infoWaterLevel.getMap() && this.infoWaterLevelID == station.BasinIdentifier){
           UpdateInfoWaterLevel(waterLevelData[i]);
         }
-        var radius = 1000;
+        var size = 0.01;
         var base = 1000;
         if(station.AlertLevel3) base = station.AlertLevel3;
-        else if(station.AlertLevel2) base = station.AlertLevel2;
-        else if(station.AlertLevel1) base = station.AlertLevel1;
+        else if(station.AlertLevel2) base = station.AlertLevel2*0.8;
+        else if(station.AlertLevel1) base = station.AlertLevel1*0.6;
 
         var value = waterLevelData[i].WaterLevel/base;
         var color = "#37cc00";
@@ -505,11 +505,16 @@ var g_APP = new Vue({
         if(this.layerWaterLevel[station.BasinIdentifier]){
           this.layerWaterLevel[station.BasinIdentifier].setOptions({
             fillColor: color,
-            radius: value*radius
+            paths: [
+              {lat: station.lat-size*value, lng: station.lon},
+              {lat: station.lat, lng: station.lon-size*value},
+              {lat: station.lat+size*value, lng: station.lon},
+              {lat: station.lat, lng: station.lon+size*value}
+            ]
           });
         }
         else{
-          var circle = new google.maps.Circle({
+          var diamond = new google.maps.Polygon({
             strokeWeight: 1,
             strokeColor: '#000000',
             strokeOpacity: 0.5,
@@ -517,11 +522,15 @@ var g_APP = new Vue({
             fillOpacity: 0.5,
             map: this.map,
             zIndex: 2,
-            center: {lat: station.lat, lng: station.lon},
-            radius: value*radius
+            paths: [
+              {lat: station.lat-size*value, lng: station.lon},
+              {lat: station.lat, lng: station.lon-size*value},
+              {lat: station.lat+size*value, lng: station.lon},
+              {lat: station.lat, lng: station.lon+size*value}
+            ]
           });
-          circle.addListener('click', clickFn(waterLevelData,i));
-          this.layerWaterLevel[station.BasinIdentifier] = circle;
+          diamond.addListener('click', clickFn(waterLevelData,i));
+          this.layerWaterLevel[station.BasinIdentifier] = diamond;
         }
       }
     },
