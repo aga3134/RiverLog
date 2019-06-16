@@ -383,10 +383,21 @@ var g_APP = new Vue({
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
     },
+    GetDataFromTime: function(data,time){
+      var timeOffset = this.TimeToOffset(time);
+      for(var i=timeOffset;i>=0;i--){
+        var t = this.OffsetToTime(i);
+        var key = t+":00";
+        if(key in data){
+          return data[key];
+        }
+      }
+      return null;
+    },
     UpdateMapRain: function(){
       if(!this.map) return;
-      var rainData = this.rainData.data[this.curTime+":00"];
-      if(!rainData) return;
+      var rainData = this.GetDataFromTime(this.rainData.data,this.curTime);
+      if(!rainData) return this.ClearMapRain();
 
       var UpdateInfoRain = function(d){
         var s = this.rainData.station[d.stationID];
@@ -449,8 +460,8 @@ var g_APP = new Vue({
     },
     UpdateMapWaterLevel: function(){
       if(!this.map) return;
-      var waterLevelData = this.waterLevelData.data[this.curTime+":00"];
-      if(!waterLevelData) return;
+      var waterLevelData = this.GetDataFromTime(this.waterLevelData.data,this.curTime);
+      if(!waterLevelData) return this.ClearMapWaterLevel();
 
       var UpdateInfoWaterLevel = function(d){
         var s = this.waterLevelData.station[d.StationIdentifier];
@@ -517,8 +528,8 @@ var g_APP = new Vue({
     UpdateMapReservoir: function(){
       if(!this.map) return;
       var hour = this.curTime.split(":")[0];
-      var reservoirData = this.reservoirData.data[hour+":00:00"];
-      if(!reservoirData) return;
+      var reservoirData = this.GetDataFromTime(this.reservoirData.data,hour+":00");
+      if(!reservoirData) return this.ClearMapReservoir();
 
       var UpdateInfoReservoir = function(d){
         var s = this.reservoirData.station[d.ReservoirIdentifier];
@@ -580,12 +591,26 @@ var g_APP = new Vue({
     },
     ClearMap: function(){
       this.ClearMapRain();
+      this.ClearMapWaterLevel();
+      this.ClearMapReservoir();
     },
     ClearMapRain: function(){
       for(var key in this.layerRain){
         this.layerRain[key].setMap(null);
       }
       this.layerRain = {};
+    },
+    ClearMapWaterLevel: function(){
+      for(var key in this.layerWaterLevel){
+        this.layerWaterLevel[key].setMap(null);
+      }
+      this.layerWaterLevel = {};
+    },
+    ClearMapReservoir: function(){
+      for(var key in this.layerReservoir){
+        this.layerReservoir[key].setMap(null);
+      }
+      this.layerReservoir = {};
     }
   }
 });
