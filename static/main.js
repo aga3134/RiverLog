@@ -139,6 +139,11 @@ var g_APP = new Vue({
           this.UpdateMap();
         }.bind(this));
 
+        $.getJSON("/static/geo/village/geo-10007.json", function(data){
+          geoJsonObject = topojson.feature(data, data.objects["geo-10007"]);
+          this.map.data.addGeoJson(geoJsonObject); 
+        }.bind(this));
+
       }.bind(this));
       
       this.infoRain = new google.maps.InfoWindow();
