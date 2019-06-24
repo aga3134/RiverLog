@@ -13,6 +13,7 @@ import datetime
 import urllib.request
 import util
 import os
+from bs4 import BeautifulSoup
 
 class AlertData:
     def __init__(self, db):
@@ -22,78 +23,21 @@ class AlertData:
         pass
     
     def CollectData10min(self):
-        try:
-            print("collect alert data 10min")
-            now = datetime.datetime.now()
-            now = now.replace(minute=(now.minute-now.minute%10))
-            t = now.strftime("%Y-%m-%d_%H-%M")
-            
-            #landslide alert
-            url = "http://data.coa.gov.tw/Service/OpenData/FromM/GetCustomerDebrisAlertInfo.aspx"
-            folder = "data/alert/landSlide/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"landSlide_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessLandslide(file)
-            
-            #rain alert county
-            url = "http://fhy.wra.gov.tw/fhy/api/RainMapApi/CountyNameByTownShip"
-            folder = "data/alert/rainCounty/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"rainCounty_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessRainCounty(file)
-            
-            #rain alert draw
-            url = "http://fhy.wra.gov.tw/fhy/api/RainMapApi/Draw"
-            folder = "data/alert/rainDraw/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"rainDraw_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessRainDraw(file)
-            
-            #water alert county
-            url = "http://fhy.wra.gov.tw/fhy/api/WaterMapApi/CountyNameToStation"
-            folder = "data/alert/waterCounty/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"waterCounty_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessWaterCounty(file)
-            
-            #water alert draw
-            url = "http://fhy.wra.gov.tw/fhy/api/WaterMapApi/Draw"
-            folder = "data/alert/waterDraw/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"waterDraw_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessWaterDraw(file)
-            
-            #reservoir alert point
-            url = "http://fhy.wra.gov.tw/fhy/api/ReservoirMapApi/Point"
-            folder = "data/alert/reservoirPoint/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"reservoirPoint_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessReservoirPoint(file)
-            
-            #reservoir alert draw
-            url = "http://fhy.wra.gov.tw/fhy/api/ReservoirMapApi/Draw"
-            folder = "data/alert/reservoirDraw/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"reservoirDraw_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessReservoirDraw(file)
-            
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
+        print("collect alert data 10min")
+        #flood warn
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=8")
+        #debris flow
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=9")
+        #rain alert
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=10")
+        #water level warn
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=11")
+        #reservoir warn
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=12")
+        #thunderstorm
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=1051")
+        #water suspend
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=1089")
             
     def CollectData1hour(self):
         try:
@@ -108,52 +52,77 @@ class AlertData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
-    
-    def ProcessLandslide(self,file):
+
+    def CollectAlert(self,url):
         try:
-            pass
+            r = requests.get(url)
+            r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                data = json.loads(r.text)
+                prevID = ""
+                for entry in data["entry"]:
+                    if entry["id"] == prevID:
+                        continue
+                    link = entry["link"]["@href"]
+                    folder = "data/alert/"
+                    if not os.path.exists(folder):
+                        os.makedirs(folder)
+                    file = folder+entry["id"]+".xml"
+                    urllib.request.urlretrieve(link, file)
+                    self.ProcessAlertFile(file)
+                    prevID = entry["id"]
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
-            
-    def ProcessRainCounty(self,file):
+
+    def ProcessAlertFile(self,file):
+        print("process file %s" % file)
         try:
-            pass
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
-            
-    def ProcessRainDraw(self,file):
-        try:
-            pass
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
-            
-    def ProcessWaterCounty(self,file):
-        try:
-            pass
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
-            
-    def ProcessWaterDraw(self,file):
-        try:
-            pass
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
-            
-    def ProcessReservoirPoint(self,file):
-        try:
-            pass
-        except:
-            print(sys.exc_info()[0])
-            traceback.print_exc()
-            
-    def ProcessReservoirDraw(self,file):
-        try:
-            pass
+            with open(file,"r",encoding="utf8") as f:
+                soup = BeautifulSoup(f.read(), 'html.parser')
+                id = soup.identifier.string
+                day = (soup.sent.string.split("T")[0]).replace("-","")
+                infoArr = soup.find_all("info")
+                for i,info in enumerate(infoArr):
+                    data = {}
+                    data["_id"] = id+"_"+str(i)
+                    query = self.db["alert"+day].find_one({"_id":data["_id"]})
+                    if not query is None:
+                        continue
+                    data["eventcode"] = info.eventcode.value.string
+                    data["effective"] = info.effective.string
+                    data["expires"] = info.expires.string
+                    data["urgency"] = info.urgency.string
+                    data["severity"] = info.severity.string
+                    data["certainty"] = info.certainty.string
+                    data["headline"] = info.headline.string
+                    data["description"] = info.description.string
+                    if not info.instruction is None:
+                        data["instruction"] = info.instruction.string
+                    if not info.responsetype is None:
+                        data["responsetype"] = info.responsetype.string
+
+                    for param in info.find_all("parameter"):
+                        if param.valuename.string == "severity_level":
+                            data["severity_level"] = param.value.string
+                        elif param.valuename.string == "debrisID":
+                            arr = param.value.string.split(",")
+                            data["debrisID"] = arr
+                        elif param.valuename.string == "counties":
+                            arr = param.value.string.split(",")
+                            data["counties"] = arr
+                        elif param.valuename.string == "townships":
+                            arr = param.value.string.split(" ")
+                            data["townships"] = arr
+                    data["geocode"] = []
+                    for geocode in info.find_all("geocode"):
+                        data["geocode"].append(geocode.value.string)
+                    data["polygon"] = []
+                    for polygon in info.find_all("polygon"):
+                        data["polygon"].append(polygon.string)
+
+                    self.db["alert"+day].insert_one(data)
+                
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
