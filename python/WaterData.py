@@ -16,6 +16,7 @@ import os
 import gc
 import ssl
 from bs4 import BeautifulSoup
+import math
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -168,6 +169,8 @@ class WaterData:
                     t = datetime.datetime.strptime(w["RecordTime"]+"+0800", "%Y-%m-%dT%H:%M:%S%z")
                     w["RecordTime"] = t
                     w["WaterLevel"] = util.ToFloat(w["WaterLevel"])
+                    if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
+                        continue
                     key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t}
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
@@ -226,6 +229,8 @@ class WaterData:
                     stationID = siteHash[name]["BasinIdentifier"]
                     w = {}
                     w["WaterLevel"] = util.ToFloat(td[3].string)
+                    if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
+                        continue
                     w["RecordTime"] = t10min
                     w["StationIdentifier"] = stationID
                     key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t10min}
@@ -276,9 +281,13 @@ class WaterData:
                         data = {}
                         data["ReservoirIdentifier"] = r["ReservoirIdentifier"]
                         data["WaterLevel"] = util.ToFloat(r["WaterLevel"])
+                        if math.isnan(data["WaterLevel"]) or data["WaterLevel"] < 0:
+                            continue
                         t = datetime.datetime.strptime(r["ObservationTime"]+"+0800", "%Y-%m-%dT%H:%M:%S%z")
                         data["ObservationTime"] = t
                         data["EffectiveWaterStorageCapacity"] = util.ToFloat(r["EffectiveWaterStorageCapacity"])
+                        if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
+                            continue
                         self.db["reservoir"+day].insert_one(data)
                         
                         #計算北中南蓄水百分比

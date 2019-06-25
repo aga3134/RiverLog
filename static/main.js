@@ -17,6 +17,7 @@ var g_APP = new Vue({
     rainData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}},
+    alertData: {},
     color: {},
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
@@ -220,6 +221,16 @@ var g_APP = new Vue({
           this.UpdateMapReservoir();
         }.bind(this));
 
+        $.get("/alert/alertData?date="+this.curYear+"-"+this.curDate,function(result){
+          if(result.status != "ok"){
+            return console.log(result.err);
+          }
+          this.alertData = d3.nest()
+            .key(function(d){return d.eventcode;})
+            .map(result.data);
+          console.log(this.alertData);
+          this.UpdateMapAlert();
+        }.bind(this));
 
       }.bind(this));
     },
@@ -603,10 +614,14 @@ var g_APP = new Vue({
         }
       }
     },
+    UpdateMapAlert: function(){
+
+    },
     ClearMap: function(){
       this.ClearMapRain();
       this.ClearMapWaterLevel();
       this.ClearMapReservoir();
+      this.ClearMapAlert();
     },
     ClearMapRain: function(){
       for(var key in this.layerRain){
@@ -625,6 +640,9 @@ var g_APP = new Vue({
         this.layerReservoir[key].setMap(null);
       }
       this.layerReservoir = {};
+    },
+    ClearMapAlert: function(){
+
     }
   }
 });

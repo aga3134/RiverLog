@@ -59,9 +59,11 @@ class AlertData:
             r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 data = json.loads(r.text)
-                prevID = ""
+                
                 for entry in data["entry"]:
-                    if entry["id"] == prevID:
+                    day = entry["updated"].split("T")[0].replace("-","")
+                    query = self.db["alert"+day].find_one({"_id":{"$regex":entry["id"]}})
+                    if not query is None:
                         continue
                     link = entry["link"]["@href"]
                     folder = "data/alert/"
@@ -70,7 +72,6 @@ class AlertData:
                     file = folder+entry["id"]+".xml"
                     urllib.request.urlretrieve(link, file)
                     self.ProcessAlertFile(file)
-                    prevID = entry["id"]
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
