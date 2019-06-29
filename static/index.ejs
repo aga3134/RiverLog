@@ -26,6 +26,7 @@
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
 		<div id="app" class="riverlog">
 			<div class="topbar">
@@ -66,7 +67,6 @@
 				<select v-model="curItem">
 					<option value="rain">雨量</option>
 					<option value="reservoir">水庫水位</option>
-					<option value="waterLevel">河川水位</option>
 				</select>
 				<div class="date-selection">
 					<div class="week-label" v-for="w in weekLabel" v-bind:style="{left:w.x+'px', top:w.y+'px'}">{{w.text}}</div>

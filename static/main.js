@@ -28,9 +28,14 @@ var g_APP = new Vue({
     infoRain: null,
     infoReservoir: null,
     infoWaterLevel: null,
+    infoAlert: null,
     infoRainID: "",
     infoReservoirID: "",
-    infoWaterLevelID: ""
+    infoWaterLevelID: "",
+    infoAlertID: "",
+    geoDebris: {},
+    geoTown: {},
+    geoVillage: {}
   },
   created: function () {
     this.InitColor();
@@ -140,17 +145,97 @@ var g_APP = new Vue({
           this.UpdateMap();
         }.bind(this));
 
-        $.getJSON("/static/geo/village/geo-10007.json", function(data){
-          geoJsonObject = topojson.feature(data, data.objects["geo-10007"]);
+        this.map.data.setStyle(function(feature){
+          var floodArr = feature.getProperty('Flood');
+          if(floodArr && floodArr.length > 0){
+            return {
+              strokeWeight: 1,
+              strokeOpacity: .5,
+              strokeColor: '#000',
+              fillColor: '#f00',
+              fillOpacity: .3
+            }
+          }
+          else{
+            return {
+              strokeOpacity: 0,
+              fillOpacity: 0
+            }
+          }
+        });
+
+        this.map.data.addListener('click',function(event){
+          var content = this.GenAlertContent(event.feature);
+          var loc = event.feature.getProperty("loc");
+          if(content != ""){
+            this.infoAlert.setOptions({content: content,position: loc});
+            this.infoAlert.open(this.map);
+            this.infoAlertID = event.feature.getId();
+          }
+          
+        }.bind(this));
+
+        $.getJSON("/static/geo/debris_sim.json", function(data){
+          geoJsonObject = topojson.feature(data, data.objects["Debris"]);
+          for(var i=0;i<geoJsonObject.features.length;i++){
+            var debris = geoJsonObject.features[i];
+            this.geoDebris[debris.properties.Debrisno] = debris;
+            debris.id = debris.properties.Debrisno;
+            //用第一個點當window位置
+            debris.properties.loc = debris.geometry.coordinates[0][0];
+          }
+          this.map.data.addGeoJson(geoJsonObject);
+        }.bind(this));
+
+        $.getJSON("/static/geo/town_sim.json", function(data){
+          geoJsonObject = topojson.feature(data, data.objects["geo"]);
+
+          for(var i=0;i<geoJsonObject.features.length;i++){
+            var town = geoJsonObject.features[i];
+            this.geoTown[town.properties.TOWNCODE] = town;
+            town.id = town.properties.TOWNCODE;
+            //用所有點平均當window位置
+            var lat = 0,lng = 0,num = 0;
+            for(var j=0;j<town.geometry.coordinates.length;j++){
+              var coord = town.geometry.coordinates[j];
+              for(var k=0;k<coord.length;k++){
+                lat += parseFloat(coord[k][1]);
+                lng += parseFloat(coord[k][0]);
+                num += 1;
+              }
+            }
+            town.properties.loc = {lat: lat/num, lng: lng/num};
+            town.properties.Flood = [];
+          }
           this.map.data.addGeoJson(geoJsonObject); 
         }.bind(this));
+
+        /*$.getJSON("/static/geo/village/geo-10007.json", function(data){
+          geoJsonObject = topojson.feature(data, data.objects["geo-10007"]);
+          this.map.data.addGeoJson(geoJsonObject); 
+        }.bind(this));*/
 
       }.bind(this));
       
       this.infoRain = new google.maps.InfoWindow();
       this.infoReservoir = new google.maps.InfoWindow();
       this.infoWaterLevel = new google.maps.InfoWindow();
-
+      this.infoAlert = new google.maps.InfoWindow();
+    },
+    GenAlertContent: function(feature){
+      var content = "";
+      var floodArr = feature.getProperty("Flood");
+      for(var i=0;i<floodArr.length;i++){
+        var flood = floodArr[i];
+        alert = true;
+        content += "<p class='info-title'>淹水警戒 "+flood.headline+"</p>";
+        content += "<p>"+flood.description+"</p>";
+        content += "<p>★ "+flood.instruction+"</p>";
+        var start = flood.effective.format("YYYY-MM-DD HH:mm");
+        var end = flood.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+      return content;
     },
     ChangeYear: function(year){
       this.curYear = year;
@@ -225,10 +310,14 @@ var g_APP = new Vue({
           if(result.status != "ok"){
             return console.log(result.err);
           }
+          for(var i=0;i<result.data.length;i++){
+            var alert = result.data[i];
+            alert.effective = moment(alert.effective);
+            alert.expires = moment(alert.expires);
+          }
           this.alertData = d3.nest()
             .key(function(d){return d.eventcode;})
             .map(result.data);
-          console.log(this.alertData);
           this.UpdateMapAlert();
         }.bind(this));
 
@@ -398,6 +487,7 @@ var g_APP = new Vue({
       this.UpdateMapRain();
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
+      this.UpdateMapAlert();
     },
     GetDataFromTime: function(data,time){
       var timeOffset = this.TimeToOffset(time);
@@ -615,7 +705,40 @@ var g_APP = new Vue({
       }
     },
     UpdateMapAlert: function(){
-
+      if(!this.map) return;
+      this.ClearMapAlert();
+      var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
+      for(var key in this.alertData){
+        var alertData = this.alertData[key];
+        switch(key){
+          case "Flood":
+            for(var i=0;i<alertData.length;i++){
+              var alert = alertData[i];
+              if(t >= alert.effective && t < alert.expires){
+                for(var j=0;j<alert.geocode.length;j++){
+                  var id = alert.geocode[j]+"0";
+                  var feature = this.map.data.getFeatureById(id);
+                  var flood = feature.getProperty("Flood");
+                  flood.push(alert);
+                  feature.setProperty("Flood",flood);
+                }
+              }
+            }
+            break;
+        }
+        
+      }
+      if(this.infoAlert.getMap()){
+        var feature = this.map.data.getFeatureById(this.infoAlertID);
+        var content = this.GenAlertContent(feature);
+        var loc = feature.getProperty("loc");
+        if(content != ""){
+          this.infoAlert.setOptions({content: content,position: loc});
+        }
+        else{
+          this.infoAlert.close();
+        }
+      }
     },
     ClearMap: function(){
       this.ClearMapRain();
@@ -642,7 +765,9 @@ var g_APP = new Vue({
       this.layerReservoir = {};
     },
     ClearMapAlert: function(){
-
+      this.map.data.forEach(function(feature){
+        feature.setProperty("Flood",[]);
+      });
     }
   }
 });
