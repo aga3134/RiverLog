@@ -146,8 +146,21 @@ var g_APP = new Vue({
         }.bind(this));
 
         this.map.data.setStyle(function(feature){
+          var alert = false;
           var floodArr = feature.getProperty('Flood');
-          if(floodArr && floodArr.length > 0){
+          if(floodArr && floodArr.length > 0) alert = true;
+          var reservoirDisArr = feature.getProperty('ReservoirDis');
+          if(reservoirDisArr && reservoirDisArr.length > 0) alert = true;
+          //var rainfallArr = feature.getProperty('rainfall');
+          //if(rainfallArr && rainfallArr.length > 0) alert = true;
+          var highWaterArr = feature.getProperty('highWater');
+          if(highWaterArr && highWaterArr.length > 0) alert = true;
+          var waterArr = feature.getProperty('water');
+          if(waterArr && waterArr.length > 0) alert = true;
+          var debrisFlowArr = feature.getProperty('debrisFlow');
+          if(debrisFlowArr && debrisFlowArr.length > 0) alert = true;
+
+          if(alert){
             return {
               strokeWeight: 1,
               strokeOpacity: .5,
@@ -184,7 +197,8 @@ var g_APP = new Vue({
             //用第一個點當window位置
             debris.properties.loc = debris.geometry.coordinates[0][0];
           }
-          this.map.data.addGeoJson(geoJsonObject);
+          debris.properties.debrisFlow = [];
+          //this.map.data.addGeoJson(geoJsonObject);
         }.bind(this));
 
         $.getJSON("/static/geo/town_sim.json", function(data){
@@ -192,6 +206,15 @@ var g_APP = new Vue({
 
           for(var i=0;i<geoJsonObject.features.length;i++){
             var town = geoJsonObject.features[i];
+            if(town.properties.TOWNCODE[0] == "6"){ //五都編號需特別處理...
+              var order = [0,1,4,5,6,7,2,3];
+              var str = "";
+              for(var j=0;j<order.length;j++){
+                str += town.properties.TOWNCODE[order[j]];
+              }
+              town.properties.TOWNCODE = str;
+              //console.log(town.properties.TOWNCODE);
+            }
             this.geoTown[town.properties.TOWNCODE] = town;
             town.id = town.properties.TOWNCODE;
             //用所有點平均當window位置
@@ -206,8 +229,13 @@ var g_APP = new Vue({
             }
             town.properties.loc = {lat: lat/num, lng: lng/num};
             town.properties.Flood = [];
+            town.properties.ReservoirDis = [];
+            town.properties.rainfall = [];
+            town.properties.highWater = [];
+            town.properties.water = [];
+            town.properties.debrisFlow = [];
           }
-          this.map.data.addGeoJson(geoJsonObject); 
+          //this.map.data.addGeoJson(geoJsonObject); 
         }.bind(this));
 
         /*$.getJSON("/static/geo/village/geo-10007.json", function(data){
@@ -224,6 +252,7 @@ var g_APP = new Vue({
     },
     GenAlertContent: function(feature){
       var content = "";
+
       var floodArr = feature.getProperty("Flood");
       for(var i=0;i<floodArr.length;i++){
         var flood = floodArr[i];
@@ -235,6 +264,66 @@ var g_APP = new Vue({
         var end = flood.expires.format("YYYY-MM-DD HH:mm");
         content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
       }
+
+      var reservoirDisArr = feature.getProperty("ReservoirDis");
+      for(var i=0;i<reservoirDisArr.length;i++){
+        var reservoirDis = reservoirDisArr[i];
+        alert = true;
+        content += "<p class='info-title'>水庫放流 "+reservoirDis.headline+"</p>";
+        content += "<p>"+reservoirDis.description+"</p>";
+        content += "<p>★ "+reservoirDis.instruction+"</p>";
+        var start = reservoirDis.effective.format("YYYY-MM-DD HH:mm");
+        var end = reservoirDis.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+
+      /*var rainfallArr = feature.getProperty("rainfall");
+      for(var i=0;i<rainfallArr.length;i++){
+        var rainFall = rainfallArr[i];
+        alert = true;
+        content += "<p class='info-title'>"+rainFall.headline+"</p>";
+        content += "<p>"+rainFall.description+"</p>";
+        var start = rainFall.effective.format("YYYY-MM-DD HH:mm");
+        var end = rainFall.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }*/
+
+      var highWaterArr = feature.getProperty("highWater");
+      for(var i=0;i<highWaterArr.length;i++){
+        var highWater = highWaterArr[i];
+        alert = true;
+        content += "<p class='info-title'>"+highWater.headline+"</p>";
+        content += "<p>"+highWater.description+"</p>";
+        content += "<p>★ "+highWater.instruction+"</p>";
+        var start = highWater.effective.format("YYYY-MM-DD HH:mm");
+        var end = highWater.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+
+      var waterArr = feature.getProperty("water");
+      for(var i=0;i<waterArr.length;i++){
+        var water = waterArr[i];
+        alert = true;
+        content += "<p class='info-title'>"+water.headline+"</p>";
+        content += "<p>"+water.description+"</p>";
+        content += "<p>★ "+water.instruction+"</p>";
+        var start = water.effective.format("YYYY-MM-DD HH:mm");
+        var end = water.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+
+      var debrisFlowArr = feature.getProperty("debrisFlow");
+      for(var i=0;i<debrisFlowArr.length;i++){
+        var debrisFlow = debrisFlowArr[i];
+        alert = true;
+        content += "<p class='info-title'>"+debrisFlow.headline+"</p>";
+        content += "<p>"+debrisFlow.description+"</p>";
+        content += "<p>★ "+debrisFlow.instruction+"</p>";
+        var start = debrisFlow.effective.format("YYYY-MM-DD HH:mm");
+        var end = debrisFlow.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+
       return content;
     },
     ChangeYear: function(year){
@@ -705,28 +794,48 @@ var g_APP = new Vue({
       }
     },
     UpdateMapAlert: function(){
+      AddAlert = function(type, alertData){
+        for(var i=0;i<alertData.length;i++){
+          var alert = alertData[i];
+          if(t >= alert.effective && t < alert.expires){
+            for(var j=0;j<alert.geocode.length;j++){
+              switch(type){
+                case "Flood": //淹水
+                case "ReservoirDis": //水庫放流
+                //case "rainfall": //降雨
+                case "highWater": //河川高水位
+                case "water": //停水
+                  var id = alert.geocode[j]+"0";
+                  var feature = this.map.data.getFeatureById(id);
+                  if(!feature){
+                    if(!(id in this.geoTown)){
+                      console.log(type+": "+id+" not found");
+                      continue;
+                    }
+                    this.map.data.addGeoJson(this.geoTown[id]);
+                    feature = this.map.data.getFeatureById(id);
+                  }
+                  var arr = feature.getProperty(type);
+                  arr.push(alert);
+                  feature.setProperty(type,arr);
+                  break;
+                case "debrisFlow": //土石流
+                  break;
+                case "thunderstorm": //雷雨
+                  break;
+              }
+
+              
+            }
+          }
+        }
+      }.bind(this);
+
       if(!this.map) return;
       this.ClearMapAlert();
       var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
       for(var key in this.alertData){
-        var alertData = this.alertData[key];
-        switch(key){
-          case "Flood":
-            for(var i=0;i<alertData.length;i++){
-              var alert = alertData[i];
-              if(t >= alert.effective && t < alert.expires){
-                for(var j=0;j<alert.geocode.length;j++){
-                  var id = alert.geocode[j]+"0";
-                  var feature = this.map.data.getFeatureById(id);
-                  var flood = feature.getProperty("Flood");
-                  flood.push(alert);
-                  feature.setProperty("Flood",flood);
-                }
-              }
-            }
-            break;
-        }
-        
+        AddAlert(key,this.alertData[key]);
       }
       if(this.infoAlert.getMap()){
         var feature = this.map.data.getFeatureById(this.infoAlertID);
