@@ -161,7 +161,26 @@ var g_APP = new Vue({
           if(debrisFlowArr && debrisFlowArr.length > 0) alert = true;
 
           if(alert){
-            return {
+            if(feature.getProperty("Debrisno")){
+              var color="#000";
+              for(var i=0;i<debrisFlowArr.length;i++){
+                var debris = debrisFlowArr[i];
+                if(debris.severity_level == "黃色警戒" && color != "#f00"){
+                  color = "#ff0";
+                }
+                else if(debris.severity_level == "紅色警戒"){
+                  color = "#f00";
+                }
+              }
+              return {
+                strokeWeight: 2,
+                strokeOpacity: 1,
+                strokeColor: color,
+                fillColor: '#000',
+                fillOpacity: 0
+              }
+            }
+            else return {
               strokeWeight: 1,
               strokeOpacity: .5,
               strokeColor: '#000',
@@ -195,9 +214,10 @@ var g_APP = new Vue({
             this.geoDebris[debris.properties.Debrisno] = debris;
             debris.id = debris.properties.Debrisno;
             //用第一個點當window位置
-            debris.properties.loc = debris.geometry.coordinates[0][0];
+            var coord = debris.geometry.coordinates[0][0];
+            debris.properties.loc = {lat: coord[1], lng: coord[0]};
+            debris.properties.debrisFlow = [];
           }
-          debris.properties.debrisFlow = [];
           //this.map.data.addGeoJson(geoJsonObject);
         }.bind(this));
 
@@ -249,6 +269,34 @@ var g_APP = new Vue({
       this.infoReservoir = new google.maps.InfoWindow();
       this.infoWaterLevel = new google.maps.InfoWindow();
       this.infoAlert = new google.maps.InfoWindow();
+    },
+    LoadVillage: function(county){
+      $.ajax({
+        url:"/static/geo/village/geo-"+county+".json",
+        async: false,
+        success: function(result){
+          geoJsonObject = topojson.feature(result, result.objects["geo-"+county]);
+          this.geoVillage[county] = {};
+          for(var i=0;i<geoJsonObject.features.length;i++){
+            var village = geoJsonObject.features[i];
+            if(!village.geometry) continue;
+            this.geoVillage[county][village.properties.VILLCODE] = village;
+            village.id = village.properties.VILLCODE;
+            //用所有點平均當window位置
+            var lat = 0,lng = 0,num = 0;
+            for(var j=0;j<village.geometry.coordinates.length;j++){
+              var coord = village.geometry.coordinates[j];
+              for(var k=0;k<coord.length;k++){
+                lat += parseFloat(coord[k][1]);
+                lng += parseFloat(coord[k][0]);
+                num += 1;
+              }
+            }
+            village.properties.loc = {lat: lat/num, lng: lng/num};
+            village.properties.debrisFlow = [];
+          }
+        }.bind(this)
+      });
     },
     GenAlertContent: function(feature){
       var content = "";
@@ -794,6 +842,11 @@ var g_APP = new Vue({
       }
     },
     UpdateMapAlert: function(){
+      if(!this.map) return;
+      this.ClearMapAlert();
+
+      var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
+
       AddAlert = function(type, alertData){
         for(var i=0;i<alertData.length;i++){
           var alert = alertData[i];
@@ -819,21 +872,56 @@ var g_APP = new Vue({
                   arr.push(alert);
                   feature.setProperty(type,arr);
                   break;
-                case "debrisFlow": //土石流
+                /*case "debrisFlow": //土石流
+                  var county = alert.geocode[j].substr(0,5);
+                  var code = alert.geocode[j].substr(5).replace("-","0");
+                  if(county[0] == '6'){ //五都編號需特別處理...
+                    code = county.substr(3,5)+code.substr(2);
+                    county = county.substr(0,3)+"00";
+                  }
+                  if(!(county in this.geoVillage)){
+                    this.LoadVillage(county);
+                  }
+                  var id = county+code
+                  var feature = this.map.data.getFeatureById(id);
+                  if(!feature){
+                    if(!(id in this.geoVillage[county])){
+                      console.log(type+": "+id+" not found");
+                      continue;
+                    }
+                    this.map.data.addGeoJson(this.geoVillage[county][id]);
+                    feature = this.map.data.getFeatureById(id);
+                  }
+                  var arr = feature.getProperty(type);
+                  arr.push(alert);
+                  feature.setProperty(type,arr);
                   break;
                 case "thunderstorm": //雷雨
-                  break;
+                  break;*/
               }
-
-              
+            }
+            if(type == "debrisFlow"){
+              for(var j=0;j<alert.debrisID.length;j++){
+                var id = alert.debrisID[j];
+                var feature = this.map.data.getFeatureById(id);
+                if(!feature){
+                  if(!(id in this.geoDebris)){
+                    console.log(type+": "+id+" not found");
+                    continue;
+                  }
+                  this.map.data.addGeoJson(this.geoDebris[id]);
+                  feature = this.map.data.getFeatureById(id);
+                }
+                var arr = feature.getProperty(type);
+                arr.push(alert);
+                feature.setProperty(type,arr);
+              }
             }
           }
+
         }
       }.bind(this);
 
-      if(!this.map) return;
-      this.ClearMapAlert();
-      var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
       for(var key in this.alertData){
         AddAlert(key,this.alertData[key]);
       }
@@ -876,6 +964,12 @@ var g_APP = new Vue({
     ClearMapAlert: function(){
       this.map.data.forEach(function(feature){
         feature.setProperty("Flood",[]);
+        feature.setProperty("ReservoirDis",[]);
+        feature.setProperty("rainfall",[]);
+        feature.setProperty("highWater",[]);
+        feature.setProperty("water",[]);
+        feature.setProperty("debrisFlow",[]);
+        feature.setProperty("thunderstorm",[]);
       });
     }
   }
