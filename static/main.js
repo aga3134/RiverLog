@@ -25,14 +25,17 @@ var g_APP = new Vue({
     layerRain: {},
     layerReservoir: {},
     layerWaterLevel: {},
+    layerThunderstorm: {},
     infoRain: null,
     infoReservoir: null,
     infoWaterLevel: null,
     infoAlert: null,
+    infoStorm: null,
     infoRainID: "",
     infoReservoirID: "",
     infoWaterLevelID: "",
     infoAlertID: "",
+    infoStormID: "",
     geoDebris: {},
     geoTown: {},
     geoVillage: {}
@@ -173,8 +176,8 @@ var g_APP = new Vue({
                 }
               }
               return {
-                strokeWeight: 2,
-                strokeOpacity: 1,
+                strokeWeight: 5,
+                strokeOpacity: 0.5,
                 strokeColor: color,
                 fillColor: '#000',
                 fillOpacity: 0
@@ -269,6 +272,7 @@ var g_APP = new Vue({
       this.infoReservoir = new google.maps.InfoWindow();
       this.infoWaterLevel = new google.maps.InfoWindow();
       this.infoAlert = new google.maps.InfoWindow();
+      this.infoStorm = new google.maps.InfoWindow();
     },
     LoadVillage: function(county){
       $.ajax({
@@ -917,6 +921,62 @@ var g_APP = new Vue({
                 feature.setProperty(type,arr);
               }
             }
+            if(type == "thunderstorm"){
+              var UpdateInfoStorm = function(d){
+                var str = "<p>"+d.headline+"</p>";
+                str += "<p>"+d.description+"</p>";
+                this.infoStorm.setOptions({content: str, position: d.loc});
+              }.bind(this);
+
+              //info window有打開，更新資訊
+              if(this.infoStorm.getMap() && this.infoStormID == alert._id){
+                UpdateInfoStorm(alert);
+              }
+
+              var clickFn = function(data){ 
+                return function() {
+                  UpdateInfoStorm(data);
+                  this.infoStorm.open(this.map);
+                  this.infoStormID = data._id;
+                }.bind(this);
+              }.bind(this);
+
+              for(var j=0;j<alert.polygon.length;j++){
+                var polygon = alert.polygon[j].split(" ");
+                var coord = [];
+                var center = {lat:0,lng:0};
+                for(var k=0;k<polygon.length;k++){
+                  var pt = polygon[k].split(",");
+                  var lat = parseFloat(pt[0]);
+                  var lng = parseFloat(pt[1]);
+                  coord.push({lat: lat, lng: lng});
+                  center.lat += lat;
+                  center.lng += lng;
+                }
+                center.lat /= polygon.length;
+                center.lng /= polygon.length;
+                alert.loc = center;
+
+                if(this.layerThunderstorm[alert._id]){
+                  this.layerThunderstorm[alert._id].setOptions({
+                    paths: coord
+                  });
+                }
+                else{
+                  var poly = new google.maps.Polygon({
+                    strokeWeight: 0,
+                    strokeColor: '#000000',
+                    strokeOpacity: 0,
+                    fillColor: "#000000",
+                    fillOpacity: 0.5,
+                    map: this.map,
+                    paths: coord
+                  });
+                  poly.addListener('click', clickFn(alert));
+                  this.layerThunderstorm[alert._id] = poly;
+                }
+              }
+            }
           }
 
         }
@@ -971,6 +1031,10 @@ var g_APP = new Vue({
         feature.setProperty("debrisFlow",[]);
         feature.setProperty("thunderstorm",[]);
       });
+      for(var key in this.layerThunderstorm){
+        this.layerThunderstorm[key].setMap(null);
+      }
+      this.layerThunderstorm = {};
     }
   }
 });

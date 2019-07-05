@@ -12,7 +12,7 @@ ac.GetData = function(param){
 	var date = new Date(param.date);
 	var t = Util.DateToDateString(date,"");
 	var Alert = mongoose.model("alert"+t, AlertSchema);
-	Alert.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
+	Alert.find({}, {__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
