@@ -2,6 +2,7 @@ var g_APP = new Vue({
   el: "#app",
   data: {
     mapType: "waterEvent",
+    sumType: "rain",
     timeStr: "",
     timebar: [],
     openDateSelect: false,
@@ -11,7 +12,6 @@ var g_APP = new Vue({
     curYear: 2018,
     curDate: "1-1",
     curTime: "0:0",
-    curItem: "rain",
     dailySum: [],
     weekLabel: [],
     monthLabel: [],
@@ -126,6 +126,9 @@ var g_APP = new Vue({
         .range(["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
               "#33ff00","#ff0","#fc0","#ff9900","#ff0000","#cc0000",
               "#990000","#990099","#cc00cc","#ff00ff","#ffccff"]);
+      this.color.reservoir = d3.scale.linear()
+        .domain([0,0.25,0.5,0.7,1])
+        .range(["#ff3333","#ff6633","#33ff33","#3366ff","#3333ff"]);
     },
     InitMap: function(){
       var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
@@ -385,14 +388,14 @@ var g_APP = new Vue({
     },
     ChangeYear: function(year){
       this.curYear = year;
-      $.get("/rain/dailySum?year="+year,function(result){
+      $.get("/"+this.sumType+"/dailySum?year="+year,function(result){
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this.rainData.dayAvg = {};
+        this[this.sumType+"Data"].dayAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this.rainData.dayAvg[d.time] = d;
+          this[this.sumType+"Data"].dayAvg[d.time] = d;
         }
         this.UpdateDailySum();
         Vue.nextTick(function(){
@@ -410,15 +413,25 @@ var g_APP = new Vue({
       selectDate.css("left",x);
       selectDate.css("top",y);
 
-      $.get("/rain/10minSum?date="+this.curYear+"-"+this.curDate,function(result){
+      var url = "";
+      switch(this.sumType){
+        case "rain":
+          url = "/rain/10minSum?date="+this.curYear+"-"+this.curDate;
+          break;
+        case "reservoir":
+          url = "/reservoir/hourSum?date="+this.curYear+"-"+this.curDate;
+          break;
+      }
+      $.get(url,function(result){
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this.rainData.timeAvg = {};
+        this[this.sumType+"Data"].timeAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this.rainData.timeAvg[d.time] = d;
+          this[this.sumType+"Data"].timeAvg[d.time] = d;
         }
+        console.log(this[this.sumType+"Data"].timeAvg);
         this.UpdateTimebar();
         this.ChangeTime("00:00");
 
@@ -547,15 +560,23 @@ var g_APP = new Vue({
         var w = d.getWeek();
         var weekDay = d.getDay();
         var t = g_Util.DateToDateString(d);
+
         var avg = this.rainData.dayAvg[t];
+        var color = this.color.rain;
+        switch(this.sumType){
+          case "reservoir":
+            avg = this.reservoirData.dayAvg[t];
+            color = this.color.reservoir;
+            break;
+        }
 
         var bt = {};
         bt.y = (w-1)*cellSize+offsetY;
         bt.x = weekDay*cellSize+offsetX;
         if(avg){
-          if(avg.northNum) bt.north = this.color.rain(avg.northSum/avg.northNum);
-          if(avg.centralNum) bt.center = this.color.rain(avg.centralSum/avg.centralNum);
-          if(avg.southNum) bt.south = this.color.rain(avg.southSum/avg.southNum);
+          if(avg.northNum) bt.north = color(avg.northSum/avg.northNum);
+          if(avg.centralNum) bt.center = color(avg.centralSum/avg.centralNum);
+          if(avg.southNum) bt.south = color(avg.southSum/avg.southNum);
         }
 
         //add month border
@@ -612,14 +633,23 @@ var g_APP = new Vue({
         var h = Math.floor(i/numPerHour);
         var m = 10*(i%numPerHour);
         var t = g_Util.PadLeft(h,2)+":"+g_Util.PadLeft(m,2);
+
         var avg = this.rainData.timeAvg[t+":00"];
+        var color = this.color.rain;
+        switch(this.sumType){
+          case "reservoir":
+            avg = this.reservoirData.timeAvg[g_Util.PadLeft(h,2)+":00:00"];
+            color = this.color.reservoir;
+            break;
+        }
+
         var bt = {};
         bt.x = i*cellW;
         bt.time = t;
         if(avg){
-          if(avg.northNum) bt.north = this.color.rain(avg.northSum/avg.northNum);
-          if(avg.centralNum) bt.center = this.color.rain(avg.centralSum/avg.centralNum);
-          if(avg.southNum) bt.south = this.color.rain(avg.southSum/avg.southNum);
+          if(avg.northNum) bt.north = color(avg.northSum/avg.northNum);
+          if(avg.centralNum) bt.center = color(avg.centralSum/avg.centralNum);
+          if(avg.southNum) bt.south = color(avg.southSum/avg.southNum);
         }
         bt.style = {left:bt.x+'px'};
         if(m == 0) bt.style["border-left"] = "1px solid #c8c8c8";
@@ -725,9 +755,11 @@ var g_APP = new Vue({
       if(!waterLevelData || this.waterLevelOption.show == false) return this.ClearMapWaterLevel();
 
       var preDataHash = {};
-      for(var i=0;i<preData.length;i++){
-        var s = preData[i].StationIdentifier;
-        preDataHash[s] = preData[i];
+      if(preData){
+        for(var i=0;i<preData.length;i++){
+          var s = preData[i].StationIdentifier;
+          preDataHash[s] = preData[i];
+        }
       }
 
       var UpdateInfoWaterLevel = function(d){

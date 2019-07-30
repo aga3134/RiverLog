@@ -64,7 +64,7 @@
 				<select v-model="curYear">
 					<option v-for="y in yearArr" v-bind:value="y">{{y}}年</option>
 				</select>
-				<select v-model="curItem">
+				<select v-model="sumType" v-on:change="ChangeYear(curYear);">
 					<option value="rain">雨量</option>
 					<option value="reservoir">水庫水位</option>
 				</select>

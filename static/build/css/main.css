@@ -170,7 +170,8 @@ a {
       width: 100%;
       padding: 5px;
       font-size: 1.2em;
-      border-bottom: 1px solid #9e8669; }
+      border-bottom: 1px solid #9e8669;
+      margin-top: 10px; }
     .riverlog .side-panel .option-item {
       display: flex;
       justify-content: flex-start;
