@@ -707,14 +707,29 @@ var g_APP = new Vue({
     },
     UpdateMapWaterLevel: function(){
       if(!this.map) return;
+
+      //compute data hash in previous time
+      var offset = this.TimeToOffset(this.curTime);
+      offset -= 1;
+      if(offset < 0) offset = 0;
+      var preData = this.GetDataFromTime(this.waterLevelData.data,this.OffsetToTime(offset));
+
       var waterLevelData = this.GetDataFromTime(this.waterLevelData.data,this.curTime);
       if(!waterLevelData) return this.ClearMapWaterLevel();
+
+      var preDataHash = {};
+      for(var i=0;i<preData.length;i++){
+        var s = preData[i].StationIdentifier;
+        preDataHash[s] = preData[i];
+      }
 
       var UpdateInfoWaterLevel = function(d){
         var s = this.waterLevelData.station[d.StationIdentifier];
         var str = "<p>"+s.ObservatoryName+"</p>";
         str += "<p>溪流 "+s.RiverName+"</p>";
-        str += "<p>水位 "+d.WaterLevel+" m</p>";
+        str += "<p>水位 "+d.WaterLevel+" m (";
+        if(d.levelDiff >= 0) str += "+";
+        str += d.levelDiff.toFixed(2)+" m)</p>";
         str += "<p>警戒水位(三級/二級/一級):</p>";
         str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
         str += "<p>時間 "+d.RecordTime+" </p>";
@@ -730,38 +745,65 @@ var g_APP = new Vue({
         }.bind(this);
       }.bind(this);
 
+      function DrawArrow(lat,lng,value){
+        var scale = 0.01;
+        var valueScale = 0.1;
+        var thresh = 0.01;
+        var arr = [];
+        if(Math.abs(value) < thresh){
+          arr.push({lat: lat-scale*0.5, lng: lng});
+          arr.push({lat: lat, lng: lng-scale*0.5});
+          arr.push({lat: lat+scale*0.5, lng: lng});
+          arr.push({lat: lat, lng: lng+scale*0.5});
+        }
+        else{
+          var base = value>0?scale*0.5:-scale*0.5;
+          arr.push({lat: lat, lng: lng-scale*0.5});
+          arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
+          arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
+          arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
+          arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
+          arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
+          arr.push({lat: lat, lng: lng+scale*0.5});
+        }
+        return arr;
+      }
+
       for(var i=0;i<waterLevelData.length;i++){
-        var station = this.waterLevelData.station[waterLevelData[i].StationIdentifier];
+        var sID = waterLevelData[i].StationIdentifier
+        var station = this.waterLevelData.station[sID];
         if(!station) continue;
+
+        //compute water level difference
+        var value = 0;
+        if(preDataHash[sID]){
+          if(preDataHash[sID].WaterLevel && waterLevelData[i].WaterLevel){
+            value = waterLevelData[i].WaterLevel-preDataHash[sID].WaterLevel;
+          }
+        }
+        waterLevelData[i].levelDiff = value;
+
         //info window有打開，更新資訊
         if(this.infoWaterLevel.getMap() && this.infoWaterLevelID == station.BasinIdentifier){
           UpdateInfoWaterLevel(waterLevelData[i]);
         }
-        var size = 0.01;
-        var base = 1000;
-        if(station.AlertLevel3) base = station.AlertLevel3;
-        else if(station.AlertLevel2) base = station.AlertLevel2*0.8;
-        else if(station.AlertLevel1) base = station.AlertLevel1*0.6;
 
-        var value = waterLevelData[i].WaterLevel/base;
         var color = "#37cc00";
         if(waterLevelData[i].WaterLevel > station.AlertLevel3) color = "#ffcc00";
         if(waterLevelData[i].WaterLevel > station.AlertLevel2) color = "#ff6600";
         if(waterLevelData[i].WaterLevel > station.AlertLevel1) color = "#ff0000";
 
         if(this.layerWaterLevel[station.BasinIdentifier]){
-          this.layerWaterLevel[station.BasinIdentifier].setOptions({
+          var arrow = this.layerWaterLevel[station.BasinIdentifier];
+          arrow.setOptions({
             fillColor: color,
-            paths: [
-              {lat: station.lat-size*value, lng: station.lon},
-              {lat: station.lat, lng: station.lon-size*value},
-              {lat: station.lat+size*value, lng: station.lon},
-              {lat: station.lat, lng: station.lon+size*value}
-            ]
+            paths: DrawArrow(station.lat,station.lon,value)
           });
+          google.maps.event.clearListeners(arrow,"click");
+          arrow.addListener('click', clickFn(waterLevelData,i));
         }
         else{
-          var diamond = new google.maps.Polygon({
+          var arrow = new google.maps.Polygon({
             strokeWeight: 1,
             strokeColor: '#000000',
             strokeOpacity: 0.5,
@@ -769,15 +811,10 @@ var g_APP = new Vue({
             fillOpacity: 0.5,
             map: this.map,
             zIndex: 2,
-            paths: [
-              {lat: station.lat-size*value, lng: station.lon},
-              {lat: station.lat, lng: station.lon-size*value},
-              {lat: station.lat+size*value, lng: station.lon},
-              {lat: station.lat, lng: station.lon+size*value}
-            ]
+            paths: DrawArrow(station.lat,station.lon,value)
           });
-          diamond.addListener('click', clickFn(waterLevelData,i));
-          this.layerWaterLevel[station.BasinIdentifier] = diamond;
+          arrow.addListener('click', clickFn(waterLevelData,i));
+          this.layerWaterLevel[station.BasinIdentifier] = arrow;
         }
       }
     },
