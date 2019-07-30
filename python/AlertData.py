@@ -70,6 +70,10 @@ class AlertData:
                     if not os.path.exists(folder):
                         os.makedirs(folder)
                     file = folder+entry["id"]+".xml"
+                    #print(link)
+                    opener = urllib.request.build_opener()
+                    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+                    urllib.request.install_opener(opener)
                     urllib.request.urlretrieve(link, file)
                     self.ProcessAlertFile(file)
         except:
