@@ -166,6 +166,21 @@ a {
       left: 0px; }
       .riverlog .side-panel.open .close-bt {
         left: 200px; }
+    .riverlog .side-panel .option-category {
+      width: 100%;
+      padding: 5px;
+      font-size: 1.2em;
+      border-bottom: 1px solid #9e8669; }
+    .riverlog .side-panel .option-item {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: wrap; }
+      .riverlog .side-panel .option-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px; }
+    .riverlog .side-panel .option-label {
+      padding: 5px; }
     .riverlog .side-panel .date-selection {
       position: relative;
       width: 100%;

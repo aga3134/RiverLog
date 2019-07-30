@@ -235,6 +235,26 @@ a{
 			}
 		}
 
+		.option-category{
+			width: 100%;
+			padding: 5px;
+			font-size: 1.2em;
+			border-bottom: 1px solid #9e8669;
+		}
+		.option-item{
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			flex-wrap: wrap;
+			input[type="checkbox"]{
+				width: 16px;
+				height: 16px;
+			}
+		}
+		.option-label{
+			padding: 5px;
+		}
+
 		.date-selection{
 			position: relative;
 			width: 100%;

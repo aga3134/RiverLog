@@ -1,6 +1,7 @@
 var g_APP = new Vue({
   el: "#app",
   data: {
+    mapType: "waterEvent",
     timeStr: "",
     timebar: [],
     openDateSelect: false,
@@ -38,7 +39,11 @@ var g_APP = new Vue({
     infoStormID: "",
     geoDebris: {},
     geoTown: {},
-    geoVillage: {}
+    geoVillage: {},
+    rainOption: {opacity:0.8, scale:1, show:true},
+    waterLevelOption: {opacity:0.5, scale:1, show:true},
+    reservoirOption: {opacity:0.5, scale:1, show:true},
+    alertOption: {opacity:0.5, showFlow:true, showReservoirDis:true, showHighWater:true, showWater:true, showDebrisFlow:true, showThunderstorm:true}
   },
   created: function () {
     this.InitColor();
@@ -177,7 +182,7 @@ var g_APP = new Vue({
               }
               return {
                 strokeWeight: 5,
-                strokeOpacity: 0.5,
+                strokeOpacity: this.alertOption.opacity,
                 strokeColor: color,
                 fillColor: '#000',
                 fillOpacity: 0
@@ -185,10 +190,10 @@ var g_APP = new Vue({
             }
             else return {
               strokeWeight: 1,
-              strokeOpacity: .5,
+              strokeOpacity: this.alertOption.opacity,
               strokeColor: '#000',
               fillColor: '#f00',
-              fillOpacity: .3
+              fillOpacity: this.alertOption.opacity
             }
           }
           else{
@@ -197,7 +202,7 @@ var g_APP = new Vue({
               fillOpacity: 0
             }
           }
-        });
+        }.bind(this));
 
         this.map.data.addListener('click',function(event){
           var content = this.GenAlertContent(event.feature);
@@ -644,7 +649,7 @@ var g_APP = new Vue({
     UpdateMapRain: function(){
       if(!this.map) return;
       var rainData = this.GetDataFromTime(this.rainData.data,this.curTime);
-      if(!rainData) return this.ClearMapRain();
+      if(!rainData || this.rainOption.show == false) return this.ClearMapRain();
 
       var UpdateInfoRain = function(d){
         var s = this.rainData.station[d.stationID];
@@ -671,11 +676,13 @@ var g_APP = new Vue({
         if(this.infoRain.getMap() && this.infoRainID == station.stationID){
           UpdateInfoRain(rainData[i]);
         }
-        var rectW = 0.01;
-        var rectH = 0.0005;
+        var rectW = 0.01*this.rainOption.scale;
+        var rectH = 0.0005*this.rainOption.scale;
         if(this.layerRain[station.stationID]){
-          this.layerRain[station.stationID].setOptions({
+          var rect = this.layerRain[station.stationID];
+          rect.setOptions({
             fillColor: this.color.rain(rainData[i].now),
+            fillOpacity: this.rainOption.opacity,
             bounds: {
               north: station.lat+rainData[i].now*rectH,
               south: station.lat,
@@ -683,14 +690,14 @@ var g_APP = new Vue({
               west: station.lon-rectW
             }
           });
+          google.maps.event.clearListeners(rect,"click");
+          rect.addListener('click', clickFn(rainData,i));
         }
         else{
           var rect = new google.maps.Rectangle({
             strokeWeight: 0,
-            strokeColor: '#ffffff',
-            strokeOpacity: 0.8,
             fillColor: this.color.rain(rainData[i].now),
-            fillOpacity: 0.8,
+            fillOpacity: this.rainOption.opacity,
             map: this.map,
             zIndex: 1,
             bounds: {
@@ -715,7 +722,7 @@ var g_APP = new Vue({
       var preData = this.GetDataFromTime(this.waterLevelData.data,this.OffsetToTime(offset));
 
       var waterLevelData = this.GetDataFromTime(this.waterLevelData.data,this.curTime);
-      if(!waterLevelData) return this.ClearMapWaterLevel();
+      if(!waterLevelData || this.waterLevelOption.show == false) return this.ClearMapWaterLevel();
 
       var preDataHash = {};
       for(var i=0;i<preData.length;i++){
@@ -745,9 +752,9 @@ var g_APP = new Vue({
         }.bind(this);
       }.bind(this);
 
-      function DrawArrow(lat,lng,value){
-        var scale = 0.01;
-        var valueScale = 0.1;
+      var DrawArrow = function(lat,lng,value){
+        var scale = 0.01*this.waterLevelOption.scale;
+        var valueScale = 0.1*this.waterLevelOption.scale;
         var thresh = 0.01;
         var arr = [];
         if(Math.abs(value) < thresh){
@@ -767,7 +774,7 @@ var g_APP = new Vue({
           arr.push({lat: lat, lng: lng+scale*0.5});
         }
         return arr;
-      }
+      }.bind(this);
 
       for(var i=0;i<waterLevelData.length;i++){
         var sID = waterLevelData[i].StationIdentifier
@@ -797,6 +804,8 @@ var g_APP = new Vue({
           var arrow = this.layerWaterLevel[station.BasinIdentifier];
           arrow.setOptions({
             fillColor: color,
+            strokeOpacity: this.waterLevelOption.opacity,
+            fillOpacity: this.waterLevelOption.opacity,
             paths: DrawArrow(station.lat,station.lon,value)
           });
           google.maps.event.clearListeners(arrow,"click");
@@ -806,9 +815,9 @@ var g_APP = new Vue({
           var arrow = new google.maps.Polygon({
             strokeWeight: 1,
             strokeColor: '#000000',
-            strokeOpacity: 0.5,
+            strokeOpacity: this.waterLevelOption.opacity,
             fillColor: color,
-            fillOpacity: 0.5,
+            fillOpacity: this.waterLevelOption.opacity,
             map: this.map,
             zIndex: 2,
             paths: DrawArrow(station.lat,station.lon,value)
@@ -822,7 +831,7 @@ var g_APP = new Vue({
       if(!this.map) return;
       var hour = this.curTime.split(":")[0];
       var reservoirData = this.GetDataFromTime(this.reservoirData.data,hour+":00");
-      if(!reservoirData) return this.ClearMapReservoir();
+      if(!reservoirData || this.reservoirOption.show == false) return this.ClearMapReservoir();
 
       var UpdateInfoReservoir = function(d){
         var s = this.reservoirData.station[d.ReservoirIdentifier];
@@ -854,17 +863,20 @@ var g_APP = new Vue({
         }
 
         var zoomLevel = this.map.getZoom();
-        var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7));
+        var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7))*this.reservoirOption.scale;
         var d = reservoirData[i];
         var percent = (100*d.EffectiveWaterStorageCapacity/station.CurruntEffectiveCapacity).toFixed(2);
 
         if(this.layerReservoir[station.id]){
+          var overlay = this.layerReservoir[station.id];
           var option = {
             size: station.CurruntEffectiveCapacity*baseSize,
             percent: percent,
-            opacity: 0.5
+            opacity: this.reservoirOption.opacity
           };
-          this.layerReservoir[station.id].Update(option);
+          overlay.Update(option);
+          google.maps.event.clearListeners(overlay,"click");
+          overlay.addListener('click', clickFn(reservoirData,i));
         }
         else{
           var overlay = new SvgOverlay({
@@ -874,7 +886,7 @@ var g_APP = new Vue({
             size: station.CurruntEffectiveCapacity*baseSize,
             svgID: "svg_"+station.id,
             percent: percent,
-            opacity: 0.5
+            opacity: this.reservoirOption.opacity
           });
           
           overlay.addListener('click', clickFn(reservoirData,i));
@@ -885,7 +897,7 @@ var g_APP = new Vue({
     UpdateMapAlert: function(){
       if(!this.map) return;
       this.ClearMapAlert();
-
+      
       var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
 
       AddAlert = function(type, alertData){
@@ -909,6 +921,11 @@ var g_APP = new Vue({
                     this.map.data.addGeoJson(this.geoTown[id]);
                     feature = this.map.data.getFeatureById(id);
                   }
+                  if(type == "Flood" && (!this.alertOption.showFlow)) continue;
+                  if(type == "ReservoirDis" && (!this.alertOption.showReservoirDis)) continue;
+                  if(type == "highWater" && (!this.alertOption.showHighWater)) continue;
+                  if(type == "water" && (!this.alertOption.showWater)) continue;
+
                   var arr = feature.getProperty(type);
                   arr.push(alert);
                   feature.setProperty(type,arr);
@@ -942,6 +959,8 @@ var g_APP = new Vue({
               }
             }
             if(type == "debrisFlow"){
+              if(!this.alertOption.showDebrisFlow) continue;
+
               for(var j=0;j<alert.debrisID.length;j++){
                 var id = alert.debrisID[j];
                 var feature = this.map.data.getFeatureById(id);
@@ -959,6 +978,8 @@ var g_APP = new Vue({
               }
             }
             if(type == "thunderstorm"){
+              if(!this.alertOption.showThunderstorm) continue;
+
               var UpdateInfoStorm = function(d){
                 var str = "<p>"+d.headline+"</p>";
                 str += "<p>"+d.description+"</p>";
@@ -996,6 +1017,7 @@ var g_APP = new Vue({
 
                 if(this.layerThunderstorm[alert._id]){
                   this.layerThunderstorm[alert._id].setOptions({
+                    fillOpacity: this.alertOption.opacity,
                     paths: coord
                   });
                 }
@@ -1005,7 +1027,7 @@ var g_APP = new Vue({
                     strokeColor: '#000000',
                     strokeOpacity: 0,
                     fillColor: "#000000",
-                    fillOpacity: 0.5,
+                    fillOpacity: this.alertOption.opacity,
                     map: this.map,
                     paths: coord
                   });
