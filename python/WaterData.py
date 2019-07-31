@@ -216,9 +216,6 @@ class WaterData:
             tday = datetime.datetime.strftime(utcnow, "%Y%m%d")
             t10min = utcnow.replace(minute=(utcnow.minute-utcnow.minute%10),second=0,microsecond=0)
 
-            opener = urllib.request.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urllib.request.install_opener(opener)
             r = requests.post("http://fhy.wra.gov.tw/fhy/Monitor/WaterInfo")
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
@@ -232,9 +229,10 @@ class WaterData:
                         continue
                     stationID = siteHash[name]["BasinIdentifier"]
                     w = {}
-                    w["WaterLevel"] = util.ToFloat(td[3].string)
+                    w["WaterLevel"] = util.ToFloat(td[4].string)
                     if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
                         continue
+
                     w["RecordTime"] = t10min
                     w["StationIdentifier"] = stationID
                     key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t10min}
