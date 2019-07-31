@@ -225,6 +225,9 @@ a {
       border-radius: 5px;
       width: 100%;
       height: 100%; }
+      .riverlog .full-panel .content-area .content-title {
+        font-size: 1.5em;
+        padding: 10px; }
 
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s; }

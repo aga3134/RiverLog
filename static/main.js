@@ -44,7 +44,8 @@ var g_APP = new Vue({
     waterLevelOption: {opacity:0.5, scale:1, show:true},
     reservoirOption: {opacity:0.5, scale:1, show:true},
     alertOption: {opacity:0.5, showFlow:true, showReservoirDis:true, showHighWater:true, showWater:true, showDebrisFlow:true, showThunderstorm:true},
-    useSatellite: false
+    useSatellite: false,
+    playSpeed: 5
   },
   created: function () {
     this.InitColor();
@@ -534,11 +535,20 @@ var g_APP = new Vue({
       else{
         this.playTimer = setInterval(function(){
           if(!this.NextTime()){
-            clearInterval(this.playTimer);
-            this.playTimer = null;
+            this.TogglePlay();
           }
-        }.bind(this),200);
+        }.bind(this),1000.0/this.playSpeed);
         this.playIcon = "/static/Image/icon-pause.png";
+      }
+    },
+    UpdatePlaySpeed: function(){
+      if(this.playTimer){
+        clearInterval(this.playTimer);
+        this.playTimer = setInterval(function(){
+          if(!this.NextTime()){
+            this.TogglePlay();
+          }
+        }.bind(this),1000.0/this.playSpeed);
       }
     },
     UpdateDailySum: function(){

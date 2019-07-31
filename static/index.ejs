@@ -157,13 +157,21 @@
 						<div class="option-label">衛星檢視</div>
 						<input type="checkbox" v-model="useSatellite" v-on:change="ToggleSatellite()">
 					</div>
+					<div class="option-item">
+						<input type="range" min="1" max="10" step="1" v-model="playSpeed" v-on:change="UpdatePlaySpeed();">
+						<div class="option-label">播放速度</div>
+					</div>
 				</div>
 			</div>
 
 			<transition name="fade">
 				<div class="full-panel" v-if="openAbout">
 					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openAbout=false;">
-					<div class="content-area"></div>
+					<div class="content-area">
+						<div class="content-title">圖示說明</div>
+						<div class="content-title">資料來源</div>
+						<div class="content-title">關於山河事件簿</div>
+					</div>
 				</div>
 			</transition>
 		</div>

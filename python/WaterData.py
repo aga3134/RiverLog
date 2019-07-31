@@ -216,9 +216,13 @@ class WaterData:
             tday = datetime.datetime.strftime(utcnow, "%Y%m%d")
             t10min = utcnow.replace(minute=(utcnow.minute-utcnow.minute%10),second=0,microsecond=0)
 
+            opener = urllib.request.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            urllib.request.install_opener(opener)
             r = requests.post("http://fhy.wra.gov.tw/fhy/Monitor/WaterInfo")
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
+                #print(r.text)
                 soup = BeautifulSoup(r.text, 'html.parser')
                 tr = soup.find_all('tr')
                 for i in range(2,len(tr)):
