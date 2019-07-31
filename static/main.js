@@ -43,7 +43,8 @@ var g_APP = new Vue({
     rainOption: {opacity:0.8, scale:1, show:true},
     waterLevelOption: {opacity:0.5, scale:1, show:true},
     reservoirOption: {opacity:0.5, scale:1, show:true},
-    alertOption: {opacity:0.5, showFlow:true, showReservoirDis:true, showHighWater:true, showWater:true, showDebrisFlow:true, showThunderstorm:true}
+    alertOption: {opacity:0.5, showFlow:true, showReservoirDis:true, showHighWater:true, showWater:true, showDebrisFlow:true, showThunderstorm:true},
+    useSatellite: false
   },
   created: function () {
     this.InitColor();
@@ -386,6 +387,14 @@ var g_APP = new Vue({
 
       return content;
     },
+    ToggleSatellite: function(){
+      if(this.useSatellite){
+        this.map.setMapTypeId('hybrid');
+      }
+      else{
+        this.map.setMapTypeId('terrain');
+      }
+    },
     ChangeYear: function(year){
       this.curYear = year;
       $.get("/"+this.sumType+"/dailySum?year="+year,function(result){
@@ -431,7 +440,7 @@ var g_APP = new Vue({
           var d = result.data[i];
           this[this.sumType+"Data"].timeAvg[d.time] = d;
         }
-        console.log(this[this.sumType+"Data"].timeAvg);
+        //console.log(this[this.sumType+"Data"].timeAvg);
         this.UpdateTimebar();
         this.ChangeTime("00:00");
 

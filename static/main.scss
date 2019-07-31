@@ -92,7 +92,7 @@ a{
 		height: 100%;
 		position: relative;
 		.icon-container{
-			width: 50px;
+			width: 40px;
 			height: 100%;
 			display: flex;
 			flex-direction: column;
@@ -100,14 +100,14 @@ a{
 			align-items: center;
 			border-right: 1px solid #c0b492;
 			.icon{
-				width: 35px;
-				height: 35px;
+				width: 30px;
+				height: 30px;
 				margin: 10px;
 				cursor: pointer;
 			}
 		}
 		#map{
-			width: calc(100% - 50px);
+			width: calc(100% - 40px);
 			height: 100%;
 		}
 		.overlay-container{
@@ -140,6 +140,13 @@ a{
 			display: none;
 			@include pad-width(){
 				display: block;
+			}
+			height: 40px;
+		}
+		.logo-mobile{
+			display: block;
+			@include pad-width(){
+				display: none;
 			}
 			height: 40px;
 		}

@@ -2,7 +2,7 @@
 <html lang="zh-Hant-TW">
 	<head>
 		<title><%=meta.title%></title>
-		<link rel="icon" href="/static/Image/icon.png?v=<%=meta.version%>">
+		<link rel="icon" href="/static/Image/logo.png?v=<%=meta.version%>">
 
 		<link rel="canonical" href="<%=meta.hostname%>/" />
 		<meta property="og:url" content="<%=meta.hostname%>/" />
@@ -30,7 +30,8 @@
 
 		<div id="app" class="riverlog">
 			<div class="topbar">
-				<img class="logo" src="/static/Image/logo.png">
+				<img class="logo" src="/static/Image/logo-text.png">
+				<img class="logo-mobile" src="/static/Image/logo.png">
 				<select v-model="mapType">
 					<option value="waterEvent">水事件地圖</option>
 					<option value="waterStatistic">年統計資料</option>
@@ -149,6 +150,12 @@
 					<div class="option-item">
 						<input type="range" min="0" max="1" step="0.1" v-model="alertOption.opacity" v-on:change="UpdateMapAlert();">
 						<div class="option-label">透明度</div>
+					</div>
+
+					<div class="option-category">地圖</div>
+					<div class="option-item">
+						<div class="option-label">衛星檢視</div>
+						<input type="checkbox" v-model="useSatellite" v-on:change="ToggleSatellite()">
 					</div>
 				</div>
 			</div>

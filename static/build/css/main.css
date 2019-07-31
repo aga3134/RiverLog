@@ -55,7 +55,7 @@ a {
     height: 100%;
     position: relative; }
     .riverlog .main-content .icon-container {
-      width: 50px;
+      width: 40px;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -63,12 +63,12 @@ a {
       align-items: center;
       border-right: 1px solid #c0b492; }
       .riverlog .main-content .icon-container .icon {
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
         margin: 10px;
         cursor: pointer; }
     .riverlog .main-content #map {
-      width: calc(100% - 50px);
+      width: calc(100% - 40px);
       height: 100%; }
     .riverlog .main-content .overlay-container {
       position: absolute;
@@ -96,6 +96,12 @@ a {
       @media only screen and (min-width: 640px) {
         .riverlog .topbar .logo {
           display: block; } }
+    .riverlog .topbar .logo-mobile {
+      display: block;
+      height: 40px; }
+      @media only screen and (min-width: 640px) {
+        .riverlog .topbar .logo-mobile {
+          display: none; } }
   .riverlog .playbar {
     width: 100%;
     border-top: 1px solid #c0b492;
