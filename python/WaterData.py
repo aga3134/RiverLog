@@ -232,7 +232,6 @@ class WaterData:
                     w["WaterLevel"] = util.ToFloat(td[4].string)
                     if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
                         continue
-
                     w["RecordTime"] = t10min
                     w["StationIdentifier"] = stationID
                     key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t10min}

@@ -34,7 +34,8 @@
 				<img class="logo-mobile" src="/static/Image/logo.png">
 				<select v-model="mapType">
 					<option value="waterEvent">水事件地圖</option>
-					<option value="waterStatistic">年統計資料</option>
+					<option value="waterUse">用水統計</option>
+					<option value="reservoirUse">水庫統計</option>
 				</select>
 			</div>
 			<div class="main-content">
@@ -179,6 +180,9 @@
 		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>
 		<script src="/static/util.js?v=<%=meta.version%>"></script>
 		<script src="/static/liquidFillGauge.js?v=<%=meta.version%>"></script>
+		<script src="/static/mapTW.js?v=<%=meta.version%>"></script>
+		<script src="/static/svgGraph.js?v=<%=meta.version%>"></script>
+		<script src="/static/infoGraph.js?v=<%=meta.version%>"></script>
 		<script src="/static/svgOverlay.js?v=<%=meta.version%>"></script>
 		<script src="/static/main.js?v=<%=meta.version%>"></script>
 	</body>

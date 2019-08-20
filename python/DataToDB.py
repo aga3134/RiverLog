@@ -8,6 +8,7 @@ import sys
 from AlertData import AlertData
 from WeatherData import WeatherData
 from WaterData import WaterData
+from StatisticData import StatisticData
 from pymongo import MongoClient
 import json
 import requests
@@ -18,6 +19,7 @@ if __name__ == "__main__":
     alert = AlertData(db)
     water = WaterData(db)
     weather = WeatherData(db)
+    statistic = StatisticData(db)
         
     #weather.ProcessRain("data/rain.xml")
     #water.Init()
@@ -49,3 +51,6 @@ if __name__ == "__main__":
         weather.ProcessHistory()
         water.ProcessHistory()
         alert.ProcessHistory()
+
+    if "statistic" in args:
+        statistic.CollectData()

@@ -8,6 +8,7 @@ var RainRoute = require("./app/route/rainRoute.js");
 var ReservoirRoute = require("./app/route/reservoirRoute.js");
 var WaterLevelRoute = require("./app/route/waterLevelRoute.js");
 var AlertRoute = require("./app/route/alertRoute.js");
+var StatisticRoute = require("./app/route/statisticRoute.js");
 
 mongoose.connect("mongodb://localhost/RiverLog", { useNewUrlParser: true });
 mongoose.Promise = global.Promise;
@@ -25,6 +26,7 @@ app.use("/rain", RainRoute);
 app.use("/reservoir", ReservoirRoute);
 app.use("/waterLevel", WaterLevelRoute);
 app.use("/alert", AlertRoute);
+app.use("/statistic", StatisticRoute);
 
 process.on('exit',function(code){
 	mongoose.disconnect();

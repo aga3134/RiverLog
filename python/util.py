@@ -13,6 +13,12 @@ def ToFloat(s):
     except ValueError:
         return float('NaN')
 
+def ToInt(s):
+    try:
+        return int(s)
+    except ValueError:
+        return float('NaN')
+
 def LatToArea(lat):
     if(lat < 23.5):
         return "south"
