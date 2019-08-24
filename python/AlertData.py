@@ -14,6 +14,9 @@ import urllib.request
 import util
 import os
 from bs4 import BeautifulSoup
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 class AlertData:
     def __init__(self, db):
@@ -38,7 +41,9 @@ class AlertData:
         self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=1051")
         #water suspend
         self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=1089")
-            
+        #typhoon
+        self.CollectAlert("https://alerts.ncdr.nat.gov.tw/JSONAtomFeed.ashx?AlertType=5")
+
     def CollectData1hour(self):
         try:
             pass
@@ -55,6 +60,7 @@ class AlertData:
 
     def CollectAlert(self,url):
         try:
+            print(url)
             r = requests.get(url)
             r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
@@ -70,7 +76,7 @@ class AlertData:
                     if not os.path.exists(folder):
                         os.makedirs(folder)
                     file = folder+entry["id"]+".xml"
-                    #print(link)
+                    print(link)
                     opener = urllib.request.build_opener()
                     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
                     urllib.request.install_opener(opener)
@@ -101,7 +107,19 @@ class AlertData:
                     data["severity"] = info.severity.string
                     data["certainty"] = info.certainty.string
                     data["headline"] = info.headline.string
-                    data["description"] = info.description.string
+                    if data["eventcode"] == "typhoon":
+                        desc = {}
+                        desc["typhoon_name"] = info.description.find("typhoon_name").string
+                        desc["cwb_typhoon_name"] = info.description.find("cwb_typhoon_name").string
+                        for section in info.description.find_all("section"):
+                            if section["title"] == "颱風資訊":
+                                desc["typhoon_name"] = section.typhoon_name.string
+                                desc["cwb_typhoon_name"] = section.cwb_typhoon_name.string
+                            else:
+                                desc[section["title"]] = section.string
+                        data["description"] = desc
+                    else:
+                        data["description"] = info.description.string
                     if not info.instruction is None:
                         data["instruction"] = info.instruction.string
                     if not info.responsetype is None:

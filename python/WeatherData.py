@@ -16,6 +16,7 @@ import util
 import os
 import gc
 import math
+from bs4 import BeautifulSoup
 
 class WeatherData:
     def __init__(self, db):
@@ -45,7 +46,21 @@ class WeatherData:
             traceback.print_exc()
     
     def CollectData1hour(self):
-        pass
+        try:
+            print("collect typhoon data 1hour")
+            now = datetime.datetime.now()
+            t = now.strftime("%Y-%m-%d_%H")
+            #typhoon trajectory
+            url = "https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key
+            folder = "data/typhoon/"
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            file = folder+"typhoon_"+t+".xml"
+            urllib.request.urlretrieve(url, file)
+            self.ProcessTyphoon(file)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
             
     def CollectData1day(self):
         pass
@@ -121,6 +136,36 @@ class WeatherData:
                         self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                 
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessTyphoon(self, file):
+        print("process file %s" % file)
+        try:
+            with open(file,"r",encoding="utf8") as f:
+                soup = BeautifulSoup(f.read(), 'html.parser')
+                typhoon = soup.find_all("tropicalcyclone")
+                for tp in typhoon:
+                    for pos in tp.analysis_data.find_all("fix"):
+                        data = {}
+                        data["typhoon_name"] = tp.typhoon_name.string
+                        data["cwb_typhoon_name"] = tp.cwb_typhoon_name.string
+                        dateStr = pos.fix_time.string
+                        dateStr = ''.join(dateStr.rsplit(':', 1))   #去掉時區的:
+                        dateObj = datetime.datetime.strptime(dateStr, "%Y-%m-%dT%H:%M:%S%z")
+                        data["time"] = dateObj
+                        data["_id"] = data["typhoon_name"]+"_"+dateStr
+                        latlng = pos.coordinate.string.split(",")
+                        data["lat"] = util.ToFloat(latlng[1])
+                        data["lng"] = util.ToFloat(latlng[0])
+                        data["max_wind_speed"] = util.ToFloat(pos.max_wind_speed.string)
+                        data["max_gust_speed"] = util.ToFloat(pos.max_gust_speed.string)
+                        data["pressure"] = util.ToFloat(pos.pressure.string)
+                        data["circle_of_15ms"] = util.ToFloat(pos.circle_of_15ms.radius.string)
+                        data["circle_of_25ms"] = util.ToFloat(pos.circle_of_25ms.radius.string)
+                        key = {"_id":data["_id"]}
+                        self.db["typhoon"].update(key,data,upsert=True)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
