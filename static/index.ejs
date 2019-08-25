@@ -123,6 +123,16 @@
 						<div class="option-label">縮放</div>
 					</div>
 
+					<div class="option-category">颱風路徑</div>
+					<div class="option-item">
+						<div class="option-label">顯示</div>
+						<input type="checkbox" v-model="typhoonTrajectoryOption.show" v-on:change="UpdateMapTyphoon();">
+					</div>
+					<div class="option-item">
+						<input type="range" min="0" max="1" step="0.1" v-model="typhoonTrajectoryOption.opacity" v-on:change="UpdateMapTyphoon();">
+						<div class="option-label">透明度</div>
+					</div>
+
 					<div class="option-category">災害警示</div>
 					<div class="option-item">
 						<div class="option-label">淹水</div>
@@ -147,6 +157,10 @@
 					<div class="option-item">
 						<div class="option-label">雷雨</div>
 						<input type="checkbox" v-model="alertOption.showThunderstorm" v-on:change="UpdateMapAlert();">
+					</div>
+					<div class="option-item">
+						<div class="option-label">颱風</div>
+						<input type="checkbox" v-model="alertOption.showTyphoon" v-on:change="UpdateMapAlert();">
 					</div>
 					<div class="option-item">
 						<input type="range" min="0" max="1" step="0.1" v-model="alertOption.opacity" v-on:change="UpdateMapAlert();">

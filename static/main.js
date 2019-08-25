@@ -19,6 +19,7 @@ var g_APP = new Vue({
     reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     alertData: {},
+    typhoonTrajectoryData: {},
     color: {},
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
@@ -27,23 +28,37 @@ var g_APP = new Vue({
     layerReservoir: {},
     layerWaterLevel: {},
     layerThunderstorm: {},
+    layerTyphoonTrajectory: {},
     infoRain: null,
     infoReservoir: null,
     infoWaterLevel: null,
     infoAlert: null,
     infoStorm: null,
+    infoTyphoonTrajectory: null,
     infoRainID: "",
     infoReservoirID: "",
     infoWaterLevelID: "",
     infoAlertID: "",
     infoStormID: "",
+    infoTyphoonTrajectoryID: "",
     geoDebris: {},
+    geoCounty: {},
     geoTown: {},
     geoVillage: {},
     rainOption: {opacity:0.8, scale:1, show:true},
     waterLevelOption: {opacity:0.5, scale:1, show:true},
     reservoirOption: {opacity:0.5, scale:1, show:true},
-    alertOption: {opacity:0.5, showFlow:true, showReservoirDis:true, showHighWater:true, showWater:true, showDebrisFlow:true, showThunderstorm:true},
+    alertOption: {
+      opacity:0.5,
+      showFlow:false,
+      showReservoirDis:false,
+      showHighWater:false,
+      showWater:false,
+      showDebrisFlow:false,
+      showThunderstorm:false,
+      showTyphoon:true
+    },
+    typhoonTrajectoryOption:{opacity:0.3, show:true},
     useSatellite: false,
     playSpeed: 5
   },
@@ -172,6 +187,8 @@ var g_APP = new Vue({
           if(waterArr && waterArr.length > 0) alert = true;
           var debrisFlowArr = feature.getProperty('debrisFlow');
           if(debrisFlowArr && debrisFlowArr.length > 0) alert = true;
+          var typhoonArr = feature.getProperty('typhoon');
+          if(typhoonArr && typhoonArr.length > 0) alert = true;
 
           if(alert){
             if(feature.getProperty("Debrisno")){
@@ -234,6 +251,35 @@ var g_APP = new Vue({
           //this.map.data.addGeoJson(geoJsonObject);
         }.bind(this));
 
+        $.getJSON("/static/geo/county_sim.json", function(data){
+          geoJsonObject = topojson.feature(data, data.objects["geo"]);
+
+          for(var i=0;i<geoJsonObject.features.length;i++){
+            var county = geoJsonObject.features[i];
+            this.geoCounty[county.properties.COUNTYCODE] = county;
+            county.id = county.properties.COUNTYCODE;
+            //用所有點平均當window位置
+            var lat = 0,lng = 0,num = 0;
+            for(var j=0;j<county.geometry.coordinates.length;j++){
+              var coord = county.geometry.coordinates[j];
+              for(var k=0;k<coord.length;k++){
+                lat += parseFloat(coord[k][1]);
+                lng += parseFloat(coord[k][0]);
+                num += 1;
+              }
+            }
+            county.properties.loc = {lat: lat/num, lng: lng/num};
+            county.properties.Flood = [];
+            county.properties.ReservoirDis = [];
+            county.properties.rainfall = [];
+            county.properties.highWater = [];
+            county.properties.water = [];
+            county.properties.debrisFlow = [];
+            county.properties.typhoon = [];
+          }
+          //this.map.data.addGeoJson(geoJsonObject); 
+        }.bind(this));
+
         $.getJSON("/static/geo/town_sim.json", function(data){
           geoJsonObject = topojson.feature(data, data.objects["geo"]);
 
@@ -267,6 +313,7 @@ var g_APP = new Vue({
             town.properties.highWater = [];
             town.properties.water = [];
             town.properties.debrisFlow = [];
+            town.properties.typhoon = [];
           }
           //this.map.data.addGeoJson(geoJsonObject); 
         }.bind(this));
@@ -283,6 +330,8 @@ var g_APP = new Vue({
       this.infoWaterLevel = new google.maps.InfoWindow();
       this.infoAlert = new google.maps.InfoWindow();
       this.infoStorm = new google.maps.InfoWindow();
+      this.infoTyphoon = new google.maps.InfoWindow();
+      this.infoTyphoonTrajectory = new google.maps.InfoWindow();
     },
     LoadVillage: function(county){
       $.ajax({
@@ -383,6 +432,18 @@ var g_APP = new Vue({
         content += "<p>★ "+debrisFlow.instruction+"</p>";
         var start = debrisFlow.effective.format("YYYY-MM-DD HH:mm");
         var end = debrisFlow.expires.format("YYYY-MM-DD HH:mm");
+        content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
+      }
+
+      var typhoonArr = feature.getProperty("typhoon");
+      for(var i=0;i<typhoonArr.length;i++){
+        var typhoon = typhoonArr[i];
+        console.log(typhoon);
+        alert = true;
+        content += "<p class='info-title'>"+typhoon.headline+" - "+typhoon.description.cwb_typhoon_name+"颱風</p>";
+        content += "<p>"+typhoon.description["注意事項"]+"</p>";
+        var start = typhoon.effective.format("YYYY-MM-DD HH:mm");
+        var end = typhoon.expires.format("YYYY-MM-DD HH:mm");
         content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
       }
 
@@ -487,7 +548,26 @@ var g_APP = new Vue({
           this.alertData = d3.nest()
             .key(function(d){return d.eventcode;})
             .map(result.data);
+
           this.UpdateMapAlert();
+        }.bind(this));
+
+        $.get("/alert/typhoonData?date="+this.curYear+"-"+this.curDate,function(result){
+          if(result.status != "ok"){
+            return console.log(result.err);
+          }
+          for(var i=0;i<result.data.length;i++){
+            var typhoon = result.data[i];
+            var t = moment(typhoon.time);
+            typhoon.time = t.format("HH:00:00");
+            typhoon.circle_of_15ms = Math.max(0,typhoon.circle_of_15ms);
+            typhoon.circle_of_25ms = Math.max(0,typhoon.circle_of_25ms);
+          }
+          this.typhoonTrajectoryData = d3.nest()
+            .key(function(d){return d.time;})
+            .map(result.data);
+
+          this.UpdateMapTyphoon();
         }.bind(this));
 
       }.bind(this));
@@ -683,6 +763,7 @@ var g_APP = new Vue({
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
       this.UpdateMapAlert();
+      this.UpdateMapTyphoon();
     },
     GetDataFromTime: function(data,time){
       var timeOffset = this.TimeToOffset(time);
@@ -948,7 +1029,7 @@ var g_APP = new Vue({
     UpdateMapAlert: function(){
       if(!this.map) return;
       this.ClearMapAlert();
-      
+      //console.log(this.alertData);
       var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
 
       AddAlert = function(type, alertData){
@@ -1087,6 +1168,28 @@ var g_APP = new Vue({
                 }
               }
             }
+            if(type == "typhoon"){
+              if(!this.alertOption.showTyphoon) continue;
+              //county
+              for(var j=0;j<alert.geocode.length;j++){
+                var id = alert.geocode[j];
+                if(id[0] == "6"){ //五都編號需特別處理...
+                  id += "000";
+                }
+                var feature = this.map.data.getFeatureById(id);
+                if(!feature){
+                  if(!(id in this.geoCounty)){
+                    console.log(type+": "+id+" not found");
+                    continue;
+                  }
+                  this.map.data.addGeoJson(this.geoCounty[id]);
+                  feature = this.map.data.getFeatureById(id);
+                }
+                var arr = feature.getProperty(type);
+                arr.push(alert);
+                feature.setProperty(type,arr);
+              }
+            }
           }
 
         }
@@ -1107,11 +1210,120 @@ var g_APP = new Vue({
         }
       }
     },
+    UpdateMapTyphoon: function(){
+      if(!this.map) return;
+      var hour = this.curTime.split(":")[0];
+      var typhoonData = this.GetDataFromTime(this.typhoonTrajectoryData,hour+":00");
+      if(!typhoonData || this.typhoonTrajectoryOption.show == false) return this.ClearMapTyphoon();
+
+      var UpdateInfoTyphoon = function(d){
+        var str = "<p class='info-title'>"+d.cwb_typhoon_name+"颱風</p>";
+        str += "<p>近中心最大風速: "+d.max_wind_speed+" m/s</p>";
+        str += "<p>近中心最大陣風: "+d.max_gust_speed+" m/s</p>";
+        str += "<p>中心氣壓: "+d.pressure+" 百帕</p>";
+        str += "<p>七級風暴風半徑: "+d.circle_of_15ms+" km</p>";
+        str += "<p>十級風暴風半徑: "+d.circle_of_25ms+" km</p>";
+        str += "<p>時間 "+d.time+" </p>";
+        var loc = new google.maps.LatLng(d.lat, d.lng);
+        this.infoTyphoonTrajectory.setOptions({content: str, position: loc});
+      }.bind(this);
+
+      var clickFn = function(data,i){ 
+        return function() {
+          UpdateInfoTyphoon(data[i]);
+          this.infoTyphoonTrajectory.open(this.map);
+          this.infoTyphoonTrajectoryID = data[i].typhoon_name;
+        }.bind(this);
+      }.bind(this);
+
+      for(var i=0;i<typhoonData.length;i++){
+        var typhoon = typhoonData[i];
+
+        //info window有打開，更新資訊
+        if(this.infoTyphoonTrajectory.getMap() && this.infoTyphoonTrajectoryID == typhoon.typhoon_name){
+          UpdateInfoTyphoon(typhoon);
+        }
+
+        var scale = 1000; //google map circle unit is m
+
+        if(this.layerTyphoonTrajectory[typhoon.typhoon_name]){
+          var graph = this.layerTyphoonTrajectory[typhoon.typhoon_name];
+
+          graph.level7.setOptions({
+            fillOpacity: this.typhoonTrajectoryOption.opacity,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: typhoon.circle_of_15ms*scale
+          });
+
+          graph.level10.setOptions({
+            fillOpacity: this.typhoonTrajectoryOption.opacity,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: typhoon.circle_of_25ms*scale
+          });
+
+          graph.center.setOptions({
+            fillOpacity: this.typhoonTrajectoryOption.opacity,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: 1*scale
+          });
+
+          google.maps.event.clearListeners(graph.level7,"click");
+          graph.level7.addListener('click', clickFn(typhoonData,i));
+          google.maps.event.clearListeners(graph.level10,"click");
+          graph.level10.addListener('click', clickFn(typhoonData,i));
+          google.maps.event.clearListeners(graph.center,"click");
+          graph.center.addListener('click', clickFn(typhoonData,i));
+        }
+        else{
+          var graph = {level7: null, level10: null, center: null};
+
+          graph.level7 = new google.maps.Circle({
+            strokeColor: '#FFFFFF',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FFFF00',
+            fillOpacity: this.typhoonTrajectoryOption.opacity,
+            map: this.map,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: typhoon.circle_of_15ms*scale
+          });
+          
+          graph.level10 = new google.maps.Circle({
+            strokeColor: '#FFFFFF',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FF0000',
+            fillOpacity: this.typhoonTrajectoryOption.opacity,
+            map: this.map,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: typhoon.circle_of_25ms*scale
+          });
+
+          graph.center = new google.maps.Circle({
+            strokeColor: '#FFFFFF',
+            strokeOpacity: 1,
+            strokeWeight: 1,
+            fillColor: '#FFFFFF',
+            fillOpacity: 0,
+            map: this.map,
+            center: {lat:typhoon.lat, lng:typhoon.lng},
+            radius: 1*scale
+          });
+          
+          graph.level7.addListener('click', clickFn(typhoonData,i));
+          graph.center.addListener('click', clickFn(typhoonData,i));
+          graph.level10.addListener('click', clickFn(typhoonData,i));
+
+          this.layerTyphoonTrajectory[typhoon.typhoon_name] = graph;
+        }
+      }
+    },
     ClearMap: function(){
       this.ClearMapRain();
       this.ClearMapWaterLevel();
       this.ClearMapReservoir();
       this.ClearMapAlert();
+      this.ClearMapTyphoon();
     },
     ClearMapRain: function(){
       for(var key in this.layerRain){
@@ -1140,11 +1352,26 @@ var g_APP = new Vue({
         feature.setProperty("water",[]);
         feature.setProperty("debrisFlow",[]);
         feature.setProperty("thunderstorm",[]);
+        feature.setProperty("typhoon",[]);
       });
       for(var key in this.layerThunderstorm){
         this.layerThunderstorm[key].setMap(null);
       }
       this.layerThunderstorm = {};
+
+      for(var key in this.layerTyphoon){
+        this.layerTyphoon[key].setMap(null);
+      }
+      this.layerTyphoon = {};
+    },
+    ClearMapTyphoon: function(){
+      for(var key in this.layerTyphoonTrajectory){
+        var graph = this.layerTyphoonTrajectory[key];
+        graph.level7.setMap(null);
+        graph.level10.setMap(null);
+        graph.center.setMap(null);
+      }
+      this.layerTyphoonTrajectory = {};
     }
   }
 });
