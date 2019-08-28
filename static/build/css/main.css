@@ -145,8 +145,6 @@ a {
     width: 30px;
     height: 30px; }
     .riverlog .close-bt:hover {
-      width: 32px;
-      height: 32px;
       filter: contrast(0.5); }
   .riverlog .side-panel {
     position: fixed;
@@ -162,16 +160,29 @@ a {
     box-shadow: 5px 0px 15px #8b6951;
     -webkit-transition: left 0.5s ease;
     transition: left 0.5s ease; }
-    .riverlog .side-panel .close-bt {
+    .riverlog .side-panel .panel-switch {
       position: fixed;
       left: -50px;
       -webkit-transition: left 0.5s ease;
       transition: left 0.5s ease;
-      z-index: 5; }
+      z-index: 5;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex-direction: column; }
+      .riverlog .side-panel .panel-switch .bt {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        margin: 5px 0px; }
+        .riverlog .side-panel .panel-switch .bt:hover {
+          filter: contrast(0.5); }
     .riverlog .side-panel.open {
       left: 0px; }
-      .riverlog .side-panel.open .close-bt {
+      .riverlog .side-panel.open .panel-switch {
         left: 200px; }
+    .riverlog .side-panel .option-container {
+      width: calc(100% - 40px); }
     .riverlog .side-panel .option-category {
       width: 100%;
       padding: 5px;

@@ -62,7 +62,12 @@
 			</div>
 
 			<div class="side-panel" v-bind:class="{open: openDateSelect}">
-				<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openDateSelect=false;">
+				<div class="panel-switch">
+					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openDateSelect=false;">
+					<img class="bt" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="SwitchPanel('option');">
+					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
+				</div>
+				
 				<select v-model="curYear">
 					<option v-for="y in yearArr" v-bind:value="y">{{y}}年</option>
 				</select>
@@ -79,8 +84,13 @@
 			</div>
 
 			<div class="side-panel" v-bind:class="{open: openOption}">
-				<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
-				<div v-if="mapType == 'waterEvent' ">
+				<div class="panel-switch">
+					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
+					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapType == 'waterEvent' ">
+					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
+				</div>
+				
+				<div class="option-container" v-if="mapType == 'waterEvent' ">
 					<div class="option-category">雨量</div>
 					<div class="option-item">
 						<div class="option-label">顯示</div>

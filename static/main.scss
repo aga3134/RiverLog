@@ -206,8 +206,6 @@ a{
 		width: 30px;
 		height: 30px;
 		&:hover{
-			width: 32px;
-			height: 32px;
 			filter: contrast(0.5);
 		}
 	}
@@ -227,19 +225,36 @@ a{
 		-webkit-transition: left $trans-time ease;
 		transition: left $trans-time ease;
 
-		.close-bt{
+		.panel-switch{
 			position: fixed;
 			left: -50px;
 			-webkit-transition: left $trans-time ease;
 			transition: left $trans-time ease;
 			z-index: 5;
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			flex-direction: column;
+			.bt{
+				cursor: pointer;
+				width: 30px;
+				height: 30px;
+				margin: 5px 0px;
+				&:hover{
+					filter: contrast(0.5);
+				}
+			}
 		}
 
 		&.open{
 			left: 0px;
-			.close-bt{
+			.panel-switch{
 				left: 200px;
 			}
+		}
+
+		.option-container{
+			width: calc(100% - 40px);
 		}
 
 		.option-category{

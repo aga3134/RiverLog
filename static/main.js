@@ -56,7 +56,7 @@ var g_APP = new Vue({
       showWater:false,
       showDebrisFlow:false,
       showThunderstorm:false,
-      showTyphoon:true
+      showTyphoon:false
     },
     typhoonTrajectoryOption:{opacity:0.3, show:true},
     useSatellite: false,
@@ -605,6 +605,22 @@ var g_APP = new Vue({
       if(offset > maxT) offset = maxT;
       this.ChangeTime(this.OffsetToTime(offset));
       return offset != maxT;
+    },
+    SwitchPanel: function(type){
+      this.openDateSelect = false;
+      this.openOption = false;
+      this.openAbout = false;
+      switch(type){ 
+        case "date":
+          this.openDateSelect = true;
+          break;
+        case "option":
+          this.openOption = true;
+          break;
+        case "about":
+          this.openAbout = true;
+          break;
+      }
     },
     TogglePlay: function(){
       if(this.playTimer){
@@ -1213,7 +1229,7 @@ var g_APP = new Vue({
     UpdateMapTyphoon: function(){
       if(!this.map) return;
       var hour = this.curTime.split(":")[0];
-      var typhoonData = this.GetDataFromTime(this.typhoonTrajectoryData,hour+":00");
+      var typhoonData = this.typhoonTrajectoryData[hour+":00:00"];
       if(!typhoonData || this.typhoonTrajectoryOption.show == false) return this.ClearMapTyphoon();
 
       var UpdateInfoTyphoon = function(d){
