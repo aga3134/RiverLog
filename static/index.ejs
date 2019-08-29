@@ -32,10 +32,9 @@
 			<div class="topbar">
 				<img class="logo" src="/static/Image/logo-text.png">
 				<img class="logo-mobile" src="/static/Image/logo.png">
-				<select v-model="mapType" v-on:change="ChangeMapType();">
+				<select v-model="mapType">
 					<option value="waterEvent">水事件地圖</option>
 					<option value="waterUse">用水統計</option>
-					<option value="reservoirUse">水庫統計</option>
 				</select>
 			</div>
 			<div class="main-content">
@@ -44,7 +43,55 @@
 					<img class="icon" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="openOption=true;">
 					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
 				</div>
+
 				<div id="map" v-show="mapType == 'waterEvent' "></div>
+
+				<div class="graph-content" v-show="mapType == 'waterUse' " v-if="waterUse">
+					<select v-model="waterUse.type">
+						<option value="overview">總用水供需</option>
+						<option value="agriculture">灌溉用水</option>
+						<option value="cultivation">養殖用水</option>
+						<option value="livestock">畜牧用水</option>
+						<option value="industry">工業用水</option>
+						<option value="living">生活用水</option>
+						<option value="reservoir">水庫統計</option>
+					</select>
+
+					<div class="graph-container">
+						<div class="graph half-w" id="overviewSupply" v-show="waterUse.type == 'overview' "></div>
+						<div class="graph half-w" id="overviewConsumption" v-show="waterUse.type == 'overview' "></div>
+						
+						<div class="graph full-w" id="agricultureMap" v-show="waterUse.type == 'agriculture' "></div>
+						
+						<div class="graph half-w" id="cultivationMap" v-show="waterUse.type == 'cultivation' "></div>
+						<div class="graph half-w" id="cultivationRank" v-show="waterUse.type == 'cultivation' "></div>
+
+						<div class="graph half-w" id="livestockMap" v-show="waterUse.type == 'livestock' "></div>
+						<div class="graph half-w" id="livestockRank" v-show="waterUse.type == 'livestock' "></div>
+
+						<div class="graph half-w" id="industryMap" v-show="waterUse.type == 'industry' "></div>
+						<div class="graph half-w" id="industryRank" v-show="waterUse.type == 'industry' "></div>
+
+						<div class="graph half-w" id="livingMap" v-show="waterUse.type == 'living' "></div>
+						<div class="graph half-w" id="livingRank" v-show="waterUse.type == 'living' "></div>
+
+						<div class="graph full-w" id="reservoirMap" v-show="waterUse.type == 'reservoir' "></div>
+					</div>
+
+					<div class="fix-bottom">
+						<div class="time-bar" id="timeBar">
+							<div class="label">{{waterUse.year}} 年</div>
+							<input id="timeRange"
+								v-on:change="waterUse.UpdateGraph();"
+								type="range" v-bind:min="waterUse.minYear" v-bind:max="waterUse.maxYear" v-model="waterUse.year" class="slider">
+							<div>
+								<img id="prevBt" class="control-icon" src="/static/Image/icon-prev.png" v-on:click="waterUse.PrevYear();">
+								<img id="playBt" class="control-icon" src="/static/Image/icon-play.png" v-on:click="waterUse.ToggleYearPlay();">
+								<img id="nextBt" class="control-icon" src="/static/Image/icon-next.png" v-on:click="waterUse.NextYear();">
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="playbar" v-if="mapType == 'waterEvent' ">
 				<div class="h-scroll">
@@ -206,7 +253,7 @@
 		<script src="/static/liquidFillGauge.js?v=<%=meta.version%>"></script>
 		<script src="/static/mapTW.js?v=<%=meta.version%>"></script>
 		<script src="/static/svgGraph.js?v=<%=meta.version%>"></script>
-		<script src="/static/infoGraph.js?v=<%=meta.version%>"></script>
+		<script src="/static/waterUseStatistic.js?v=<%=meta.version%>"></script>
 		<script src="/static/svgOverlay.js?v=<%=meta.version%>"></script>
 		<script src="/static/mapControl.js?v=<%=meta.version%>"></script>
 		<script src="/static/main.js?v=<%=meta.version%>"></script>

@@ -883,6 +883,7 @@ MapControl.prototype.ClearMapReservoir = function(){
 };
 
 MapControl.prototype.ClearMapAlert = function(){
+  if(!this.map) return;
 	this.map.data.forEach(function(feature){
     feature.setProperty("Flood",[]);
     feature.setProperty("ReservoirDis",[]);

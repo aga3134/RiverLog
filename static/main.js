@@ -40,7 +40,8 @@ var g_APP = new Vue({
     },
     typhoonTrajectoryOption:{opacity:0.3, show:true},
     useSatellite: false,
-    playSpeed: 5
+    playSpeed: 5,
+    waterUse: null,
   },
   created: function () {
     this.InitColor();
@@ -130,6 +131,9 @@ var g_APP = new Vue({
     InitMap: function(){
       this.mapControl = new MapControl();
       this.mapControl.InitMap();
+
+      this.waterUse = new WaterUseStatistic();
+      this.waterUse.InitMap();
     },
     ToggleSatellite: function(){
       this.mapControl.ToggleSatellite(this.useSatellite);
@@ -298,9 +302,6 @@ var g_APP = new Vue({
           this.openAbout = true;
           break;
       }
-    },
-    ChangeMapType(){
-
     },
     TogglePlay: function(){
       if(this.playTimer){
