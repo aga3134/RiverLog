@@ -269,6 +269,9 @@ a{
 			justify-content: flex-start;
 			align-items: center;
 			flex-wrap: wrap;
+			input[type="range"]{
+				width: 100px;
+			}
 			input[type="checkbox"]{
 				width: 16px;
 				height: 16px;

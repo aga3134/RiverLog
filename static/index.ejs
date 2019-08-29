@@ -32,7 +32,7 @@
 			<div class="topbar">
 				<img class="logo" src="/static/Image/logo-text.png">
 				<img class="logo-mobile" src="/static/Image/logo.png">
-				<select v-model="mapType">
+				<select v-model="mapType" v-on:change="ChangeMapType();">
 					<option value="waterEvent">水事件地圖</option>
 					<option value="waterUse">用水統計</option>
 					<option value="reservoirUse">水庫統計</option>
@@ -208,6 +208,7 @@
 		<script src="/static/svgGraph.js?v=<%=meta.version%>"></script>
 		<script src="/static/infoGraph.js?v=<%=meta.version%>"></script>
 		<script src="/static/svgOverlay.js?v=<%=meta.version%>"></script>
+		<script src="/static/mapControl.js?v=<%=meta.version%>"></script>
 		<script src="/static/main.js?v=<%=meta.version%>"></script>
 	</body>
 </html>

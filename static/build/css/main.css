@@ -194,6 +194,8 @@ a {
       justify-content: flex-start;
       align-items: center;
       flex-wrap: wrap; }
+      .riverlog .side-panel .option-item input[type="range"] {
+        width: 100px; }
       .riverlog .side-panel .option-item input[type="checkbox"] {
         width: 16px;
         height: 16px; }
