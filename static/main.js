@@ -476,12 +476,10 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       var rainData = this.GetDataFromTime(this.rainData.data,this.curTime);
       if(!rainData || this.rainOption.show == false) return this.mapControl.ClearMapRain();
-
       this.mapControl.UpdateMapRain(rainData);
     },
     UpdateMapWaterLevel: function(){
       if(!this.mapControl) return;
-
       //compute data hash in previous time
       var offset = this.TimeToOffset(this.curTime);
       offset -= 1;
@@ -498,7 +496,6 @@ var g_APP = new Vue({
           preDataHash[s] = preData[i];
         }
       }
-
       this.mapControl.UpdateMapWaterLevel(preDataHash, waterLevelData);
     },
     UpdateMapReservoir: function(){
@@ -506,7 +503,6 @@ var g_APP = new Vue({
       var hour = this.curTime.split(":")[0];
       var reservoirData = this.GetDataFromTime(this.reservoirData.data,hour+":00");
       if(!reservoirData || this.reservoirOption.show == false) return this.mapControl.ClearMapReservoir();
-
       this.mapControl.UpdateMapReservoir(reservoirData);
     },
     UpdateMapAlert: function(){
@@ -514,7 +510,6 @@ var g_APP = new Vue({
       this.mapControl.ClearMapAlert();
       //console.log(this.alertData);
       var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
-
       this.mapControl.UpdateMapAlert(this.alertData, t);
     },
     UpdateMapTyphoon: function(){
@@ -522,7 +517,6 @@ var g_APP = new Vue({
       var hour = this.curTime.split(":")[0];
       var typhoonData = this.typhoonTrajectoryData[hour+":00:00"];
       if(!typhoonData || this.typhoonTrajectoryOption.show == false) return this.mapControl.ClearMapTyphoon();
-
       this.mapControl.UpdateMapTyphoon(typhoonData);
     }
   }
