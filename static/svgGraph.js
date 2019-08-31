@@ -1,4 +1,186 @@
 
+function SvgGraph(param){
+	//remove all children then append svg
+	this.selector = param.selector;
+	var graph = $(this.selector);
+	graph.empty();
+	this.svg = d3.select(param.selector).append("svg");
+
+	this.graphArr = param.graph;
+	this.axis = param.axis;
+	this.padding = {left: 20, right: 20, top: 20, bottom: 20};
+	if(param.padding) this.padding = param.padding;
+
+	this.w = graph.width();
+	this.h = graph.height();
+	this.scaleW = d3.scale.linear()
+		.domain([this.axis.minX,this.axis.maxX])
+		.range([0,this.w-this.padding.left-this.padding.right]);
+	this.scaleH = d3.scale.linear()
+		.domain([this.axis.minY,this.axis.maxY])
+		.range([this.h-this.padding.bottom-this.padding.top,0]);
+}
+
+SvgGraph.prototype.DrawGraph = function(){
+	this.ClearGraph();
+	for(var i=0;i<this.graphArr.length;i++){
+		var graph = this.graphArr[i];
+		switch(graph.type){
+			case "mapTW":
+				this.DrawGraphMapTW(graph);
+				break;
+			case "line":
+				this.DrawGraphLine(graph);
+				break;
+			case "bar":
+				this.DrawGraphBar(graph);
+				break;
+			case "stack":
+				this.DrawGraphStack(graph);
+				break;
+			case "pie":
+				this.DrawGraphPie(graph);
+				break;
+		}
+	}
+	this.DrawAxis();
+};
+
+SvgGraph.prototype.DrawAxis = function(){
+	if(!this.axis) return;
+	var xAxis = d3.svg.axis().orient("bottom").scale(this.scaleW)
+		.tickFormat(function(d){return d;});;
+	var yAxis = d3.svg.axis().orient("left").scale(this.scaleH);
+	var offsetY = this.axis.alignZero?this.scaleH(0):this.h-this.padding.bottom;
+
+	var xAxisGroup = this.svg.append("g").call(xAxis)
+		.attr({
+			"font-size": "12px",
+			"transform":"translate("+this.padding.left+","+offsetY+")",
+			"fill":"black",
+			"stroke":"black",
+			"stroke-width": 0.5
+		});
+	xAxisGroup.select('path')
+  		.style({ 'stroke': 'black', 'fill': 'none', 'stroke-width': '2px'});
+		
+	var yAxisGroup = this.svg.append("g").call(yAxis)
+		.attr({
+			"font-size": "12px",
+			"transform":"translate("+this.padding.left+","+this.padding.bottom+")",
+			"fill":"black",
+			"stroke":"black",
+			"stroke-width": 0.5
+		});
+	yAxisGroup.select('path')
+		.style({ 'stroke': 'black', 'fill': 'none', 'stroke-width': '2px'});
+
+	if(this.axis.curX){
+		this.svg.append("line")
+			.style({
+				"stroke":"#333333",
+				"stroke-width":1
+			})
+			.attr({
+				"x1":this.scaleW(this.axis.curX)+this.padding.left,
+				"y1":this.padding.top,
+				"x2":this.scaleW(this.axis.curX)+this.padding.left,
+				"y2":this.h-this.padding.bottom
+			});
+	}
+};
+
+SvgGraph.prototype.DrawGraphMapTW = function(graph){
+
+};
+
+SvgGraph.prototype.DrawGraphLine = function(graph){
+	var line = d3.svg.line()
+		.x(function(d){
+			return parseInt(this.scaleW(d.x))+this.padding.left;
+		}.bind(this))
+		.y(function(d){
+			return parseInt(this.scaleH(d.y))+this.padding.top;
+		}.bind(this));
+
+	
+	for(var i=0;i<graph.data.length;i++){
+		var data = graph.data[i];
+
+		var lineChart = this.svg.append("g");
+		lineChart.append("path")
+			.attr("fill", "none")
+			.attr("stroke", data.color)
+			.attr("stroke-linejoin", "round")
+			.attr("stroke-linecap", "round")
+			.attr("stroke-width", 1.5)
+			.attr("d", line(data.value));
+
+		var circleGroup = this.svg.append("g");
+		circleGroup.selectAll("circle").data(data.value)
+			.enter().append("circle")
+			.attr("r",10)
+			.attr("opacity",0)
+			.attr("fill","white")
+			.attr("stroke",data.color)
+			.attr("stroke-width",0.5)
+			.attr("cx", function(d){
+				return this.padding.left+this.scaleW(d.x);
+			}.bind(this))
+			.attr("cy", function(d){
+				return this.padding.top+this.scaleH(d.y);
+			}.bind(this))
+			.on("mouseover",function(){
+				var cur = d3.select(this);
+				cur.attr("opacity",0.5);
+			})
+			.on("mouseout",function(){
+				d3.select(this).attr("opacity",0);
+			});
+	}
+};
+
+SvgGraph.prototype.DrawGraphBar = function(graph){
+
+};
+
+SvgGraph.prototype.DrawGraphStack = function(graph){
+	var stack = d3.layout.stack();
+	var dataArr = [];
+	for(var i=0;i<graph.data.length;i++){
+		dataArr.push(graph.data[i].value);
+	}
+	var stackData = stack(dataArr);
+
+	var rectW = (this.scaleW(1)-this.scaleW(0))*0.5;
+	
+	for(var i=0;i<graph.data.length;i++){
+		var stackChart = this.svg.append("g");
+		stackChart.selectAll("rect").data(stackData[i])
+			.enter().append("rect")
+			.attr("fill", graph.data[i].color)
+			.attr("x", function(d){
+				return this.padding.left+this.scaleW(d.x)-rectW*0.5;
+			}.bind(this))
+			.attr("y", function(d){
+				return this.padding.top+this.scaleH(d.y+d.y0);
+			}.bind(this))
+			.attr("height", function(d){
+				return this.scaleH(d.y0) - this.scaleH(d.y + d.y0);
+			}.bind(this))
+			.attr("width", rectW);
+	}
+};
+
+SvgGraph.prototype.DrawGraphPie = function(graph){
+
+};
+
+SvgGraph.prototype.ClearGraph = function(){
+	this.svg.selectAll("*").remove();
+};
+
+
 var g_SvgGraph = function(){
 	
 
@@ -121,6 +303,7 @@ var g_SvgGraph = function(){
 	};
 
 	var TimeLine = function(param){
+		console.log(param);
 		if(param.data == null) return;
 
 		//compute scale

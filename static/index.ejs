@@ -32,7 +32,7 @@
 			<div class="topbar">
 				<img class="logo" src="/static/Image/logo-text.png">
 				<img class="logo-mobile" src="/static/Image/logo.png">
-				<select v-model="mapType">
+				<select v-model="mapType" v-on:change="UpdateMapType();">
 					<option value="waterEvent">水事件地圖</option>
 					<option value="waterUse">用水統計</option>
 				</select>
@@ -86,7 +86,8 @@
 								type="range" v-bind:min="waterUse.minYear" v-bind:max="waterUse.maxYear" v-model="waterUse.year" class="slider">
 							<div>
 								<img id="prevBt" class="control-icon" src="/static/Image/icon-prev.png" v-on:click="waterUse.PrevYear();">
-								<img id="playBt" class="control-icon" src="/static/Image/icon-play.png" v-on:click="waterUse.ToggleYearPlay();">
+								<img id="playBt" class="control-icon" v-if="waterUse.isPlay" src="/static/Image/icon-pause.png" v-on:click="waterUse.ToggleYearPlay();">
+								<img id="playBt" class="control-icon" v-else src="/static/Image/icon-play.png" v-on:click="waterUse.ToggleYearPlay();">
 								<img id="nextBt" class="control-icon" src="/static/Image/icon-next.png" v-on:click="waterUse.NextYear();">
 							</div>
 						</div>

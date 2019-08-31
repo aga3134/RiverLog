@@ -138,6 +138,20 @@ var g_APP = new Vue({
     ToggleSatellite: function(){
       this.mapControl.ToggleSatellite(this.useSatellite);
     },
+    UpdateMapType: function(){
+      switch(this.mapType){
+        case "waterEvent":
+          Vue.nextTick(function(){
+            this.UpdateMap();
+          }.bind(this));
+          break;
+        case "waterUse":
+          Vue.nextTick(function(){
+            this.waterUse.UpdateGraph();
+          }.bind(this));
+          break;
+      }
+    },
     ChangeYear: function(year){
       this.curYear = year;
       $.get("/"+this.sumType+"/dailySum?year="+year,function(result){
@@ -528,5 +542,5 @@ window.addEventListener('load', function() {
 });
 
 window.addEventListener('resize', function(e) {
-  
+  g_APP.UpdateMapType();
 });

@@ -101,14 +101,14 @@ a {
         flex-wrap: wrap; }
         .riverlog .main-content .graph-content .graph-container .graph {
           margin: 10px;
-          height: 400px;
-          background-color: #ffffff;
-          border-radius: 5px;
-          border: 1px solid #a59b9b; }
+          height: 350px; }
           .riverlog .main-content .graph-content .graph-container .graph.full-w {
             width: calc(100% - 20px); }
           .riverlog .main-content .graph-content .graph-container .graph.half-w {
             width: calc(50% - 20px); }
+          .riverlog .main-content .graph-content .graph-container .graph svg {
+            width: 100%;
+            height: 100%; }
       .riverlog .main-content .graph-content .fix-bottom {
         position: fixed;
         bottom: 0px;
