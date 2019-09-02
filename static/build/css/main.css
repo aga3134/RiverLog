@@ -113,6 +113,9 @@ a {
         .riverlog .main-content .graph-content .graph-container .graph {
           margin: 10px;
           height: 320px; }
+          .riverlog .main-content .graph-content .graph-container .graph.border {
+            border-radius: 5px;
+            border: 1px solid #a59b9b; }
           .riverlog .main-content .graph-content .graph-container .graph svg {
             width: 100%;
             height: 100%; }

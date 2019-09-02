@@ -14,12 +14,15 @@ function SvgGraph(param){
 
 	this.w = graph.width();
 	this.h = graph.height();
-	this.scaleW = d3.scale.linear()
-		.domain([this.axis.minX,this.axis.maxX])
-		.range([0,this.w-this.padding.left-this.padding.right]);
-	this.scaleH = d3.scale.linear()
-		.domain([this.axis.minY,this.axis.maxY])
-		.range([this.h-this.padding.bottom-this.padding.top,0]);
+	if(this.axis){
+		this.scaleW = d3.scale.linear()
+			.domain([this.axis.minX,this.axis.maxX])
+			.range([0,this.w-this.padding.left-this.padding.right]);
+		this.scaleH = d3.scale.linear()
+			.domain([this.axis.minY,this.axis.maxY])
+			.range([this.h-this.padding.bottom-this.padding.top,0]);
+	}
+	
 
 	this.palettes = ["#a2b9bc","#b2ad7f", "#878f99", " #6b5b95",
 					 "#d6cbd3", "#eca1a6", "#bdcebe", "#ada397",
@@ -33,8 +36,8 @@ SvgGraph.prototype.DrawGraph = function(){
 	for(var i=0;i<this.graphArr.length;i++){
 		var graph = this.graphArr[i];
 		switch(graph.type){
-			case "mapTW":
-				this.DrawGraphMapTW(graph);
+			case "map":
+				this.DrawGraphMap(graph);
 				break;
 			case "line":
 				this.DrawGraphLine(graph);
@@ -54,7 +57,7 @@ SvgGraph.prototype.DrawGraph = function(){
 };
 
 SvgGraph.prototype.DrawAxis = function(){
-	if(!this.axis) return;
+	if(!this.axis || !this.axis.draw) return;
 	var xAxis = d3.svg.axis().orient("bottom").scale(this.scaleW)
 		.tickFormat(function(d){return d;});;
 	var yAxis = d3.svg.axis().orient("left").scale(this.scaleH);
@@ -97,8 +100,34 @@ SvgGraph.prototype.DrawAxis = function(){
 	}
 };
 
-SvgGraph.prototype.DrawGraphMapTW = function(graph){
+SvgGraph.prototype.DrawGraphMap = function(graph){
+	var proj = d3.geo.mercator()
+   			.center([120.7764642,23.682094])
+   			.scale(4800)
+   			.translate([this.w*0.5, this.h*0.5]);
 
+    var pathFn = d3.geo.path().projection(proj);
+
+	for(var i=0;i<graph.data.length;i++){
+		var data = graph.data[i];
+		var bg = this.svg.append("g");
+		bg.selectAll("path").data(data.path)
+    		.enter().append("path")
+    		.attr("d",pathFn)
+    		.attr("fill","none")
+    		.attr("stroke","#333333");
+
+    	var markerGroup = this.svg.append("g");
+    	for(var j=0;j<data.marker.length;j++){
+    		var marker = data.marker[j];
+    		var pt = proj([marker.lng, marker.lat]);
+    		markerGroup.append('circle')
+    			.attr("stroke","#ff3333")
+            	.attr("cx",pt[0])
+            	.attr("cy", pt[1])
+            	.attr("r", marker.radius);
+    	}
+	}
 };
 
 SvgGraph.prototype.DrawGraphLine = function(graph){

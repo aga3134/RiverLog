@@ -163,9 +163,10 @@ a{
 				.graph{
 					margin: 10px;
 					height: 320px;
-					//background-color: #ffffff;
-					//border-radius: 5px;
-					//border: 1px solid #a59b9b;
+					&.border{
+						border-radius: 5px;
+						border: 1px solid #a59b9b;
+					}
 					
 					svg{
 						width: 100%;

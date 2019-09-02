@@ -47,7 +47,7 @@
 				<div id="map" v-show="mapType == 'waterEvent' "></div>
 
 				<div class="graph-content" v-show="mapType == 'waterUse' " v-if="waterUse">
-					<select v-model="waterUse.type">
+					<select v-model="waterUse.type" v-on:change="waterUse.UpdateGraph();">
 						<option value="overview">總用水供需</option>
 						<option value="agriculture">灌溉用水</option>
 						<option value="cultivation">養殖用水</option>
@@ -285,6 +285,7 @@
 		</div>
 
 		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>
+		<script type="text/javascript" src="http://d3js.org/topojson.v1.min.js"></script>
 		<script src="/static/util.js?v=<%=meta.version%>"></script>
 		<script src="/static/liquidFillGauge.js?v=<%=meta.version%>"></script>
 		<script src="/static/mapTW.js?v=<%=meta.version%>"></script>

@@ -3,7 +3,7 @@ function WaterUseStatistic(){
 	this.minYear = 2010;
 	this.maxYear = 2019;
 	this.year = 2010;
-	this.type = "overview";
+	this.type = "agriculture";
 	this.agricultureMap = null;
 	this.reservoirMap = null;
 	this.yearTimer = null;
@@ -15,56 +15,14 @@ function WaterUseStatistic(){
 	this.industryData = {};
 	this.livingData = {};
 	this.reservoirData = {};
+	this.county = null;
+	this.countyPath = null;
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
-	var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
-  var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
-
-  $.get("/static/mapStyle.json",function(style){
-    this.agricultureMap = new google.maps.Map(document.getElementById('agricultureMap'), {
-      center: taiwan,
-      zoom: loc.zoom,
-      scaleControl: true,
-      mapTypeId: 'terrain',
-      styles: style,
-      mapTypeControl: false
-    });
-
-    google.maps.event.addListener(this.agricultureMap, 'click', function(event) {
-      
-    });
-
-    this.agricultureMap.addListener('dragend', function() {
-
-    });
-
-    this.agricultureMap.addListener('zoom_changed', function() {
-      
-    }.bind(this));
-
-
-    this.reservoirMap = new google.maps.Map(document.getElementById('reservoirMap'), {
-      center: taiwan,
-      zoom: loc.zoom,
-      scaleControl: true,
-      mapTypeId: 'terrain',
-      styles: style,
-      mapTypeControl: false
-    });
-
-    google.maps.event.addListener(this.reservoirMap, 'click', function(event) {
-      
-    });
-
-    this.reservoirMap.addListener('dragend', function() {
-
-    });
-
-    this.reservoirMap.addListener('zoom_changed', function() {
-      
-    }.bind(this));
-
+	d3.json("/static/geo/county_sim.json", function(data) {
+    this.county = topojson.feature(data, data.objects["geo"]).features;
+	  this.UpdateGraph();
   }.bind(this));
 };
 
@@ -99,29 +57,32 @@ WaterUseStatistic.prototype.ToggleYearPlay = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraph = function(){
-	switch(this.type){
-		case "overview":
-			this.UpdateGraphOverview();
-			break;
-		case "agriculture":
-			this.UpdateGraphAgriculture();
-			break;
-		case "cultivation":
-			this.UpdateGraphCultivation();
-			break;
-		case "livestock":
-			this.UpdateGraphLivestock();
-			break;
-		case "industry":
-			this.UpdateGraphIndustry();
-			break;
-		case "living":
-			this.UpdateGraphLiving();
-			break;
-		case "reservoir":
-			this.UpdateGraphReservoir();
-			break;
-	}
+	Vue.nextTick(function(){
+		switch(this.type){
+			case "overview":
+				this.UpdateGraphOverview();
+				break;
+			case "agriculture":
+				this.UpdateGraphAgriculture();
+				break;
+			case "cultivation":
+				this.UpdateGraphCultivation();
+				break;
+			case "livestock":
+				this.UpdateGraphLivestock();
+				break;
+			case "industry":
+				this.UpdateGraphIndustry();
+				break;
+			case "living":
+				this.UpdateGraphLiving();
+				break;
+			case "reservoir":
+				this.UpdateGraphReservoir();
+				break;
+		}
+	}.bind(this));
+	
 };
 
 WaterUseStatistic.prototype.BoundYear = function(){
@@ -173,7 +134,8 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 		maxX: this.maxYear,
 		minY: 0,
 		maxY: this.overviewData.maxSupply,
-		curX: this.year
+		curX: this.year,
+		draw: true
 	};
 	
 	var supplyStack = {
@@ -296,7 +258,64 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
+	if(!this.agricultureData.data){
+		$.ajax({
+      url:"/statistic/waterUseAgriculture",
+      async: false,
+      success: function(result){
+        if(result.status != "ok"){
+          return console.log(result.err);
+        }
+        for(var i=0;i<result.data.length;i++){
+        	result.data[i].Year += 1911;
+        }
+        this.agricultureData.data = d3.nest()
+          .key(function(d){return d.Year;})
+          .map(result.data);
 
+        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+        this.agricultureData.minYear = yearBound[0];
+        this.agricultureData.maxYear = yearBound[1];
+      }.bind(this)
+    });
+	}
+	if(!this.agricultureData.association){
+		$.ajax({
+      url:"/static/geo/irrigationAssociation.json",
+      async: false,
+      success: function(result){
+      	for(var i=0;i<result.length;i++){
+      		result[i].shape = "circle";
+      		result[i].radius = 5;
+      	}
+        this.agricultureData.association = result;
+      }.bind(this)
+    });
+	}
+
+	this.minYear = this.agricultureData.minYear;
+	this.maxYear = this.agricultureData.maxYear;
+	this.BoundYear();
+
+	//===================agriculture map===========================
+	var param = {};
+	param.selector = "#agricultureMap";
+	param.textInfo = "#agricultureMapText";
+	var agriMap = {
+		"type": "map",
+		"data": [
+			{
+				"name": "水利會位置",
+				"unit": "",
+				"color": "#ff3333",
+				"path": this.county,
+				"marker": this.agricultureData.association
+			}
+		]
+	};
+	param.graph = [agriMap];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
 };
 
 WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
