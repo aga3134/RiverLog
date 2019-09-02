@@ -42,8 +42,8 @@ SvgGraph.prototype.DrawGraph = function(){
 			case "line":
 				this.DrawGraphLine(graph);
 				break;
-			case "bar":
-				this.DrawGraphBar(graph);
+			case "rank":
+				this.DrawGraphRank(graph);
 				break;
 			case "stack":
 				this.DrawGraphStack(graph);
@@ -107,9 +107,12 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
    			.translate([this.w*0.5, this.h*0.5]);
 
     var pathFn = d3.geo.path().projection(proj);
-
+    var textInfo = $(this.textInfo);
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
+		var color = d3.scale.linear()
+			.domain([data.color.minValue, data.color.maxValue])
+        	.range([data.color.minColor, data.color.maxColor]);
 		var bg = this.svg.append("g");
 		bg.selectAll("path").data(data.path)
     		.enter().append("path")
@@ -117,16 +120,30 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
     		.attr("fill","none")
     		.attr("stroke","#333333");
 
-    	var markerGroup = this.svg.append("g");
-    	for(var j=0;j<data.marker.length;j++){
-    		var marker = data.marker[j];
-    		var pt = proj([marker.lng, marker.lat]);
-    		markerGroup.append('circle')
-    			.attr("stroke","#ff3333")
-            	.attr("cx",pt[0])
-            	.attr("cy", pt[1])
-            	.attr("r", marker.radius);
+    	if(data.marker){
+    		var markerGroup = this.svg.append("g");
+	    	for(var j=0;j<data.marker.length;j++){
+	    		var marker = data.marker[j];
+	    		var pt = proj([marker.lng, marker.lat]);
+	    		markerGroup.append('circle')
+	    			.attr("fill", color(marker.value))
+	    			.attr("stroke","#ffffff")
+	            	.attr("cx",pt[0])
+	            	.attr("cy", pt[1])
+	            	.attr("r", marker.radius)
+	            	.attr("data-name", marker.name)
+	            	.attr("data-value", marker.value.toFixed(2))
+	            	.attr("data-unit", marker.unit)
+	            	.on("mouseover",function(){
+						var cur = d3.select(this);
+						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-value")+data.unit);
+					})
+					.on("mouseout",function(d){
+						textInfo.text("");
+					});
+	    	}
     	}
+    	
 	}
 };
 
@@ -182,8 +199,64 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 	}
 };
 
-SvgGraph.prototype.DrawGraphBar = function(graph){
+SvgGraph.prototype.DrawGraphRank = function(graph){
+	var textInfo = $(this.textInfo);
+	var scaleW = this.scaleW;
+	var rectH = this.scaleH(0)-this.scaleH(1);
 
+	for(var i=0;i<graph.data.length;i++){
+		var data = graph.data[i];
+		data.value = data.value.sort(function(a,b){
+			return b.value - a.value;
+		});
+		var color = d3.scale.linear()
+			.domain([this.axis.minX, this.axis.maxX])
+        	.range([data.color.minColor, data.color.maxColor]);
+		
+		var rankGroup = this.svg.append("g");
+		rankGroup.selectAll("rect").data(data.value)
+    		.enter().append("rect")
+    		.attr("x",this.padding.left)
+    		.attr("y",function(d,i){
+    			return rectH*i;
+    		})
+    		.attr("width",function(d){
+    			return scaleW(d.value);
+    		})
+    		.attr("height",rectH)
+    		.attr("fill",function(d){
+    			return color(d.value);
+    		})
+    		.attr("stroke","#ffffff")
+    		.on("mouseover",function(d){
+				var cur = d3.select(this);
+				textInfo.text(d.name+": "+d.value.toFixed(2)+data.unit);
+			})
+			.on("mouseout",function(d){
+				textInfo.text("");
+			});
+
+    	var textGroup = this.svg.append("g");
+		textGroup.selectAll("text").data(data.value)
+    		.enter().append("text")
+    		.attr("x",this.padding.left+10)
+    		.attr("y",function(d,i){
+    			return rectH*(i+0.5);
+    		})
+    		.attr("fill","#ffffff")
+    		.attr("font-size","12px")
+    		.attr("alignment-baseline","middle")
+    		.text(function(d){
+    			return d.name;
+    		})
+    		.on("mouseover",function(d){
+				var cur = d3.select(this);
+				textInfo.text(d.name+": "+d.value.toFixed(2)+data.unit);
+			})
+			.on("mouseout",function(d){
+				textInfo.text("");
+			});
+	}
 };
 
 SvgGraph.prototype.DrawGraphStack = function(graph){
@@ -193,13 +266,15 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
 		dataArr.push(data.value);
-		for(var j=0;j<data.value.length;j++){
-			var key = data.value[j].x;
-			if(key in sum){
-				sum[key] += data.value[j].y;
-			}
-			else{
-				sum[key] = data.value[j].y;
+		if(graph.data.length > 1){
+			for(var j=0;j<data.value.length;j++){
+				var key = data.value[j].x;
+				if(key in sum){
+					sum[key] += data.value[j].y;
+				}
+				else{
+					sum[key] = data.value[j].y;
+				}
 			}
 		}
 	}
@@ -226,13 +301,17 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 				return this.scaleH(d.y0) - this.scaleH(d.y + d.y0);
 			}.bind(this))
 			.attr("data-name", data.name)
-			.attr("data-unit", data.unit)
 			.attr("width", rectW)
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.style("stroke-width",2);
-				var ratio = (d.y/sum[d.x]*100).toFixed(2);
-				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit")+"("+ratio+"%)");
+				
+				var str = d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit");
+				if(d.x in sum){
+					var ratio = (d.y/sum[d.x]*100).toFixed(2);
+					str += "("+ratio+"%)";
+				}
+				textInfo.text(str);
 			})
 			.on("mouseout",function(d){
 				d3.select(this).style("stroke-width",0);

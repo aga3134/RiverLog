@@ -297,17 +297,47 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	this.maxYear = this.agricultureData.maxYear;
 	this.BoundYear();
 
+	//compute water consumption
+	var associationHash = {};
+	for(var i=0;i<this.agricultureData.association.length;i++){
+		var association = this.agricultureData.association[i];
+		associationHash[association.id] = association;
+	}
+	var data = this.agricultureData.data[this.year];
+	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	for(var i=0;i<data.length;i++){
+		var d = data[i];
+		var sum = 0;
+		var scale = 0.001;	//千立方公尺 -> 百萬立方公尺
+		sum += d.FirstPhaseRiceWaterConsumption*scale;
+		sum += d.FirstPhaseMiscellaneousWaterConsumption*scale;
+		sum += d.SecondPhaseRiceWaterConsumption*scale;
+		sum += d.SecondPhaseMiscellaneousWaterConsumption*scale;
+		if(sum < minValue) minValue = sum;
+		if(sum > maxValue) maxValue = sum;
+		associationHash[d.IrrigationAssociation].value = sum;
+	}
+
 	//===================agriculture map===========================
 	var param = {};
 	param.selector = "#agricultureMap";
 	param.textInfo = "#agricultureMapText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: this.agricultureData.association.length
+	};
 	var agriMap = {
 		"type": "map",
 		"data": [
 			{
 				"name": "水利會位置",
-				"unit": "",
-				"color": "#ff3333",
+				"unit": "百萬立方公尺",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
 				"path": this.county,
 				"marker": this.agricultureData.association
 			}
@@ -315,6 +345,34 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	};
 	param.graph = [agriMap];
 	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//===================agriculture rank===========================
+	param = {};
+	param.selector = "#agricultureRank";
+	param.textInfo = "#agricultureRankText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: this.agricultureData.association.length
+	};
+	var agriRank = {
+		"type": "rank",
+		"data": [
+			{
+				"name": "用水排名",
+				"unit": "百萬立方公尺",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"value": this.agricultureData.association
+			}
+		]
+	};
+	param.graph = [agriRank];
+	graph = new SvgGraph(param);
 	graph.DrawGraph();
 };
 

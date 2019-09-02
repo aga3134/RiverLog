@@ -11,7 +11,7 @@ var WaterUseAgricultureSchema = new mongoose.Schema({
 	SecondPhaseMiscellaneousIrrigationArea: Number,		//第二期雜作面積(公頃)
 	SecondPhaseMiscellaneousWaterConsumption: Number,	//第二期雜作用水量(千立方公尺)
 	SecondPhaseRiceIrrigationArea: Number,				//第二期水稻面積(公頃)
-	SecondPhaseRiceWaterConsumption: String,			//第二期水稻用水量(千立方公尺)
+	SecondPhaseRiceWaterConsumption: Number,			//第二期水稻用水量(千立方公尺)
 	Status: String,										//資料狀態 (1為尚未審核、2為通過、3為退回、4為刪除、5為待議)
 	Year: Number,										//年份
 }, {collection: "waterUseAgriculture"});
