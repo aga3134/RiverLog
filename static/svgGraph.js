@@ -2,6 +2,7 @@
 function SvgGraph(param){
 	//remove all children then append svg
 	this.selector = param.selector;
+	this.textInfo = param.textInfo;
 	var graph = $(this.selector);
 	graph.empty();
 	this.svg = d3.select(param.selector).append("svg");
@@ -19,6 +20,12 @@ function SvgGraph(param){
 	this.scaleH = d3.scale.linear()
 		.domain([this.axis.minY,this.axis.maxY])
 		.range([this.h-this.padding.bottom-this.padding.top,0]);
+
+	this.palettes = ["#a2b9bc","#b2ad7f", "#878f99", " #6b5b95",
+					 "#d6cbd3", "#eca1a6", "#bdcebe", "#ada397",
+					 "#d5e1df","#e3eaa7", "#b5e7a0", "#86af49",
+					 "#b9936c","#dac292", "#e6e2d3", "#c4b7a6",
+					 "#3e4444","#82b74b","#405d27", "#c1946a"];
 }
 
 SvgGraph.prototype.DrawGraph = function(){
@@ -78,8 +85,8 @@ SvgGraph.prototype.DrawAxis = function(){
 	if(this.axis.curX){
 		this.svg.append("line")
 			.style({
-				"stroke":"#333333",
-				"stroke-width":1
+				"stroke":"#ffffff",
+				"stroke-width":2
 			})
 			.attr({
 				"x1":this.scaleW(this.axis.curX)+this.padding.left,
@@ -103,14 +110,16 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			return parseInt(this.scaleH(d.y))+this.padding.top;
 		}.bind(this));
 
-	
+
+	var textInfo = $(this.textInfo);
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
+		var color = data.color?data.color:this.palettes[i%this.palettes.length];
 
 		var lineChart = this.svg.append("g");
 		lineChart.append("path")
 			.attr("fill", "none")
-			.attr("stroke", data.color)
+			.attr("stroke", color)
 			.attr("stroke-linejoin", "round")
 			.attr("stroke-linecap", "round")
 			.attr("stroke-width", 1.5)
@@ -122,7 +131,7 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			.attr("r",10)
 			.attr("opacity",0)
 			.attr("fill","white")
-			.attr("stroke",data.color)
+			.attr("stroke",color)
 			.attr("stroke-width",0.5)
 			.attr("cx", function(d){
 				return this.padding.left+this.scaleW(d.x);
@@ -130,12 +139,16 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			.attr("cy", function(d){
 				return this.padding.top+this.scaleH(d.y);
 			}.bind(this))
-			.on("mouseover",function(){
+			.attr("data-name",data.name)
+			.attr("data-unit",data.unit)
+			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.attr("opacity",0.5);
+				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit"));
 			})
-			.on("mouseout",function(){
+			.on("mouseout",function(d){
 				d3.select(this).attr("opacity",0);
+				textInfo.text("");
 			});
 	}
 };
@@ -147,20 +160,35 @@ SvgGraph.prototype.DrawGraphBar = function(graph){
 SvgGraph.prototype.DrawGraphStack = function(graph){
 	var stack = d3.layout.stack();
 	var dataArr = [];
+	var sum = {};
 	for(var i=0;i<graph.data.length;i++){
-		dataArr.push(graph.data[i].value);
+		var data = graph.data[i];
+		dataArr.push(data.value);
+		for(var j=0;j<data.value.length;j++){
+			var key = data.value[j].x;
+			if(key in sum){
+				sum[key] += data.value[j].y;
+			}
+			else{
+				sum[key] = data.value[j].y;
+			}
+		}
 	}
 	var stackData = stack(dataArr);
 
 	var rectW = (this.scaleW(1)-this.scaleW(0))*0.5;
-	
+	var textInfo = $(this.textInfo);
 	for(var i=0;i<graph.data.length;i++){
 		var stackChart = this.svg.append("g");
+		var data = graph.data[i];
+		var color = data.color?data.color:this.palettes[i%this.palettes.length];
 		stackChart.selectAll("rect").data(stackData[i])
 			.enter().append("rect")
-			.attr("fill", graph.data[i].color)
+			.attr("fill", color)
+			.attr("stroke", "#ffff00")
+			.attr("stroke-width", 0)
 			.attr("x", function(d){
-				return this.padding.left+this.scaleW(d.x)-rectW*0.5;
+				return this.padding.left+this.scaleW(d.x)-0.5*rectW;
 			}.bind(this))
 			.attr("y", function(d){
 				return this.padding.top+this.scaleH(d.y+d.y0);
@@ -168,7 +196,19 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 			.attr("height", function(d){
 				return this.scaleH(d.y0) - this.scaleH(d.y + d.y0);
 			}.bind(this))
-			.attr("width", rectW);
+			.attr("data-name", data.name)
+			.attr("data-unit", data.unit)
+			.attr("width", rectW)
+			.on("mouseover",function(d){
+				var cur = d3.select(this);
+				cur.style("stroke-width",2);
+				var ratio = (d.y/sum[d.x]*100).toFixed(2);
+				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit")+"("+ratio+"%)");
+			})
+			.on("mouseout",function(d){
+				d3.select(this).style("stroke-width",0);
+				textInfo.text("");
+			});
 	}
 };
 

@@ -58,24 +58,59 @@
 					</select>
 
 					<div class="graph-container">
-						<div class="graph half-w" id="overviewSupply" v-show="waterUse.type == 'overview' "></div>
-						<div class="graph half-w" id="overviewConsumption" v-show="waterUse.type == 'overview' "></div>
+						<div class="half-w" v-show="waterUse.type == 'overview' ">
+							<div class="graph-title">總用水供給</div>
+							<div class="graph" id="overviewSupply"></div>
+							<div class="graph-info" id="overviewSupplyText">111</div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'overview' ">
+							<div class="graph-title">總用水需求</div>
+							<div class="graph" id="overviewConsumption"></div>
+							<div class="graph-info" id="overviewConsumptionText"></div>
+						</div>
 						
-						<div class="graph full-w" id="agricultureMap" v-show="waterUse.type == 'agriculture' "></div>
+						<div class="half-w" v-show="waterUse.type == 'agriculture' ">
+							<div class="graph-title">水利會位置</div>
+							<div class="graph" id="agricultureMap"></div>
+							<div class="graph-info" id="agricultureMapText"></div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'agriculture' ">
+							<div class="graph-title">灌概用水</div>
+							<div class="graph" id="agricultureConsumption"></div>
+							<div class="graph-info" id="agricultureConsumptionText"></div>
+						</div>
 						
-						<div class="graph half-w" id="cultivationMap" v-show="waterUse.type == 'cultivation' "></div>
-						<div class="graph half-w" id="cultivationRank" v-show="waterUse.type == 'cultivation' "></div>
+						<div class="half-w" v-show="waterUse.type == 'cultivation' ">
+							<div class="graph" id="cultivationMap"></div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'cultivation' ">
+							<div class="graph" id="cultivationRank"></div>
+						</div>
 
-						<div class="graph half-w" id="livestockMap" v-show="waterUse.type == 'livestock' "></div>
-						<div class="graph half-w" id="livestockRank" v-show="waterUse.type == 'livestock' "></div>
+						<div class="half-w" v-show="waterUse.type == 'livestock' ">
+							<div class="graph" id="livestockMap"></div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'livestock' ">
+							<div class="graph" id="livestockRank"></div>
+						</div>
 
-						<div class="graph half-w" id="industryMap" v-show="waterUse.type == 'industry' "></div>
-						<div class="graph half-w" id="industryRank" v-show="waterUse.type == 'industry' "></div>
+						<div class="half-w" v-show="waterUse.type == 'industry' ">
+							<div class="graph" id="industryMap"></div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'industry' ">
+							<div class="graph" id="industryRank"></div>
+						</div>
 
-						<div class="graph half-w" id="livingMap" v-show="waterUse.type == 'living' "></div>
-						<div class="graph half-w" id="livingRank" v-show="waterUse.type == 'living' "></div>
+						<div class="half-w" v-show="waterUse.type == 'living' ">
+							<div class="graph" id="livingMap"></div>
+						</div>
+						<div class="half-w" v-show="waterUse.type == 'living' ">
+							<div class="graph" id="livingRank"></div>
+						</div>
 
-						<div class="graph full-w" id="reservoirMap" v-show="waterUse.type == 'reservoir' "></div>
+						<div class="half-w" v-show="waterUse.type == 'reservoir' ">
+							<div class="graph" id="reservoirMap"></div>
+						</div>
 					</div>
 
 					<div class="fix-bottom">

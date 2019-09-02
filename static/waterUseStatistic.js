@@ -158,8 +158,10 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	this.maxYear = this.overviewData.maxYear;
 	this.BoundYear();
 
+	//=====================overviewSupply=======================
 	var param = {};
 	param.selector = "#overviewSupply";
+	param.textInfo = "#overviewSupplyText";
 	param.padding = {
 		left: 50,
 		right: 20,
@@ -179,21 +181,21 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 		"data": [
 			{
 				"name": "河川引水",
-				"color": "#33ff33",
+				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyRiver}
 				})
 			},
 			{
 				"name": "水庫調節",
-				"color": "#3333ff",
+				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyReservoir}
 				})
 			},
 			{
 				"name": "地下水及其他",
-				"color": "#ffff33",
+				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyUnderGround}
 				})
@@ -205,6 +207,7 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 		"data": [
 			{
 				"name": "總供水量",
+				"unit": "百萬立方公尺",
 				"color": "#ff3333",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.TotalWaterSupply}
@@ -216,56 +219,80 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	var graph = new SvgGraph(param);
 	graph.DrawGraph();
 
-	/*var supplyRiver = {
-	  x: this.overviewData.data.map(function(d){
-	  	return d.Year;
-	  }),
-	  y: this.overviewData.data.map(function(d){
-	  	return d.WaterSupplyRiver;
-	  }),
-	  name: '河川引水',
-	  type: 'bar'
+	//=====================overviewConsumption=======================
+	param = {};
+	param.selector = "#overviewConsumption";
+	param.textInfo = "#overviewConsumptionText";
+	param.padding = {
+		left: 50,
+		right: 20,
+		top: 20,
+		bottom: 20
 	};
-
-	var supplyReservoir = {
-	  x: this.overviewData.data.map(function(d){
-	  	return d.Year;
-	  }),
-	  y: this.overviewData.data.map(function(d){
-	  	return d.WaterSupplyReservoir;
-	  }),
-	  name: '水庫調節',
-	  type: 'bar'
+	param.axis = {
+		minX: this.minYear,
+		maxX: this.maxYear,
+		minY: 0,
+		maxY: this.overviewData.maxSupply,
+		curX: this.year
 	};
-
-	var supplyUnderGround = {
-	  x: this.overviewData.data.map(function(d){
-	  	return d.Year;
-	  }),
-	  y: this.overviewData.data.map(function(d){
-	  	return d.WaterSupplyUnderGround;
-	  }),
-	  name: '地下水及其他',
-	  type: 'bar'
+	
+	var consumptionStack = {
+		"type": "stack",
+		"data": [
+			{
+				"name": "灌溉用水",
+				"unit": "百萬立方公尺",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.WaterUseAgriculture}
+				})
+			},
+			{
+				"name": "養殖用水",
+				"unit": "百萬立方公尺",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.WaterUseCultivation}
+				})
+			},
+			{
+				"name": "畜牧用水",
+				"unit": "百萬立方公尺",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.WaterUseLivestock}
+				})
+			},
+			{
+				"name": "工業用水",
+				"unit": "百萬立方公尺",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.WaterUseIndustry}
+				})
+			},
+			{
+				"name": "生活用水",
+				"unit": "百萬立方公尺",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.WaterUseLiving}
+				})
+			}
+		]
 	};
-
-	var supplyTotal = {
-	  x: this.overviewData.data.map(function(d){
-	  	return d.Year;
-	  }),
-	  y: this.overviewData.data.map(function(d){
-	  	return d.TotalWaterSupply;
-	  }),
-	  name: '全部',
-	  type: 'line'
+	var totalConsumption = {
+		"type": "line",
+		"data": [
+			{
+				"name": "總用水量",
+				"unit": "百萬立方公尺",
+				"color": "#ff3333",
+				"value": this.overviewData.data.map(function(d){
+					return {x: d.Year, y: d.TotalWaterUse}
+				})
+			}
+		]
 	};
-
-	var data = [supplyRiver, supplyReservoir, supplyUnderGround, supplyTotal];
-
-	var layout = {barmode: 'stack'};
-
-	Plotly.newPlot('overviewSupply', data, layout);*/
-
+	param.graph = [consumptionStack,totalConsumption];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
 };
 
 WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
