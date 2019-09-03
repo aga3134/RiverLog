@@ -111,7 +111,7 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
 		var color = d3.scale.linear()
-			.domain([data.color.minValue, data.color.maxValue])
+			.domain([this.axis.minX, this.axis.maxX])
         	.range([data.color.minColor, data.color.maxColor]);
 		var bg = this.svg.append("g");
 		bg.selectAll("path").data(data.path)
@@ -126,21 +126,22 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 	    		var marker = data.marker[j];
 	    		var pt = proj([marker.lng, marker.lat]);
 	    		markerGroup.append('circle')
-	    			.attr("fill", color(marker.value))
+	    			.attr("fill", color(marker.x))
 	    			.attr("stroke","#ffffff")
 	            	.attr("cx",pt[0])
 	            	.attr("cy", pt[1])
 	            	.attr("r", marker.radius)
 	            	.attr("data-name", marker.name)
-	            	.attr("data-value", marker.value.toFixed(2))
+	            	.attr("data-x", marker.x.toFixed(2))
 	            	.attr("data-unit", marker.unit)
 	            	.on("mouseover",function(){
 						var cur = d3.select(this);
-						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-value")+data.unit);
+						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-x")+data.unit);
 					})
 					.on("mouseout",function(d){
 						textInfo.text("");
-					});
+					})
+					.on("click",data.clickFn);
 	    	}
     	}
     	
@@ -195,19 +196,19 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			.on("mouseout",function(d){
 				d3.select(this).attr("opacity",0);
 				textInfo.text("");
-			});
+			})
+			.on("click",data.clickFn);
 	}
 };
 
 SvgGraph.prototype.DrawGraphRank = function(graph){
 	var textInfo = $(this.textInfo);
-	var scaleW = this.scaleW;
 	var rectH = this.scaleH(0)-this.scaleH(1);
 
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
 		data.value = data.value.sort(function(a,b){
-			return b.value - a.value;
+			return b.x - a.x;
 		});
 		var color = d3.scale.linear()
 			.domain([this.axis.minX, this.axis.maxX])
@@ -218,31 +219,32 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     		.enter().append("rect")
     		.attr("x",this.padding.left)
     		.attr("y",function(d,i){
-    			return rectH*i;
-    		})
+    			return this.padding.top+rectH*i;
+    		}.bind(this))
     		.attr("width",function(d){
-    			return scaleW(d.value);
-    		})
+    			return this.scaleW(d.x);
+    		}.bind(this))
     		.attr("height",rectH)
     		.attr("fill",function(d){
-    			return color(d.value);
+    			return color(d.x);
     		})
     		.attr("stroke","#ffffff")
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.value.toFixed(2)+data.unit);
+				textInfo.text(d.name+": "+d.x.toFixed(2)+data.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");
-			});
+			})
+			.on("click",data.clickFn);
 
     	var textGroup = this.svg.append("g");
 		textGroup.selectAll("text").data(data.value)
     		.enter().append("text")
     		.attr("x",this.padding.left+10)
     		.attr("y",function(d,i){
-    			return rectH*(i+0.5);
-    		})
+    			return this.padding.top+rectH*(i+0.5);
+    		}.bind(this))
     		.attr("fill","#ffffff")
     		.attr("font-size","12px")
     		.attr("alignment-baseline","middle")
@@ -251,11 +253,12 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     		})
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.value.toFixed(2)+data.unit);
+				textInfo.text(d.name+": "+d.x.toFixed(2)+data.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");
-			});
+			})
+			.on("click",data.clickFn);
 	}
 };
 
@@ -316,7 +319,8 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 			.on("mouseout",function(d){
 				d3.select(this).style("stroke-width",0);
 				textInfo.text("");
-			});
+			})
+			.on("click",data.clickFn);
 	}
 };
 

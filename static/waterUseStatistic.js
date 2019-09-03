@@ -17,6 +17,7 @@ function WaterUseStatistic(){
 	this.reservoirData = {};
 	this.county = null;
 	this.countyPath = null;
+	this.openDetailPanel = false;
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
@@ -315,7 +316,7 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 		sum += d.SecondPhaseMiscellaneousWaterConsumption*scale;
 		if(sum < minValue) minValue = sum;
 		if(sum > maxValue) maxValue = sum;
-		associationHash[d.IrrigationAssociation].value = sum;
+		associationHash[d.IrrigationAssociation].x = sum;
 	}
 
 	//===================agriculture map===========================
@@ -339,7 +340,10 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 					"maxColor": "#333333"
 				},
 				"path": this.county,
-				"marker": this.agricultureData.association
+				"marker": this.agricultureData.association,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+				}.bind(this)
 			}
 		]
 	};
@@ -351,6 +355,9 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	param = {};
 	param.selector = "#agricultureRank";
 	param.textInfo = "#agricultureRankText";
+	param.padding = {
+		top: 10, bottom: 10, left: 10, right: 10
+	}
 	param.axis = {
 		minX: minValue,
 		maxX: maxValue,
@@ -367,7 +374,10 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 					"minColor": "#888888",
 					"maxColor": "#333333"
 				},
-				"value": this.agricultureData.association
+				"value": this.agricultureData.association,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+				}.bind(this)
 			}
 		]
 	};

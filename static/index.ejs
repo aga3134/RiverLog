@@ -113,6 +113,10 @@
 						</div>
 					</div>
 
+					<div class="detail-panel" v-bind:class="{open: waterUse.openDetailPanel}">
+						<div class="close-bt" v-on:click="waterUse.openDetailPanel = false;">X</div>
+					</div>
+
 					<div class="fix-bottom">
 						<div class="time-bar" id="timeBar">
 							<div class="label">{{waterUse.year}} 年</div>

@@ -122,6 +122,17 @@ a {
         .riverlog .main-content .graph-content .graph-container .graph-info {
           margin: 10px;
           text-align: center; }
+      .riverlog .main-content .graph-content .detail-panel {
+        position: fixed;
+        left: 100%;
+        -webkit-transition: left .5s;
+        transition: left .5s;
+        top: 0px;
+        width: calc(100% - 40px);
+        height: 100%;
+        background-color: #feffe8; }
+        .riverlog .main-content .graph-content .detail-panel.open {
+          left: 40px; }
       .riverlog .main-content .graph-content .fix-bottom {
         position: fixed;
         bottom: 0px;
@@ -152,7 +163,7 @@ a {
           background: #999999;
           outline: none;
           opacity: 0.7;
-          -webkit-transition: .2s;
+          -webkit-transition: opacity .2s;
           transition: opacity .2s; }
           .riverlog .main-content .graph-content .time-bar .slider:hover {
             opacity: 1; }
