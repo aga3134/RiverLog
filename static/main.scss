@@ -182,6 +182,7 @@ a{
 			.detail-panel{
 				position: fixed;
 				left: 100%;
+				padding: 10px;
 				-webkit-transition: left .5s;
 				transition: left .5s;
 				&.open{
@@ -191,6 +192,7 @@ a{
 				width: calc(100% - 40px);
 				height: 100%;
 				background-color: #feffe8;
+				box-shadow: 0px 0px 10px #888888;
 			}
 
 			.fix-bottom{
@@ -446,7 +448,7 @@ a{
 		overflow-y: auto;
 
 		.content-area{
-			background-color: #e6e3d9;
+			background-color: #feffe8;
 			border-radius: 5px;
 			width: 100%;
 			height: 100%;

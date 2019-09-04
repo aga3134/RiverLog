@@ -125,12 +125,14 @@ a {
       .riverlog .main-content .graph-content .detail-panel {
         position: fixed;
         left: 100%;
+        padding: 10px;
         -webkit-transition: left .5s;
         transition: left .5s;
         top: 0px;
         width: calc(100% - 40px);
         height: 100%;
-        background-color: #feffe8; }
+        background-color: #feffe8;
+        box-shadow: 0px 0px 10px #888888; }
         .riverlog .main-content .graph-content .detail-panel.open {
           left: 40px; }
       .riverlog .main-content .graph-content .fix-bottom {
@@ -332,7 +334,7 @@ a {
     overflow-x: hidden;
     overflow-y: auto; }
     .riverlog .full-panel .content-area {
-      background-color: #e6e3d9;
+      background-color: #feffe8;
       border-radius: 5px;
       width: 100%;
       height: 100%; }

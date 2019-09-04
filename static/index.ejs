@@ -61,7 +61,7 @@
 						<div class="half-w" v-show="waterUse.type == 'overview' ">
 							<div class="graph-title">總用水供給</div>
 							<div class="graph" id="overviewSupply"></div>
-							<div class="graph-info" id="overviewSupplyText">111</div>
+							<div class="graph-info" id="overviewSupplyText"></div>
 						</div>
 						<div class="half-w" v-show="waterUse.type == 'overview' ">
 							<div class="graph-title">總用水需求</div>
@@ -114,7 +114,20 @@
 					</div>
 
 					<div class="detail-panel" v-bind:class="{open: waterUse.openDetailPanel}">
-						<div class="close-bt" v-on:click="waterUse.openDetailPanel = false;">X</div>
+						<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="waterUse.openDetailPanel = false;">
+						<div class="graph-container">
+							<div class="half-w" v-show="waterUse.type == 'agriculture' " >
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} 用水項目</div>
+								<div class="graph" id="agricultureCategory"></div>
+								<div class="graph-info" id="agricultureCategoryText"></div>
+							</div>
+							<div class="half-w" v-show="waterUse.type == 'agriculture' " >
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} 用水比例</div>
+								<div class="graph" id="agricultureRatio"></div>
+								<div class="graph-info" id="agricultureRatioText"></div>
+							</div>
+
+						</div>
 					</div>
 
 					<div class="fix-bottom">

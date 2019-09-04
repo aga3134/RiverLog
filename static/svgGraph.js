@@ -124,8 +124,15 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
     		var markerGroup = this.svg.append("g");
 	    	for(var j=0;j<data.marker.length;j++){
 	    		var marker = data.marker[j];
+	    		var clickFn = function(){
+	    			var d = marker;
+	    			return function(){
+	    				data.clickFn(d);
+	    			};
+	    		}();
 	    		var pt = proj([marker.lng, marker.lat]);
 	    		markerGroup.append('circle')
+	    			.style("cursor","pointer")
 	    			.attr("fill", color(marker.x))
 	    			.attr("stroke","#ffffff")
 	            	.attr("cx",pt[0])
@@ -138,10 +145,10 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 						var cur = d3.select(this);
 						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-x")+data.unit);
 					})
-					.on("mouseout",function(d){
+					.on("mouseout",function(){
 						textInfo.text("");
 					})
-					.on("click",data.clickFn);
+					.on("click",clickFn);
 	    	}
     	}
     	
@@ -175,6 +182,7 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 		var circleGroup = this.svg.append("g");
 		circleGroup.selectAll("circle").data(data.value)
 			.enter().append("circle")
+			.style("cursor","pointer")
 			.attr("r",10)
 			.attr("opacity",0)
 			.attr("fill","white")
@@ -191,7 +199,7 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.attr("opacity",0.5);
-				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit"));
+				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y.toFixed(2)+cur.attr("data-unit"));
 			})
 			.on("mouseout",function(d){
 				d3.select(this).attr("opacity",0);
@@ -217,6 +225,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
 		var rankGroup = this.svg.append("g");
 		rankGroup.selectAll("rect").data(data.value)
     		.enter().append("rect")
+    		.style("cursor","pointer")
     		.attr("x",this.padding.left)
     		.attr("y",function(d,i){
     			return this.padding.top+rectH*i;
@@ -241,6 +250,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     	var textGroup = this.svg.append("g");
 		textGroup.selectAll("text").data(data.value)
     		.enter().append("text")
+    		.style("cursor","pointer")
     		.attr("x",this.padding.left+10)
     		.attr("y",function(d,i){
     			return this.padding.top+rectH*(i+0.5);
@@ -291,6 +301,7 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 		var color = data.color?data.color:this.palettes[i%this.palettes.length];
 		stackChart.selectAll("rect").data(stackData[i])
 			.enter().append("rect")
+			.style("cursor","pointer")
 			.attr("fill", color)
 			.attr("stroke", "#ffff00")
 			.attr("stroke-width", 0)
@@ -304,6 +315,7 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 				return this.scaleH(d.y0) - this.scaleH(d.y + d.y0);
 			}.bind(this))
 			.attr("data-name", data.name)
+			.attr("data-unit", data.unit)
 			.attr("width", rectW)
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
@@ -325,7 +337,44 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 };
 
 SvgGraph.prototype.DrawGraphPie = function(graph){
+	var inRadius = graph.inRadius||0;
+	var radius = Math.min(this.w,this.h)*0.5;
+	var arc = d3.svg.arc()
+	    .outerRadius(radius)
+	    .innerRadius(inRadius);
 
+	var pie = d3.layout.pie()
+	    .sort(null)
+	    .value(function(d){return d.value;});
+
+	var textInfo = $(this.textInfo);
+	var pieGroup = this.svg.append("g")
+		.attr("transform", "translate(" + this.w*0.5 + "," + this.h*0.5 + ")");
+	pieGroup.selectAll("path").data(pie(graph.data)).enter()
+		.append("path")
+		.attr("d", arc)
+		.attr("stroke","#ffffff")
+		.attr("stroke-width",0)
+		.attr("fill", function(d,i){
+			if(d.color) return d.color;
+			else return this.palettes[i%this.palettes.length];
+		}.bind(this))
+		.on("mouseover",function(d){
+			var cur = d3.select(this);
+			cur.style("stroke-width",2);
+
+			var str = d.data.name+": "+d.data.value.toFixed(2)+d.data.unit;
+			textInfo.text(str);
+		})
+		.on("mouseout",function(d){
+			var cur = d3.select(this);
+			cur.style("stroke-width",0);
+			textInfo.text("");
+		})
+		.on("click",function(d){
+
+		});
+	
 };
 
 SvgGraph.prototype.ClearGraph = function(){
