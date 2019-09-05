@@ -140,10 +140,9 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 	            	.attr("r", marker.radius)
 	            	.attr("data-name", marker.name)
 	            	.attr("data-x", marker.x.toFixed(2))
-	            	.attr("data-unit", marker.unit)
 	            	.on("mouseover",function(){
 						var cur = d3.select(this);
-						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-x")+data.unit);
+						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-x")+graph.unit);
 					})
 					.on("mouseout",function(){
 						textInfo.text("");
@@ -195,11 +194,10 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 				return this.padding.top+this.scaleH(d.y);
 			}.bind(this))
 			.attr("data-name",data.name)
-			.attr("data-unit",data.unit)
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.attr("opacity",0.5);
-				textInfo.text(d.x+"年 "+cur.attr("data-name")+": "+d.y.toFixed(2)+cur.attr("data-unit"));
+				textInfo.text(d.x+graph.unitX+" "+cur.attr("data-name")+": "+d.y.toFixed(2)+graph.unitY);
 			})
 			.on("mouseout",function(d){
 				d3.select(this).attr("opacity",0);
@@ -240,7 +238,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     		.attr("stroke","#ffffff")
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.x.toFixed(2)+data.unit);
+				textInfo.text(d.name+": "+d.x.toFixed(2)+graph.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");
@@ -263,7 +261,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     		})
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.x.toFixed(2)+data.unit);
+				textInfo.text(d.name+": "+d.x.toFixed(2)+graph.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");
@@ -315,13 +313,12 @@ SvgGraph.prototype.DrawGraphStack = function(graph){
 				return this.scaleH(d.y0) - this.scaleH(d.y + d.y0);
 			}.bind(this))
 			.attr("data-name", data.name)
-			.attr("data-unit", data.unit)
 			.attr("width", rectW)
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.style("stroke-width",2);
 				
-				var str = d.x+"年 "+cur.attr("data-name")+": "+d.y+cur.attr("data-unit");
+				var str = d.x+graph.unitX+" "+cur.attr("data-name")+": "+d.y.toFixed(2)+graph.unitY;
 				if(d.x in sum){
 					var ratio = (d.y/sum[d.x]*100).toFixed(2);
 					str += "("+ratio+"%)";
@@ -363,7 +360,7 @@ SvgGraph.prototype.DrawGraphPie = function(graph){
 			var cur = d3.select(this);
 			cur.style("stroke-width",2);
 
-			var str = d.data.name+": "+d.data.value.toFixed(2)+d.data.unit;
+			var str = d.data.name+": "+d.data.value.toFixed(2)+graph.unit;
 			textInfo.text(str);
 		})
 		.on("mouseout",function(d){

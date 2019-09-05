@@ -6,6 +6,7 @@ function WaterUseStatistic(){
 	this.type = "agriculture";
 	this.yearTimer = null;
 	this.isPlay = false;
+	this.playSpeed = 2;
 	this.overviewData = {};
 	this.agricultureData = {};
 	this.cultivationData = {};
@@ -46,13 +47,25 @@ WaterUseStatistic.prototype.ToggleYearPlay = function(){
 			if(this.year == this.maxYear){
 				this.ToggleYearPlay();
 			}
-		}.bind(this),500);
+		}.bind(this),1000/this.playSpeed);
 	}
 	else{
 		if(this.yearTimer){
 			clearInterval(this.yearTimer);
 			this.yearTimer = null;
 		}
+	}
+};
+
+WaterUseStatistic.prototype.UpdatePlaySpeed = function(){
+	if(this.yearTimer){
+		clearInterval(this.yearTimer);
+		this.yearTimer = setInterval(function(){
+			this.NextYear();
+			if(this.year == this.maxYear){
+				this.ToggleYearPlay();
+			}
+		}.bind(this),1000/this.playSpeed);
 	}
 };
 
@@ -140,24 +153,23 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	
 	var supplyStack = {
 		"type": "stack",
+		"unitX": "年",
+		"unitY": "百萬立方公尺",
 		"data": [
 			{
 				"name": "河川引水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyRiver}
 				})
 			},
 			{
 				"name": "水庫調節",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyReservoir}
 				})
 			},
 			{
 				"name": "地下水及其他",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterSupplyUnderGround}
 				})
@@ -166,10 +178,11 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	};
 	var totalSupply = {
 		"type": "line",
+		"unitX": "年",
+		"unitY": "百萬立方公尺",
 		"data": [
 			{
 				"name": "總供水量",
-				"unit": "百萬立方公尺",
 				"color": "#ff3333",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.TotalWaterSupply}
@@ -201,38 +214,35 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	
 	var consumptionStack = {
 		"type": "stack",
+		"unitX": "年",
+		"unitY": "百萬立方公尺",
 		"data": [
 			{
 				"name": "灌溉用水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterUseAgriculture}
 				})
 			},
 			{
 				"name": "養殖用水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterUseCultivation}
 				})
 			},
 			{
 				"name": "畜牧用水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterUseLivestock}
 				})
 			},
 			{
 				"name": "工業用水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterUseIndustry}
 				})
 			},
 			{
 				"name": "生活用水",
-				"unit": "百萬立方公尺",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.WaterUseLiving}
 				})
@@ -241,10 +251,11 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	};
 	var totalConsumption = {
 		"type": "line",
+		"unitX": "年",
+		"unitY": "百萬立方公尺",
 		"data": [
 			{
 				"name": "總用水量",
-				"unit": "百萬立方公尺",
 				"color": "#ff3333",
 				"value": this.overviewData.data.map(function(d){
 					return {x: d.Year, y: d.TotalWaterUse}
@@ -276,6 +287,7 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
         	d.SecondPhaseMiscellaneousWaterConsumption *= scale;
         }
         this.agricultureData.data = result.data;
+        Vue.set(this.agricultureData, "type", "用水量");
 
         var yearBound = d3.extent(result.data, function(d) { return d.Year; });
         this.agricultureData.minYear = yearBound[0];
@@ -313,13 +325,43 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	}
 	var data = yearData[this.year];
 	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	var unit =  "";
 	for(var i=0;i<data.length;i++){
 		var d = data[i];
+		switch(this.agricultureData.type){
+			case "用水量":
+				d.value = [
+					d.FirstPhaseRiceWaterConsumption,
+					d.FirstPhaseMiscellaneousWaterConsumption,
+					d.SecondPhaseRiceWaterConsumption,
+					d.SecondPhaseMiscellaneousWaterConsumption
+				];
+				unit = "百萬立方公尺";
+				break;
+			case "灌溉面積":
+				d.value = [
+					d.FirstPhaseRiceIrrigationArea,
+					d.FirstPhaseMiscellaneousIrrigationArea,
+					d.SecondPhaseRiceIrrigationArea,
+					d.SecondPhaseMiscellaneousIrrigationArea
+				];
+				unit = "公頃";
+				break;
+			case "單位面積用水量":
+				d.value = [
+					d.FirstPhaseRiceIrrigationArea?d.FirstPhaseRiceWaterConsumption/d.FirstPhaseRiceIrrigationArea:0,
+					d.FirstPhaseMiscellaneousIrrigationArea?d.FirstPhaseMiscellaneousWaterConsumption/d.FirstPhaseMiscellaneousIrrigationArea:0,
+					d.SecondPhaseRiceIrrigationArea?d.SecondPhaseRiceWaterConsumption/d.SecondPhaseRiceIrrigationArea:0,
+					d.SecondPhaseMiscellaneousIrrigationArea?d.SecondPhaseMiscellaneousWaterConsumption/d.SecondPhaseMiscellaneousIrrigationArea:0
+				];
+				unit = "百萬立方公尺/公頃";
+				break;
+		}
+
 		var sum = 0;
-		sum += d.FirstPhaseRiceWaterConsumption;
-		sum += d.FirstPhaseMiscellaneousWaterConsumption;
-		sum += d.SecondPhaseRiceWaterConsumption;
-		sum += d.SecondPhaseMiscellaneousWaterConsumption;
+		for(var j=0;j<d.value.length;j++){
+			sum += d.value[j];
+		}
 		if(sum < minValue) minValue = sum;
 		if(sum > maxValue) maxValue = sum;
 		associationHash[d.IrrigationAssociation].x = sum;
@@ -337,10 +379,10 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	};
 	var agriMap = {
 		"type": "map",
+		"unit": unit,
 		"data": [
 			{
 				"name": "水利會位置",
-				"unit": "百萬立方公尺",
 				"color": {
 					"minColor": "#888888",
 					"maxColor": "#333333"
@@ -375,10 +417,10 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	};
 	var agriRank = {
 		"type": "rank",
+		"unit": unit,
 		"data": [
 			{
 				"name": "用水排名",
-				"unit": "百萬立方公尺",
 				"color": {
 					"minColor": "#888888",
 					"maxColor": "#333333"
@@ -412,12 +454,45 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
   });
 
   var maxValue = Number.MIN_VALUE;
+  var minValue = Number.MAX_VALUE;
+  var unit =  "";
   for(var i=0;i<data.length;i++){
   	var d = data[i];
-  	if(d.FirstPhaseRiceWaterConsumption > maxValue) maxValue = d.FirstPhaseRiceWaterConsumption;
-  	if(d.FirstPhaseMiscellaneousWaterConsumption > maxValue) maxValue = d.FirstPhaseMiscellaneousWaterConsumption;
-  	if(d.SecondPhaseRiceWaterConsumption > maxValue) maxValue = d.SecondPhaseRiceWaterConsumption;
-  	if(d.SecondPhaseMiscellaneousWaterConsumption > maxValue) maxValue = d.SecondPhaseMiscellaneousWaterConsumption;
+  	switch(this.agricultureData.type){
+			case "用水量":
+				d.value = [
+					d.FirstPhaseRiceWaterConsumption,
+					d.FirstPhaseMiscellaneousWaterConsumption,
+					d.SecondPhaseRiceWaterConsumption,
+					d.SecondPhaseMiscellaneousWaterConsumption
+				];
+				unit = "百萬立方公尺";
+				break;
+			case "灌溉面積":
+				d.value = [
+					d.FirstPhaseRiceIrrigationArea,
+					d.FirstPhaseMiscellaneousIrrigationArea,
+					d.SecondPhaseRiceIrrigationArea,
+					d.SecondPhaseMiscellaneousIrrigationArea
+				];
+				unit = "公頃";
+				break;
+			case "單位面積用水量":
+				d.value = [
+					d.FirstPhaseRiceIrrigationArea?d.FirstPhaseRiceWaterConsumption/d.FirstPhaseRiceIrrigationArea:0,
+					d.FirstPhaseMiscellaneousIrrigationArea?d.FirstPhaseMiscellaneousWaterConsumption/d.FirstPhaseMiscellaneousIrrigationArea:0,
+					d.SecondPhaseRiceIrrigationArea?d.SecondPhaseRiceWaterConsumption/d.SecondPhaseRiceIrrigationArea:0,
+					d.SecondPhaseMiscellaneousIrrigationArea?d.SecondPhaseMiscellaneousWaterConsumption/d.SecondPhaseMiscellaneousIrrigationArea:0
+				];
+				unit = "百萬立方公尺/公頃";
+				break;
+		}
+  	var sum = 0;
+  	for(var j=0;j<d.value.length;j++){
+			sum += d.value[j];
+		}
+  	if(sum < minValue) minValue = sum;
+  	if(sum > maxValue) maxValue = sum;
   }
 
   //====================agriculture category=====================
@@ -438,41 +513,57 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 		curX: this.year,
 		draw: true
 	};
-	
-	var category = {
+
+	var total = {
 		"type": "line",
+		"unitX": "年",
+		"unitY": unit,
 		"data": [
 			{
-				"name": "第一期稻作用水量",
-				"unit": "百萬立方公尺",
+				"name": "總"+this.agricultureData.type,
+				"color": "#ff3333",
 				"value": data.map(function(d){
-					return {x: d.Year, y: d.FirstPhaseRiceWaterConsumption}
+					return {
+						x: d.Year,
+						y: d3.sum(d.value)
+					}
+				})
+			}
+		]
+	}
+	
+	var stack = {
+		"type": "stack",
+		"unitX": "年",
+		"unitY": unit,
+		"data": [
+			{
+				"name": "第一期稻作"+this.agricultureData.type,
+				"value": data.map(function(d){
+					return {x: d.Year, y: d.value[0]}
 				})
 			},
 			{
-				"name": "第一期雜作用水量",
-				"unit": "百萬立方公尺",
+				"name": "第一期雜作"+this.agricultureData.type,
 				"value": data.map(function(d){
-					return {x: d.Year, y: d.FirstPhaseMiscellaneousWaterConsumption}
+					return {x: d.Year, y: d.value[1]}
 				})
 			},
 			{
-				"name": "第二期稻作用水量",
-				"unit": "百萬立方公尺",
+				"name": "第二期稻作"+this.agricultureData.type,
 				"value": data.map(function(d){
-					return {x: d.Year, y: d.SecondPhaseRiceWaterConsumption}
+					return {x: d.Year, y: d.value[2]}
 				})
 			},
 			{
-				"name": "第二期雜作用水量",
-				"unit": "百萬立方公尺",
+				"name": "第二期雜作"+this.agricultureData.type,
 				"value": data.map(function(d){
-					return {x: d.Year, y: d.SecondPhaseMiscellaneousWaterConsumption}
+					return {x: d.Year, y: d.value[3]}
 				})
 			},
 		]
 	};
-	param.graph = [category];
+	param.graph = [stack,total];
 	var graph = new SvgGraph(param);
 	graph.DrawGraph();
 
@@ -481,6 +572,10 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 		return this.year == d.Year;
 	}.bind(this))[0];
 
+	if(!d){
+		d = {value:[0,0,0,0]};
+	}
+
 	param = {};
 	param.selector = "#agricultureRatio";
 	param.textInfo = "#agricultureRatioText";
@@ -488,26 +583,23 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 	var ratio = {
 		"type": "pie",
 		"inRadius": 50,
+		"unit": unit,
 		"data": [
 			{
-				"name": "第一期稻作用水量",
-				"unit": "百萬立方公尺",
-				"value": d.FirstPhaseRiceWaterConsumption
+				"name": "第一期稻作"+this.agricultureData.type,
+				"value": d.value[0]
 			},
 			{
-				"name": "第一期雜作用水量",
-				"unit": "百萬立方公尺",
-				"value": d.FirstPhaseMiscellaneousWaterConsumption
+				"name": "第一期雜作"+this.agricultureData.type,
+				"value": d.value[1]
 			},
 			{
-				"name": "第二期稻作用水量",
-				"unit": "百萬立方公尺",
-				"value": d.SecondPhaseRiceWaterConsumption
+				"name": "第二期稻作"+this.agricultureData.type,
+				"value": d.value[2]
 			},
 			{
-				"name": "第二期雜作用水量",
-				"unit": "百萬立方公尺",
-				"value": d.SecondPhaseMiscellaneousWaterConsumption
+				"name": "第二期雜作"+this.agricultureData.type,
+				"value": d.value[3]
 			},
 		]
 	};

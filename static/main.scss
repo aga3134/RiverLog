@@ -261,6 +261,7 @@ a{
 		align-items: center;
 		font-size: 1.5em;
 		flex-wrap: wrap;
+		background-color: #d6c1a2;
 
 		.logo{
 			display: none;
@@ -339,17 +340,18 @@ a{
 	.side-panel{
 		position: fixed;
 		left: -250px;
-		top: 0px;
+		bottom: 0px;
 		z-index: 2;
 		width: 250px;
 		max-width: 100%;
-		height: 100%;
+		max-height: 100%;
 		padding: 10px;
 		overflow-y: auto;
-		background-color: $theme-bg;
+		background-color: #e1ceaa;
 		box-shadow: 5px 0px 15px #8b6951;
 		-webkit-transition: left $trans-time ease;
 		transition: left $trans-time ease;
+		border-radius: 5px;
 
 		.panel-switch{
 			position: fixed;

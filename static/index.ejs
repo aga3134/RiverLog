@@ -57,58 +57,70 @@
 						<option value="reservoir">水庫統計</option>
 					</select>
 
-					<div class="graph-container">
-						<div class="half-w" v-show="waterUse.type == 'overview' ">
+					<div class="graph-container" v-show="waterUse.type == 'overview' ">
+						<div class="half-w">
 							<div class="graph-title">總用水供給</div>
 							<div class="graph" id="overviewSupply"></div>
 							<div class="graph-info" id="overviewSupplyText"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'overview' ">
+						<div class="half-w">
 							<div class="graph-title">總用水需求</div>
 							<div class="graph" id="overviewConsumption"></div>
 							<div class="graph-info" id="overviewConsumptionText"></div>
 						</div>
+					</div>
 						
-						<div class="half-w" v-show="waterUse.type == 'agriculture' ">
-							<div class="graph-title">水利會用水統計</div>
+					<div class="graph-container" v-show="waterUse.type == 'agriculture' ">
+						<div class="half-w">
+							<div class="graph-title">水利會{{waterUse.agricultureData.type}}統計</div>
 							<div class="graph" id="agricultureMap"></div>
 							<div class="graph-info" id="agricultureMapText"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'agriculture' ">
-							<div class="graph-title">用水排名</div>
+						<div class="half-w">
+							<div class="graph-title">水利會{{waterUse.agricultureData.type}}排名</div>
 							<div class="graph" id="agricultureRank"></div>
 							<div class="graph-info" id="agricultureRankText"></div>
 						</div>
+					</div>
 						
-						<div class="half-w" v-show="waterUse.type == 'cultivation' ">
+					<div class="graph-container" v-show="waterUse.type == 'cultivation' ">
+						<div class="half-w">
 							<div class="graph" id="cultivationMap"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'cultivation' ">
+						<div class="half-w">
 							<div class="graph" id="cultivationRank"></div>
 						</div>
+					</div>
 
-						<div class="half-w" v-show="waterUse.type == 'livestock' ">
+					<div class="graph-container" v-show="waterUse.type == 'livestock' ">
+						<div class="half-w">
 							<div class="graph" id="livestockMap"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'livestock' ">
+						<div class="half-w">
 							<div class="graph" id="livestockRank"></div>
 						</div>
+					</div>
 
-						<div class="half-w" v-show="waterUse.type == 'industry' ">
+					<div class="graph-container" v-show="waterUse.type == 'industry' ">
+						<div class="half-w">
 							<div class="graph" id="industryMap"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'industry' ">
+						<div class="half-w">
 							<div class="graph" id="industryRank"></div>
 						</div>
+					</div>
 
-						<div class="half-w" v-show="waterUse.type == 'living' ">
+					<div class="graph-container" v-show="waterUse.type == 'living' ">
+						<div class="half-w">
 							<div class="graph" id="livingMap"></div>
 						</div>
-						<div class="half-w" v-show="waterUse.type == 'living' ">
+						<div class="half-w">
 							<div class="graph" id="livingRank"></div>
 						</div>
+					</div>
 
-						<div class="half-w" v-show="waterUse.type == 'reservoir' ">
+					<div class="graph-container" v-show="waterUse.type == 'living' ">
+						<div class="half-w">
 							<div class="graph" id="reservoirMap"></div>
 						</div>
 					</div>
@@ -117,12 +129,12 @@
 						<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="waterUse.openDetailPanel = false;">
 						<div class="graph-container">
 							<div class="half-w" v-show="waterUse.type == 'agriculture' " >
-								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} 用水項目</div>
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} {{waterUse.agricultureData.type}}</div>
 								<div class="graph" id="agricultureCategory"></div>
 								<div class="graph-info" id="agricultureCategoryText"></div>
 							</div>
 							<div class="half-w" v-show="waterUse.type == 'agriculture' " >
-								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} 用水比例</div>
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} {{waterUse.agricultureData.type}}比例</div>
 								<div class="graph" id="agricultureRatio"></div>
 								<div class="graph-info" id="agricultureRatioText"></div>
 							</div>
@@ -286,6 +298,27 @@
 						<input type="range" min="1" max="10" step="1" v-model="playSpeed" v-on:change="UpdatePlaySpeed();">
 						<div class="option-label">播放速度</div>
 					</div>
+				</div>
+
+				<div class="option-container" v-if="mapType == 'waterUse' && waterUse">
+					<div v-show="waterUse.type == 'agriculture'">
+						<div class="option-category">灌溉用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.agricultureData.type" v-on:change="waterUse.UpdateGraph();">
+								<option value="用水量">用水量</option>
+								<option value="灌溉面積">灌溉面積</option>
+								<option value="單位面積用水量">單位面積用水量</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="option-category">動態播放</div>
+					<div class="option-item">
+						<input type="range" min="1" max="10" step="1" v-model="waterUse.playSpeed" v-on:change="waterUse.UpdatePlaySpeed();">
+						<div class="option-label">播放速度</div>
+					</div>
+					
 				</div>
 			</div>
 
