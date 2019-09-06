@@ -125,7 +125,7 @@ a {
       .riverlog .main-content .graph-content .detail-panel {
         position: fixed;
         left: 100%;
-        padding: 10px;
+        padding: 40px 10px;
         -webkit-transition: left .5s;
         transition: left .5s;
         top: 0px;

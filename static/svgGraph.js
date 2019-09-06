@@ -88,7 +88,7 @@ SvgGraph.prototype.DrawAxis = function(){
 	if(this.axis.curX){
 		this.svg.append("line")
 			.style({
-				"stroke":"#ffffff",
+				"stroke":"#33ff33",
 				"stroke-width":2
 			})
 			.attr({
@@ -116,9 +116,30 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 		var bg = this.svg.append("g");
 		bg.selectAll("path").data(data.path)
     		.enter().append("path")
+    		.attr("data-county", function(d){
+    			return d.properties.COUNTYNAME;
+    		})
     		.attr("d",pathFn)
     		.attr("fill","none")
     		.attr("stroke","#333333");
+
+    	if(data.value){
+    		for(var j=0;j<data.value.length;j++){
+    			var d = data.value[j];
+    			bg.selectAll("path[data-county='"+d.name+"']")
+    				.attr("fill", color(d.value))
+    				.attr("data-value", d.value.toFixed(2))
+    				.attr("data-name", d.name)
+    				.on("mouseover",function(){
+						var cur = d3.select(this);
+						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-value")+graph.unit);
+					})
+					.on("mouseout",function(){
+						textInfo.text("");
+					})
+					.on("click",clickFn);
+    		}
+    	}
 
     	if(data.marker){
     		var markerGroup = this.svg.append("g");
@@ -133,16 +154,16 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
 	    		var pt = proj([marker.lng, marker.lat]);
 	    		markerGroup.append('circle')
 	    			.style("cursor","pointer")
-	    			.attr("fill", color(marker.x))
+	    			.attr("fill", color(marker.value))
 	    			.attr("stroke","#ffffff")
 	            	.attr("cx",pt[0])
 	            	.attr("cy", pt[1])
 	            	.attr("r", marker.radius)
 	            	.attr("data-name", marker.name)
-	            	.attr("data-x", marker.x.toFixed(2))
+	            	.attr("data-value", marker.value.toFixed(2))
 	            	.on("mouseover",function(){
 						var cur = d3.select(this);
-						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-x")+graph.unit);
+						textInfo.text(cur.attr("data-name")+": "+cur.attr("data-value")+graph.unit);
 					})
 					.on("mouseout",function(){
 						textInfo.text("");
@@ -214,7 +235,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
 	for(var i=0;i<graph.data.length;i++){
 		var data = graph.data[i];
 		data.value = data.value.sort(function(a,b){
-			return b.x - a.x;
+			return b.value - a.value;
 		});
 		var color = d3.scale.linear()
 			.domain([this.axis.minX, this.axis.maxX])
@@ -229,16 +250,16 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     			return this.padding.top+rectH*i;
     		}.bind(this))
     		.attr("width",function(d){
-    			return this.scaleW(d.x);
+    			return this.scaleW(d.value);
     		}.bind(this))
     		.attr("height",rectH)
     		.attr("fill",function(d){
-    			return color(d.x);
+    			return color(d.value);
     		})
     		.attr("stroke","#ffffff")
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.x.toFixed(2)+graph.unit);
+				textInfo.text(d.name+": "+d.value.toFixed(2)+graph.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");
@@ -261,7 +282,7 @@ SvgGraph.prototype.DrawGraphRank = function(graph){
     		})
     		.on("mouseover",function(d){
 				var cur = d3.select(this);
-				textInfo.text(d.name+": "+d.x.toFixed(2)+graph.unit);
+				textInfo.text(d.name+": "+d.value.toFixed(2)+graph.unit);
 			})
 			.on("mouseout",function(d){
 				textInfo.text("");

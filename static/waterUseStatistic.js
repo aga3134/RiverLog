@@ -3,7 +3,7 @@ function WaterUseStatistic(){
 	this.minYear = 2010;
 	this.maxYear = 2019;
 	this.year = 2010;
-	this.type = "agriculture";
+	this.type = "cultivation";
 	this.yearTimer = null;
 	this.isPlay = false;
 	this.playSpeed = 2;
@@ -18,6 +18,8 @@ function WaterUseStatistic(){
 	this.countyPath = null;
 	this.openDetailPanel = false;
 	this.select = {};
+	this.countyMap = {"1":"基隆市","2":"臺北市","3":"新北市","4":"桃園市","5":"新竹市","6":"新竹縣","7":"苗栗縣","8":"臺中市","9":"臺中縣","10":"南投縣","11":"彰化縣","12":"雲林縣","13":"嘉義市","14":"嘉義縣","15":"臺南市","16":"高雄市","17":"高雄市","18":"高雄縣","19":"屏東縣","20":"臺東縣","21":"花蓮縣","22":"宜蘭縣","23":"澎湖縣","24":"金門縣","25":"連江縣","26":"新竹縣","27":"臺中市","28":"嘉義縣","29":"臺南市","0":"其他"};
+	this.cultivationKindMap = {"1":"吳郭魚","2":"鰻魚","3":"鱸魚","4":"虱目魚","5":"鯛類","7":"烏魚","8":"海水蝦類","9":"長腳大蝦","10":"文蛤","11":"蜆","12":"龍鬚菜","14":"其他鹹水","15":"其他淡水","16":"鱠","17":"九孔","18":"香魚"};
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
@@ -209,7 +211,8 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 		maxX: this.maxYear,
 		minY: 0,
 		maxY: this.overviewData.maxSupply,
-		curX: this.year
+		curX: this.year,
+		draw: true
 	};
 	
 	var consumptionStack = {
@@ -268,6 +271,43 @@ WaterUseStatistic.prototype.UpdateGraphOverview = function(){
 	graph.DrawGraph();
 };
 
+WaterUseStatistic.prototype.GetAgricultureValue = function(d){
+	switch(this.agricultureData.type){
+		case "灌溉用水":
+			return [
+				d.FirstPhaseRiceWaterConsumption,
+				d.FirstPhaseMiscellaneousWaterConsumption,
+				d.SecondPhaseRiceWaterConsumption,
+				d.SecondPhaseMiscellaneousWaterConsumption
+			];
+		case "灌溉面積":
+			return [
+				d.FirstPhaseRiceIrrigationArea,
+				d.FirstPhaseMiscellaneousIrrigationArea,
+				d.SecondPhaseRiceIrrigationArea,
+				d.SecondPhaseMiscellaneousIrrigationArea
+			];
+		case "單位面積用水量":
+			return [
+				d.FirstPhaseRiceIrrigationArea?d.FirstPhaseRiceWaterConsumption/d.FirstPhaseRiceIrrigationArea:0,
+				d.FirstPhaseMiscellaneousIrrigationArea?d.FirstPhaseMiscellaneousWaterConsumption/d.FirstPhaseMiscellaneousIrrigationArea:0,
+				d.SecondPhaseRiceIrrigationArea?d.SecondPhaseRiceWaterConsumption/d.SecondPhaseRiceIrrigationArea:0,
+				d.SecondPhaseMiscellaneousIrrigationArea?d.SecondPhaseMiscellaneousWaterConsumption/d.SecondPhaseMiscellaneousIrrigationArea:0
+			];
+	}
+};
+
+WaterUseStatistic.prototype.GetAgricultureUnit = function(){
+	switch(this.agricultureData.type){
+		case "灌溉用水":
+			return "百萬立方公尺";
+		case "灌溉面積":
+			return "公頃";
+		case "單位面積用水量":
+			return "百萬立方公尺/公頃";
+	}
+};
+
 WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	if(!this.agricultureData.data){
 		$.ajax({
@@ -287,7 +327,7 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
         	d.SecondPhaseMiscellaneousWaterConsumption *= scale;
         }
         this.agricultureData.data = result.data;
-        Vue.set(this.agricultureData, "type", "用水量");
+        Vue.set(this.agricultureData, "type", "灌溉用水");
 
         var yearBound = d3.extent(result.data, function(d) { return d.Year; });
         this.agricultureData.minYear = yearBound[0];
@@ -325,46 +365,17 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	}
 	var data = yearData[this.year];
 	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  "";
+	var unit =  this.GetAgricultureUnit();
 	for(var i=0;i<data.length;i++){
 		var d = data[i];
-		switch(this.agricultureData.type){
-			case "用水量":
-				d.value = [
-					d.FirstPhaseRiceWaterConsumption,
-					d.FirstPhaseMiscellaneousWaterConsumption,
-					d.SecondPhaseRiceWaterConsumption,
-					d.SecondPhaseMiscellaneousWaterConsumption
-				];
-				unit = "百萬立方公尺";
-				break;
-			case "灌溉面積":
-				d.value = [
-					d.FirstPhaseRiceIrrigationArea,
-					d.FirstPhaseMiscellaneousIrrigationArea,
-					d.SecondPhaseRiceIrrigationArea,
-					d.SecondPhaseMiscellaneousIrrigationArea
-				];
-				unit = "公頃";
-				break;
-			case "單位面積用水量":
-				d.value = [
-					d.FirstPhaseRiceIrrigationArea?d.FirstPhaseRiceWaterConsumption/d.FirstPhaseRiceIrrigationArea:0,
-					d.FirstPhaseMiscellaneousIrrigationArea?d.FirstPhaseMiscellaneousWaterConsumption/d.FirstPhaseMiscellaneousIrrigationArea:0,
-					d.SecondPhaseRiceIrrigationArea?d.SecondPhaseRiceWaterConsumption/d.SecondPhaseRiceIrrigationArea:0,
-					d.SecondPhaseMiscellaneousIrrigationArea?d.SecondPhaseMiscellaneousWaterConsumption/d.SecondPhaseMiscellaneousIrrigationArea:0
-				];
-				unit = "百萬立方公尺/公頃";
-				break;
-		}
-
+		d.value = this.GetAgricultureValue(d);
 		var sum = 0;
 		for(var j=0;j<d.value.length;j++){
 			sum += d.value[j];
 		}
 		if(sum < minValue) minValue = sum;
 		if(sum > maxValue) maxValue = sum;
-		associationHash[d.IrrigationAssociation].x = sum;
+		associationHash[d.IrrigationAssociation].value = sum;
 	}
 
 	//===================agriculture map===========================
@@ -455,38 +466,10 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 
   var maxValue = Number.MIN_VALUE;
   var minValue = Number.MAX_VALUE;
-  var unit =  "";
+  var unit =  this.GetAgricultureUnit();
   for(var i=0;i<data.length;i++){
   	var d = data[i];
-  	switch(this.agricultureData.type){
-			case "用水量":
-				d.value = [
-					d.FirstPhaseRiceWaterConsumption,
-					d.FirstPhaseMiscellaneousWaterConsumption,
-					d.SecondPhaseRiceWaterConsumption,
-					d.SecondPhaseMiscellaneousWaterConsumption
-				];
-				unit = "百萬立方公尺";
-				break;
-			case "灌溉面積":
-				d.value = [
-					d.FirstPhaseRiceIrrigationArea,
-					d.FirstPhaseMiscellaneousIrrigationArea,
-					d.SecondPhaseRiceIrrigationArea,
-					d.SecondPhaseMiscellaneousIrrigationArea
-				];
-				unit = "公頃";
-				break;
-			case "單位面積用水量":
-				d.value = [
-					d.FirstPhaseRiceIrrigationArea?d.FirstPhaseRiceWaterConsumption/d.FirstPhaseRiceIrrigationArea:0,
-					d.FirstPhaseMiscellaneousIrrigationArea?d.FirstPhaseMiscellaneousWaterConsumption/d.FirstPhaseMiscellaneousIrrigationArea:0,
-					d.SecondPhaseRiceIrrigationArea?d.SecondPhaseRiceWaterConsumption/d.SecondPhaseRiceIrrigationArea:0,
-					d.SecondPhaseMiscellaneousIrrigationArea?d.SecondPhaseMiscellaneousWaterConsumption/d.SecondPhaseMiscellaneousIrrigationArea:0
-				];
-				unit = "百萬立方公尺/公頃";
-				break;
-		}
+  	d.value = this.GetAgricultureValue(d);
   	var sum = 0;
   	for(var j=0;j<d.value.length;j++){
 			sum += d.value[j];
@@ -609,8 +592,279 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 
 };
 
-WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
+WaterUseStatistic.prototype.GetCultivationValue = function(d){
+	switch(this.cultivationData.type){
+		case "養殖用水":
+			return d.TotalWaterConsumption;
+		case "養殖面積":
+			return 	d.CultivationArea;
+		case "單位面積用水量":
+			if(d.CultivationArea > 0){
+				return d.TotalWaterConsumption/d.CultivationArea;
+			}
+  		else return 0;
+	}
+};
 
+WaterUseStatistic.prototype.GetCultivationUnit = function(d){
+	switch(this.cultivationData.type){
+		case "養殖用水":
+			return "百萬立方公尺";
+		case "養殖面積":
+			return "公頃";
+		case "單位面積用水量":
+			return "百萬立方公尺/公頃";
+	}
+};
+
+WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
+	if(!this.cultivationData.data){
+		$.ajax({
+	      url:"/statistic/waterUseCultivation",
+	      async: false,
+	      success: function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        var scale = 0.001;	//千立方公尺 -> 百萬立方公尺
+	        for(var i=0;i<result.data.length;i++){
+	        	var d = result.data[i];
+	        	d.Year += 1911;
+	        	d.TotalWaterConsumption *= scale;
+	        }
+	        this.cultivationData.data = result.data;
+	        Vue.set(this.cultivationData, "type", "養殖用水");
+
+	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+	        this.cultivationData.minYear = yearBound[0];
+	        this.cultivationData.maxYear = yearBound[1];
+	      }.bind(this)
+	    });
+	}
+
+	this.minYear = this.cultivationData.minYear;
+	this.maxYear = this.cultivationData.maxYear;
+	this.BoundYear();
+
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .key(function(d){return d.County})
+    .rollup(function(arr){
+    	return d3.sum(arr, function(d){
+    		return 	this.GetCultivationValue(d);
+    	}.bind(this));
+    }.bind(this))
+    .map(this.cultivationData.data);
+
+	//compute water consumption
+	var data = yearData[this.year];
+	var dataArr = [];
+	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	var unit =  this.GetCultivationUnit();
+	for(var county in data){
+		var d = data[county];
+		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+		if(d < minValue) minValue = d;
+		if(d > maxValue) maxValue = d;
+	}
+	
+	//===================cultivation map===========================
+	var param = {};
+	param.selector = "#cultivationMap";
+	param.textInfo = "#cultivationMapText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var cultiMap = {
+		"type": "map",
+		"unit": unit,
+		"data": [
+			{
+				"name": "縣市統計",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"path": this.county,
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.cultivationData.select = select;
+					this.UpdateCultivationDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [cultiMap];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//===================agriculture rank===========================
+	param = {};
+	param.selector = "#cultivationRank";
+	param.textInfo = "#cultivationRankText";
+	param.padding = {
+		top: 10, bottom: 10, left: 10, right: 10
+	}
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var cultiRank = {
+		"type": "rank",
+		"unit": unit,
+		"data": [
+			{
+				"name": "用水排名",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.cultivationData.select = select;
+					this.UpdateCultivationDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [cultiRank];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	this.UpdateCultivationDetail();
+};
+
+WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
+	if(!this.cultivationData.select) return;
+
+	var countyData = d3.nest()
+    .key(function(d){return d.County;})
+    .map(this.cultivationData.data);
+
+  var data = countyData[this.cultivationData.select.id];
+
+  var yearSum = d3.nest()
+  	.key(function(d){return d.Year})
+  	.rollup(function(arr){
+  		return d3.sum(arr, function(d){
+    		return 	this.GetCultivationValue(d);
+    	}.bind(this));
+  	}.bind(this))
+  	.entries(data);
+
+  yearSum = yearSum.sort(function(a,b){
+  	return a.key-b.key;
+  });
+
+  var maxValue = Number.MIN_VALUE;
+  var minValue = Number.MAX_VALUE;
+  for(var i=0;i<yearSum.length;i++){
+  	var d = yearSum[i];
+  	if(d.values > maxValue) maxValue = d.values;
+  	if(d.values < minValue) minValue = d.values;
+  }
+
+  var unit = this.GetCultivationUnit();
+
+  //====================cultivation category=====================
+	var param = {};
+	param.selector = "#cultivationCategory";
+	param.textInfo = "#cultivationCategoryText";
+	param.padding = {
+		left: 50,
+		right: 20,
+		top: 20,
+		bottom: 20
+	};
+	param.axis = {
+		minX: this.minYear,
+		maxX: this.maxYear,
+		minY: 0,
+		maxY: maxValue,
+		curX: this.year,
+		draw: true
+	};
+
+	var total = {
+		"type": "line",
+		"unitX": "年",
+		"unitY": unit,
+		"data": [
+			{
+				"name": "總"+this.cultivationData.type,
+				"color": "#ff3333",
+				"value": yearSum.map(function(d){
+					return {"x": d.key, "y": d.values};
+				})
+			}
+		]
+	}
+
+	var kindData = d3.nest()
+    .key(function(d){return d.CultivationKind;})
+    .key(function(d){return d.Year;})
+    .map(data);
+
+  var dataArr = [];
+  for(var kind in kindData){
+  	var arr = kindData[kind];
+
+  	//loop from minYear to maxYear to avoid missing data
+  	var value = [];
+  	for(var year=this.minYear;year<=this.maxYear;year++){
+  		if(year in arr){
+  			var d = arr[year][0];
+  			value.push({"x": year, "y":this.GetCultivationValue(d)});
+  		}
+  		else value.push({"x": year, "y":0});
+  	}
+
+  	dataArr.push({
+  		"name": this.cultivationKindMap[kind]+this.cultivationData.type,
+  		"value": value
+  	});
+  }
+	
+	var stack = {
+		"type": "stack",
+		"unitX": "年",
+		"unitY": unit,
+		"data": dataArr
+	};
+	param.graph = [stack,total];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//====================cultivation ratio=====================
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .map(data);
+  var arr = yearData[this.year];
+	param = {};
+	param.selector = "#cultivationRatio";
+	param.textInfo = "#cultivationRatioText";
+	
+	var ratio = {
+		"type": "pie",
+		"inRadius": 50,
+		"unit": unit,
+		"data": arr.map(function(d){
+			var name = this.cultivationKindMap[d.CultivationKind];
+			return {"name": name, "value":this.GetCultivationValue(d)};
+		}.bind(this))
+	};
+	param.graph = [ratio];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
 };
 
 WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
