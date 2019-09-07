@@ -126,7 +126,14 @@ SvgGraph.prototype.DrawGraphMap = function(graph){
     	if(data.value){
     		for(var j=0;j<data.value.length;j++){
     			var d = data.value[j];
+    			var clickFn = function(){
+    				var value = d;
+	    			return function(){
+	    				data.clickFn(value);
+	    			};
+	    		}();
     			bg.selectAll("path[data-county='"+d.name+"']")
+    				.style("cursor","pointer")
     				.attr("fill", color(d.value))
     				.attr("data-value", d.value.toFixed(2))
     				.attr("data-name", d.name)

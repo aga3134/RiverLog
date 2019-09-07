@@ -3,7 +3,7 @@ function WaterUseStatistic(){
 	this.minYear = 2010;
 	this.maxYear = 2019;
 	this.year = 2010;
-	this.type = "cultivation";
+	this.type = "living";
 	this.yearTimer = null;
 	this.isPlay = false;
 	this.playSpeed = 2;
@@ -20,6 +20,8 @@ function WaterUseStatistic(){
 	this.select = {};
 	this.countyMap = {"1":"基隆市","2":"臺北市","3":"新北市","4":"桃園市","5":"新竹市","6":"新竹縣","7":"苗栗縣","8":"臺中市","9":"臺中縣","10":"南投縣","11":"彰化縣","12":"雲林縣","13":"嘉義市","14":"嘉義縣","15":"臺南市","16":"高雄市","17":"高雄市","18":"高雄縣","19":"屏東縣","20":"臺東縣","21":"花蓮縣","22":"宜蘭縣","23":"澎湖縣","24":"金門縣","25":"連江縣","26":"新竹縣","27":"臺中市","28":"嘉義縣","29":"臺南市","0":"其他"};
 	this.cultivationKindMap = {"1":"吳郭魚","2":"鰻魚","3":"鱸魚","4":"虱目魚","5":"鯛類","7":"烏魚","8":"海水蝦類","9":"長腳大蝦","10":"文蛤","11":"蜆","12":"龍鬚菜","14":"其他鹹水","15":"其他淡水","16":"鱠","17":"九孔","18":"香魚"};
+	this.livestockKindMap = {"2":"水牛及黃雜牛","3":"乳牛","4":"豬","5":"綿羊及山羊","6":"乳羊","7":"雞","8":"鴨"};
+	this.industryKindMap = {"0800":"食品及飼品製造業","0900":"飲料製造業","1000":"菸草製造業","1100":"紡織業","1200":"成衣及服飾品製造業","1300":"皮革、毛皮及其製品製造業","1400":"木竹製品製造業","1500":"紙漿、紙及紙製品製造業","1600":"印刷及資料儲存媒體複製業","1700":"石油及煤製品製造業","1800":"化學原材料、肥料、氮化合物、塑橡膠原料及人造纖維製造業","1900":"其他化學製品製造業","2000":"藥品及醫用化學製品製造業","2100":"橡膠製品製造業","2200":"塑膠製品製造業","2300":"非金屬礦物製品製造業","2400":"基本金屬製造業","2500":"金屬製品製造業","2600":"電子零組件製造業","2700":"電腦、電子產品及光學製品製造業","2800":"電力設備及配備製造業","2900":"機械設備製造業","3000":"汽車及其零件製造業","3100":"其他運輸工具及其零件製造業","3200":"家具製造業","3300":"其他製造業","3400":"產業用機械設備維修及安裝業"};
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
@@ -300,11 +302,11 @@ WaterUseStatistic.prototype.GetAgricultureValue = function(d){
 WaterUseStatistic.prototype.GetAgricultureUnit = function(){
 	switch(this.agricultureData.type){
 		case "灌溉用水":
-			return "百萬立方公尺";
+			return "千立方公尺";
 		case "灌溉面積":
 			return "公頃";
 		case "單位面積用水量":
-			return "百萬立方公尺/公頃";
+			return "千立方公尺/公頃";
 	}
 };
 
@@ -317,14 +319,9 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        var scale = 0.001;	//千立方公尺 -> 百萬立方公尺
         for(var i=0;i<result.data.length;i++){
         	var d = result.data[i];
         	d.Year += 1911;
-        	d.FirstPhaseRiceWaterConsumption *= scale;
-        	d.FirstPhaseMiscellaneousWaterConsumption *= scale;
-        	d.SecondPhaseRiceWaterConsumption *= scale;
-        	d.SecondPhaseMiscellaneousWaterConsumption *= scale;
         }
         this.agricultureData.data = result.data;
         Vue.set(this.agricultureData, "type", "灌溉用水");
@@ -483,7 +480,7 @@ WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
 	param.selector = "#agricultureCategory";
 	param.textInfo = "#agricultureCategoryText";
 	param.padding = {
-		left: 50,
+		left: 80,
 		right: 20,
 		top: 20,
 		bottom: 20
@@ -606,14 +603,14 @@ WaterUseStatistic.prototype.GetCultivationValue = function(d){
 	}
 };
 
-WaterUseStatistic.prototype.GetCultivationUnit = function(d){
+WaterUseStatistic.prototype.GetCultivationUnit = function(){
 	switch(this.cultivationData.type){
 		case "養殖用水":
-			return "百萬立方公尺";
+			return "千立方公尺";
 		case "養殖面積":
 			return "公頃";
 		case "單位面積用水量":
-			return "百萬立方公尺/公頃";
+			return "千立方公尺/公頃";
 	}
 };
 
@@ -626,11 +623,9 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 	        if(result.status != "ok"){
 	          return console.log(result.err);
 	        }
-	        var scale = 0.001;	//千立方公尺 -> 百萬立方公尺
 	        for(var i=0;i<result.data.length;i++){
 	        	var d = result.data[i];
 	        	d.Year += 1911;
-	        	d.TotalWaterConsumption *= scale;
 	        }
 	        this.cultivationData.data = result.data;
 	        Vue.set(this.cultivationData, "type", "養殖用水");
@@ -780,7 +775,7 @@ WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
 	param.selector = "#cultivationCategory";
 	param.textInfo = "#cultivationCategoryText";
 	param.padding = {
-		left: 50,
+		left: 80,
 		right: 20,
 		top: 20,
 		bottom: 20
@@ -849,6 +844,7 @@ WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
     .key(function(d){return d.Year;})
     .map(data);
   var arr = yearData[this.year];
+  if(!arr) arr = [];
 	param = {};
 	param.selector = "#cultivationRatio";
 	param.textInfo = "#cultivationRatioText";
@@ -867,18 +863,731 @@ WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
 	graph.DrawGraph();
 };
 
-WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
+WaterUseStatistic.prototype.GetLivestockValue = function(d){
+	switch(this.livestockData.type){
+		case "畜牧用水":
+			return d.WaterConsumption;
+		case "畜牧數量":
+			return 	d.LivestockQuantity;
+		case "每千隻用水量":
+			if(d.LivestockQuantity > 0){
+				return d.WaterConsumption/d.LivestockQuantity;
+			}
+  		else return 0;
+	}
+};
 
+WaterUseStatistic.prototype.GetLivestockUnit = function(){
+	switch(this.livestockData.type){
+		case "畜牧用水":
+			return "千立方公尺";
+		case "畜牧數量":
+			return "千隻";
+		case "每千隻用水量":
+			return "千立方公尺/千隻";
+	}
+};
+
+WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
+	if(!this.livestockData.data){
+		$.ajax({
+	      url:"/statistic/waterUseLivestock",
+	      async: false,
+	      success: function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        for(var i=0;i<result.data.length;i++){
+	        	var d = result.data[i];
+	        	d.Year += 1911;
+	        	if(d.AnimalHusbandryKind != 7 && d.AnimalHusbandryKind != 8){
+	        		d.LivestockQuantity /= 1000;	//隻 -> 千隻
+	        	}
+	        }
+	        this.livestockData.data = result.data;
+	        Vue.set(this.livestockData, "type", "畜牧用水");
+
+	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+	        this.livestockData.minYear = yearBound[0];
+	        this.livestockData.maxYear = yearBound[1];
+	      }.bind(this)
+	    });
+	}
+
+	this.minYear = this.livestockData.minYear;
+	this.maxYear = this.livestockData.maxYear;
+	this.BoundYear();
+
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .key(function(d){return d.County})
+    .rollup(function(arr){
+    	return d3.sum(arr, function(d){
+    		return 	this.GetLivestockValue(d);
+    	}.bind(this));
+    }.bind(this))
+    .map(this.livestockData.data);
+
+	//compute water consumption
+	var data = yearData[this.year];
+	var dataArr = [];
+	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	var unit =  this.GetLivestockUnit();
+	for(var county in data){
+		var d = data[county];
+		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+		if(d < minValue) minValue = d;
+		if(d > maxValue) maxValue = d;
+	}
+	
+	//===================livestock map===========================
+	var param = {};
+	param.selector = "#livestockMap";
+	param.textInfo = "#livestockMapText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var livestockMap = {
+		"type": "map",
+		"unit": unit,
+		"data": [
+			{
+				"name": "縣市統計",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"path": this.county,
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.livestockData.select = select;
+					this.UpdateLivestockDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [livestockMap];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//===================livestock rank===========================
+	param = {};
+	param.selector = "#livestockRank";
+	param.textInfo = "#livestockRankText";
+	param.padding = {
+		top: 10, bottom: 10, left: 10, right: 10
+	}
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var livestockRank = {
+		"type": "rank",
+		"unit": unit,
+		"data": [
+			{
+				"name": "用水排名",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.livestockData.select = select;
+					this.UpdateLivestockDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [livestockRank];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	this.UpdateLivestockDetail();
+};
+
+WaterUseStatistic.prototype.UpdateLivestockDetail = function(){
+	if(!this.livestockData.select) return;
+
+	var countyData = d3.nest()
+    .key(function(d){return d.County;})
+    .map(this.livestockData.data);
+
+  var data = countyData[this.livestockData.select.id];
+
+  var yearSum = d3.nest()
+  	.key(function(d){return d.Year})
+  	.rollup(function(arr){
+  		return d3.sum(arr, function(d){
+    		return 	this.GetLivestockValue(d);
+    	}.bind(this));
+  	}.bind(this))
+  	.entries(data);
+
+  yearSum = yearSum.sort(function(a,b){
+  	return a.key-b.key;
+  });
+
+  var maxValue = Number.MIN_VALUE;
+  var minValue = Number.MAX_VALUE;
+  for(var i=0;i<yearSum.length;i++){
+  	var d = yearSum[i];
+  	if(d.values > maxValue) maxValue = d.values;
+  	if(d.values < minValue) minValue = d.values;
+  }
+
+  var unit = this.GetLivestockUnit();
+
+  //====================livestock category=====================
+	var param = {};
+	param.selector = "#livestockCategory";
+	param.textInfo = "#livestockCategoryText";
+	param.padding = {
+		left: 50,
+		right: 20,
+		top: 20,
+		bottom: 20
+	};
+	param.axis = {
+		minX: this.minYear,
+		maxX: this.maxYear,
+		minY: 0,
+		maxY: maxValue,
+		curX: this.year,
+		draw: true
+	};
+
+	var total = {
+		"type": "line",
+		"unitX": "年",
+		"unitY": unit,
+		"data": [
+			{
+				"name": "總"+this.livestockData.type,
+				"color": "#ff3333",
+				"value": yearSum.map(function(d){
+					return {"x": d.key, "y": d.values};
+				})
+			}
+		]
+	}
+
+	var kindData = d3.nest()
+    .key(function(d){return d.AnimalHusbandryKind;})
+    .key(function(d){return d.Year;})
+    .map(data);
+
+  var dataArr = [];
+  for(var kind in kindData){
+  	var arr = kindData[kind];
+
+  	//loop from minYear to maxYear to avoid missing data
+  	var value = [];
+  	for(var year=this.minYear;year<=this.maxYear;year++){
+  		if(year in arr){
+  			var d = arr[year][0];
+  			value.push({"x": year, "y":this.GetLivestockValue(d)});
+  		}
+  		else value.push({"x": year, "y":0});
+  	}
+
+  	dataArr.push({
+  		"name": this.livestockKindMap[kind]+this.livestockData.type,
+  		"value": value
+  	});
+  }
+	
+	var stack = {
+		"type": "stack",
+		"unitX": "年",
+		"unitY": unit,
+		"data": dataArr
+	};
+	param.graph = [stack,total];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//====================livestock ratio=====================
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .map(data);
+  var arr = yearData[this.year];
+  if(!arr) arr = [];
+	param = {};
+	param.selector = "#livestockRatio";
+	param.textInfo = "#livestockRatioText";
+	
+	var ratio = {
+		"type": "pie",
+		"inRadius": 50,
+		"unit": unit,
+		"data": arr.map(function(d){
+			var name = this.livestockKindMap[d.AnimalHusbandryKind];
+			return {"name": name, "value":this.GetLivestockValue(d)};
+		}.bind(this))
+	};
+	param.graph = [ratio];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+};
+
+WaterUseStatistic.prototype.GetIndustryValue = function(d){
+	switch(this.industryData.type){
+		case "工業用水":
+			return d.IndustrialWaterConsumption;
+		case "工業面積":
+			return 	d.IndustryArea;
+		case "單位面積用水量":
+			if(d.IndustryArea > 0){
+				return d.IndustrialWaterConsumption/d.IndustryArea;
+			}
+  		else return 0;
+	}
+};
+
+WaterUseStatistic.prototype.GetIndustryUnit = function(){
+	switch(this.industryData.type){
+		case "工業用水":
+			return "百萬立方公尺";
+		case "工業面積":
+			return "公頃";
+		case "單位面積用水量":
+			return "百萬立方公尺/公頃";
+	}
 };
 
 WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
+	if(!this.industryData.data){
+		$.ajax({
+	      url:"/statistic/waterUseIndustry",
+	      async: false,
+	      success: function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        for(var i=0;i<result.data.length;i++){
+	        	var d = result.data[i];
+	        	d.Year += 1911;
+	        }
+	        this.industryData.data = result.data;
+	        Vue.set(this.industryData, "type", "工業用水");
 
+	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+	        this.industryData.minYear = yearBound[0];
+	        this.industryData.maxYear = yearBound[1];
+	      }.bind(this)
+	    });
+	}
+
+	this.minYear = this.industryData.minYear;
+	this.maxYear = this.industryData.maxYear;
+	this.BoundYear();
+
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .key(function(d){return d.County})
+    .rollup(function(arr){
+    	return d3.sum(arr, function(d){
+    		return 	this.GetIndustryValue(d);
+    	}.bind(this));
+    }.bind(this))
+    .map(this.industryData.data);
+
+	//compute water consumption
+	var data = yearData[this.year];
+	var dataArr = [];
+	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	var unit =  this.GetIndustryUnit();
+	for(var county in data){
+		var d = data[county];
+		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+		if(d < minValue) minValue = d;
+		if(d > maxValue) maxValue = d;
+	}
+	
+	//===================industry map===========================
+	var param = {};
+	param.selector = "#industryMap";
+	param.textInfo = "#industryMapText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var industryMap = {
+		"type": "map",
+		"unit": unit,
+		"data": [
+			{
+				"name": "縣市統計",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"path": this.county,
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.industryData.select = select;
+					this.UpdateIndustryDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [industryMap];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//===================industry rank===========================
+	param = {};
+	param.selector = "#industryRank";
+	param.textInfo = "#industryRankText";
+	param.padding = {
+		top: 10, bottom: 10, left: 10, right: 10
+	}
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var industryRank = {
+		"type": "rank",
+		"unit": unit,
+		"data": [
+			{
+				"name": "用水排名",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.industryData.select = select;
+					this.UpdateIndustryDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [industryRank];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	this.UpdateIndustryDetail();
+};
+
+WaterUseStatistic.prototype.UpdateIndustryDetail = function(){
+	if(!this.industryData.select) return;
+
+	var countyData = d3.nest()
+    .key(function(d){return d.County;})
+    .map(this.industryData.data);
+
+  var data = countyData[this.industryData.select.id];
+
+  var yearSum = d3.nest()
+  	.key(function(d){return d.Year})
+  	.rollup(function(arr){
+  		return d3.sum(arr, function(d){
+    		return 	this.GetIndustryValue(d);
+    	}.bind(this));
+  	}.bind(this))
+  	.entries(data);
+
+  yearSum = yearSum.sort(function(a,b){
+  	return a.key-b.key;
+  });
+
+  var maxValue = Number.MIN_VALUE;
+  var minValue = Number.MAX_VALUE;
+  for(var i=0;i<yearSum.length;i++){
+  	var d = yearSum[i];
+  	if(d.values > maxValue) maxValue = d.values;
+  	if(d.values < minValue) minValue = d.values;
+  }
+
+  var unit = this.GetIndustryUnit();
+
+  //====================industry category=====================
+	var param = {};
+	param.selector = "#industryCategory";
+	param.textInfo = "#industryCategoryText";
+	param.padding = {
+		left: 50,
+		right: 20,
+		top: 20,
+		bottom: 20
+	};
+	param.axis = {
+		minX: this.minYear,
+		maxX: this.maxYear,
+		minY: 0,
+		maxY: maxValue,
+		curX: this.year,
+		draw: true
+	};
+
+	var total = {
+		"type": "line",
+		"unitX": "年",
+		"unitY": unit,
+		"data": [
+			{
+				"name": "總"+this.industryData.type,
+				"color": "#ff3333",
+				"value": yearSum.map(function(d){
+					return {"x": d.key, "y": d.values};
+				})
+			}
+		]
+	}
+
+	var kindData = d3.nest()
+    .key(function(d){return d.Category;})
+    .key(function(d){return d.Year;})
+    .map(data);
+
+  var dataArr = [];
+  for(var kind in kindData){
+  	var arr = kindData[kind];
+
+  	//loop from minYear to maxYear to avoid missing data
+  	var value = [];
+  	for(var year=this.minYear;year<=this.maxYear;year++){
+  		if(year in arr){
+  			var d = arr[year][0];
+  			value.push({"x": year, "y":this.GetIndustryValue(d)});
+  		}
+  		else value.push({"x": year, "y":0});
+  	}
+
+  	dataArr.push({
+  		"name": this.industryKindMap[kind]+this.industryData.type,
+  		"value": value
+  	});
+  }
+	
+	var stack = {
+		"type": "stack",
+		"unitX": "年",
+		"unitY": unit,
+		"data": dataArr
+	};
+	param.graph = [stack,total];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//====================industry ratio=====================
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .map(data);
+  var arr = yearData[this.year];
+  if(!arr) arr = [];
+	param = {};
+	param.selector = "#industryRatio";
+	param.textInfo = "#industryRatioText";
+	
+	var ratio = {
+		"type": "pie",
+		"inRadius": 50,
+		"unit": unit,
+		"data": arr.map(function(d){
+			var name = this.industryKindMap[d.Category];
+			return {"name": name, "value":this.GetIndustryValue(d)};
+		}.bind(this))
+	};
+	param.graph = [ratio];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+};
+
+WaterUseStatistic.prototype.GetLivingValue = function(d){
+	switch(this.livingData.type){
+		case "每人每日配水量":
+			return d.DistributedWaterQuantityPerPersonPerDay;
+		case "每人每日生活總用水量":
+			return d.DomesticWaterConsumptionPerPersonPerDay;
+		case "自行取水用水人口":
+			return d.SelfIntakePopulation;
+		case "自行取水年用水量":
+			return d.SelfIntakeWaterConsumption;
+		case "自行取水每人每日生活用水量":
+			return	d.SelfIntakeWaterConsumptionPerPersonPerDay;
+		case "自來水年用水量":
+			return	d.TapWaterConsumption;
+		case "自來水供水人口":
+			return d.TapWaterPopulation;
+		case "每人每日售水量":
+			return d.WaterSalesPerPersonPerDay;
+	}
+};
+
+WaterUseStatistic.prototype.GetLivingUnit = function(){
+	switch(this.livingData.type){
+		case "每人每日配水量":
+			return "公升/人/每日";
+		case "每人每日生活總用水量":
+			return 	"公升/人/每日";
+		case "自行取水用水人口":
+			return "人";
+		case "自行取水年用水量":
+			return "千立方公尺";
+		case "自行取水每人每日生活用水量":
+			return "公升/人/每日";
+		case "自來水年用水量":
+			return "千立方公尺";
+		case "自來水供水人口":
+			return "人";
+		case "每人每日售水量":
+			return "公升/人/每日";
+	}
 };
 
 WaterUseStatistic.prototype.UpdateGraphLiving = function(){
+	if(!this.livingData.data){
+		$.ajax({
+	      url:"/statistic/waterUseLiving",
+	      async: false,
+	      success: function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        for(var i=0;i<result.data.length;i++){
+	        	var d = result.data[i];
+	        	d.Year += 1911;
+	        }
+	        this.livingData.data = result.data;
+	        Vue.set(this.livingData, "type", "每人每日配水量");
+
+	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+	        this.livingData.minYear = yearBound[0];
+	        this.livingData.maxYear = yearBound[1];
+	      }.bind(this)
+	    });
+	}
+
+	this.minYear = this.livingData.minYear;
+	this.maxYear = this.livingData.maxYear;
+	this.BoundYear();
+
+	var yearData = d3.nest()
+    .key(function(d){return d.Year;})
+    .key(function(d){return d.County})
+    .rollup(function(arr){
+    	return d3.sum(arr, function(d){
+    		return 	this.GetLivingValue(d);
+    	}.bind(this));
+    }.bind(this))
+    .map(this.livingData.data);
+
+	//compute water consumption
+	var data = yearData[this.year];
+	var dataArr = [];
+	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+	var unit =  this.GetLivingUnit();
+	for(var county in data){
+		var d = data[county];
+		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+		if(d < minValue) minValue = d;
+		if(d > maxValue) maxValue = d;
+	}
+	
+	//===================living map===========================
+	var param = {};
+	param.selector = "#livingMap";
+	param.textInfo = "#livingMapText";
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var livingMap = {
+		"type": "map",
+		"unit": unit,
+		"data": [
+			{
+				"name": "縣市統計",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"path": this.county,
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.livingData.select = select;
+					this.UpdateLivingDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [livingMap];
+	var graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	//===================living rank===========================
+	param = {};
+	param.selector = "#livingRank";
+	param.textInfo = "#livingRankText";
+	param.padding = {
+		top: 10, bottom: 10, left: 10, right: 10
+	}
+	param.axis = {
+		minX: minValue,
+		maxX: maxValue,
+		minY: 0,
+		maxY: dataArr.length
+	};
+	var livingRank = {
+		"type": "rank",
+		"unit": unit,
+		"data": [
+			{
+				"name": "用水排名",
+				"color": {
+					"minColor": "#888888",
+					"maxColor": "#333333"
+				},
+				"value": dataArr,
+				"clickFn": function(d){
+					this.openDetailPanel = true;
+					var select = {"id":d.id, "name":d.name};
+					this.livingData.select = select;
+					this.UpdateLivingDetail();
+				}.bind(this)
+			}
+		]
+	};
+	param.graph = [livingRank];
+	graph = new SvgGraph(param);
+	graph.DrawGraph();
+
+	this.UpdateLivingDetail();
+};
+
+WaterUseStatistic.prototype.UpdateLivingDetail = function(){
 
 };
 
 WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
+
+};
+
+WaterUseStatistic.prototype.UpdateReservoirDetail = function(){
 
 };
