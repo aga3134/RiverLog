@@ -306,7 +306,7 @@ a {
     .riverlog .side-panel .date-selection {
       position: relative;
       width: 100%;
-      min-height: 100%; }
+      min-height: 100vh; }
       .riverlog .side-panel .date-selection .week-label {
         position: absolute; }
       .riverlog .side-panel .date-selection .month-label {

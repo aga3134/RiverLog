@@ -17,6 +17,8 @@ import gc
 import ssl
 from bs4 import BeautifulSoup
 import math
+import pytz
+taiwan = pytz.timezone('Asia/Taipei')
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -35,6 +37,7 @@ class WaterData:
             now = now.replace(minute=(now.minute-now.minute%10))
             t = now.strftime("%Y-%m-%d_%H-%M")
             #water level
+            """
             url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=2D09DB8B-6A1B-485E-88B5-923A462F475C"
             folder = "data/waterLevel/"
             if not os.path.exists(folder):
@@ -42,9 +45,12 @@ class WaterData:
             file = folder+"waterLevel_"+t+".json"
             urllib.request.urlretrieve(url, file)
             self.ProcessWaterLevel(file)
+            """
 
             #collect water level from fhy website for more real time data
             self.ProcessWaterLevelFromWebsite()
+
+            self.ProcessFlood("https://sta.ci.taiwan.gov.tw/STA_WaterResource_lastest/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B7%B1%E5%BA%A6%27,Datastream/name)%20&$count=true")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -257,6 +263,42 @@ class WaterData:
                         
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessFlood(self, url):
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                data = r.json()["value"]
+                #add site
+                for d in data:
+                    if len(d["Thing"]["Locations"]) == 0:
+                        continue
+                    s = {}
+                    s["_id"] = d["Thing"]["name"]
+                    s["stationName"] = d["Thing"]["properties"]["stationName"]
+                    coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                    s["lat"] = coord[1]
+                    s["lng"] = coord[0]
+                    self.db["floodSite"].update({"_id":s["_id"]},s,upsert=True)
+                #add data
+                for d in data:
+                    if len(d["Observations"]) == 0:
+                        continue
+                    f = {}
+                    f["stationID"] = d["Thing"]["name"]
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=pytz.utc)
+                    f["time"] = t.isoformat()
+                    f["value"] = d["Observations"][0]["result"]
+                    key = {"stationID":f["stationID"],"time":f["time"]}
+                    t = t.astimezone(taiwan)
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["flood"+day].find_one(key)
+                    if query is None:
+                        self.db["flood"+day].insert_one(f)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

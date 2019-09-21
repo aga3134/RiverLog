@@ -109,8 +109,6 @@ class AlertData:
                     data["headline"] = info.headline.string
                     if data["eventcode"] == "typhoon":
                         desc = {}
-                        desc["typhoon_name"] = info.description.find("typhoon_name").string
-                        desc["cwb_typhoon_name"] = info.description.find("cwb_typhoon_name").string
                         for section in info.description.find_all("section"):
                             if section["title"] == "颱風資訊":
                                 desc["typhoon_name"] = section.typhoon_name.string
