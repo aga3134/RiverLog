@@ -3,7 +3,7 @@ function WaterUseStatistic(){
 	this.minYear = 2010;
 	this.maxYear = 2019;
 	this.year = 2010;
-	this.type = "living";
+	this.type = "overview";
 	this.yearTimer = null;
 	this.isPlay = false;
 	this.playSpeed = 2;
@@ -25,10 +25,18 @@ function WaterUseStatistic(){
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
+	d3.json("/static/geo/irrigationAssociation.json", function(result){
+	  	for(var i=0;i<result.length;i++){
+	  		result[i].shape = "circle";
+	  		result[i].radius = 5;
+	  	}
+	    this.agricultureData.association = result;
+	}.bind(this));
+
 	d3.json("/static/geo/county_sim.json", function(data) {
-    this.county = topojson.feature(data, data.objects["geo"]).features;
-	  this.UpdateGraph();
-  }.bind(this));
+    	this.county = topojson.feature(data, data.objects["geo"]).features;
+		this.UpdateGraph();
+	}.bind(this));
 };
 
 WaterUseStatistic.prototype.PrevYear = function(){
@@ -108,169 +116,171 @@ WaterUseStatistic.prototype.BoundYear = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphOverview = function(){
+	var DrawData = function(){
+		this.minYear = this.overviewData.minYear;
+		this.maxYear = this.overviewData.maxYear;
+		this.BoundYear();
+
+		//=====================overviewSupply=======================
+		var param = {};
+		param.selector = "#overviewSupply";
+		param.textInfo = "#overviewSupplyText";
+		param.padding = {
+			left: 50,
+			right: 20,
+			top: 20,
+			bottom: 20
+		};
+		param.axis = {
+			minX: this.minYear,
+			maxX: this.maxYear,
+			minY: 0,
+			maxY: this.overviewData.maxSupply,
+			curX: this.year,
+			draw: true
+		};
+		
+		var supplyStack = {
+			"type": "stack",
+			"unitX": "年",
+			"unitY": "百萬立方公尺",
+			"data": [
+				{
+					"name": "河川引水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterSupplyRiver}
+					})
+				},
+				{
+					"name": "水庫調節",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterSupplyReservoir}
+					})
+				},
+				{
+					"name": "地下水及其他",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterSupplyUnderGround}
+					})
+				}
+			]
+		};
+		var totalSupply = {
+			"type": "line",
+			"unitX": "年",
+			"unitY": "百萬立方公尺",
+			"data": [
+				{
+					"name": "總供水量",
+					"color": "#ff3333",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.TotalWaterSupply}
+					})
+				}
+			]
+		};
+		param.graph = [supplyStack,totalSupply];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//=====================overviewConsumption=======================
+		param = {};
+		param.selector = "#overviewConsumption";
+		param.textInfo = "#overviewConsumptionText";
+		param.padding = {
+			left: 50,
+			right: 20,
+			top: 20,
+			bottom: 20
+		};
+		param.axis = {
+			minX: this.minYear,
+			maxX: this.maxYear,
+			minY: 0,
+			maxY: this.overviewData.maxSupply,
+			curX: this.year,
+			draw: true
+		};
+		
+		var consumptionStack = {
+			"type": "stack",
+			"unitX": "年",
+			"unitY": "百萬立方公尺",
+			"data": [
+				{
+					"name": "灌溉用水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterUseAgriculture}
+					})
+				},
+				{
+					"name": "養殖用水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterUseCultivation}
+					})
+				},
+				{
+					"name": "畜牧用水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterUseLivestock}
+					})
+				},
+				{
+					"name": "工業用水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterUseIndustry}
+					})
+				},
+				{
+					"name": "生活用水",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.WaterUseLiving}
+					})
+				}
+			]
+		};
+		var totalConsumption = {
+			"type": "line",
+			"unitX": "年",
+			"unitY": "百萬立方公尺",
+			"data": [
+				{
+					"name": "總用水量",
+					"color": "#ff3333",
+					"value": this.overviewData.data.map(function(d){
+						return {x: d.Year, y: d.TotalWaterUse}
+					})
+				}
+			]
+		};
+		param.graph = [consumptionStack,totalConsumption];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+	}.bind(this);
+
 	if(!this.overviewData.data){
-		$.ajax({
-      url:"/statistic/waterUseOverview",
-      async: false,
-      success: function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        for(var i=0;i<result.data.length;i++){
-        	result.data[i].Year += 1911;
-        }
-        this.overviewData.data = result.data.sort(function(a,b){
-        	return a.Year - b.Year;
-        });
-        var yearBound = d3.extent(this.overviewData.data, function(d) { return d.Year; });
-        this.overviewData.minYear = yearBound[0];
-        this.overviewData.maxYear = yearBound[1];
-        var supplyBound = d3.extent(this.overviewData.data, function(d) { return d.TotalWaterSupply; });
-        this.overviewData.minSupply = supplyBound[0];
-        this.overviewData.maxSupply = supplyBound[1];
-      }.bind(this)
-    });
+		$.get("/statistic/waterUseOverview", function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        for(var i=0;i<result.data.length;i++){
+	        	result.data[i].Year += 1911;
+	        }
+	        this.overviewData.data = result.data.sort(function(a,b){
+	        	return a.Year - b.Year;
+	        });
+	        var yearBound = d3.extent(this.overviewData.data, function(d) { return d.Year; });
+	        this.overviewData.minYear = yearBound[0];
+	        this.overviewData.maxYear = yearBound[1];
+	        var supplyBound = d3.extent(this.overviewData.data, function(d) { return d.TotalWaterSupply; });
+	        this.overviewData.minSupply = supplyBound[0];
+	        this.overviewData.maxSupply = supplyBound[1];
+	        DrawData();
+	    }.bind(this));
 	}
+	else DrawData();
 
-	this.minYear = this.overviewData.minYear;
-	this.maxYear = this.overviewData.maxYear;
-	this.BoundYear();
-
-	//=====================overviewSupply=======================
-	var param = {};
-	param.selector = "#overviewSupply";
-	param.textInfo = "#overviewSupplyText";
-	param.padding = {
-		left: 50,
-		right: 20,
-		top: 20,
-		bottom: 20
-	};
-	param.axis = {
-		minX: this.minYear,
-		maxX: this.maxYear,
-		minY: 0,
-		maxY: this.overviewData.maxSupply,
-		curX: this.year,
-		draw: true
-	};
 	
-	var supplyStack = {
-		"type": "stack",
-		"unitX": "年",
-		"unitY": "百萬立方公尺",
-		"data": [
-			{
-				"name": "河川引水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterSupplyRiver}
-				})
-			},
-			{
-				"name": "水庫調節",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterSupplyReservoir}
-				})
-			},
-			{
-				"name": "地下水及其他",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterSupplyUnderGround}
-				})
-			}
-		]
-	};
-	var totalSupply = {
-		"type": "line",
-		"unitX": "年",
-		"unitY": "百萬立方公尺",
-		"data": [
-			{
-				"name": "總供水量",
-				"color": "#ff3333",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.TotalWaterSupply}
-				})
-			}
-		]
-	};
-	param.graph = [supplyStack,totalSupply];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	//=====================overviewConsumption=======================
-	param = {};
-	param.selector = "#overviewConsumption";
-	param.textInfo = "#overviewConsumptionText";
-	param.padding = {
-		left: 50,
-		right: 20,
-		top: 20,
-		bottom: 20
-	};
-	param.axis = {
-		minX: this.minYear,
-		maxX: this.maxYear,
-		minY: 0,
-		maxY: this.overviewData.maxSupply,
-		curX: this.year,
-		draw: true
-	};
-	
-	var consumptionStack = {
-		"type": "stack",
-		"unitX": "年",
-		"unitY": "百萬立方公尺",
-		"data": [
-			{
-				"name": "灌溉用水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterUseAgriculture}
-				})
-			},
-			{
-				"name": "養殖用水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterUseCultivation}
-				})
-			},
-			{
-				"name": "畜牧用水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterUseLivestock}
-				})
-			},
-			{
-				"name": "工業用水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterUseIndustry}
-				})
-			},
-			{
-				"name": "生活用水",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.WaterUseLiving}
-				})
-			}
-		]
-	};
-	var totalConsumption = {
-		"type": "line",
-		"unitX": "年",
-		"unitY": "百萬立方公尺",
-		"data": [
-			{
-				"name": "總用水量",
-				"color": "#ff3333",
-				"value": this.overviewData.data.map(function(d){
-					return {x: d.Year, y: d.TotalWaterUse}
-				})
-			}
-		]
-	};
-	param.graph = [consumptionStack,totalConsumption];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
 };
 
 WaterUseStatistic.prototype.GetAgricultureValue = function(d){
@@ -311,143 +321,131 @@ WaterUseStatistic.prototype.GetAgricultureUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
-	if(!this.agricultureData.data){
-		$.ajax({
-      url:"/statistic/waterUseAgriculture",
-      async: false,
-      success: function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        for(var i=0;i<result.data.length;i++){
-        	var d = result.data[i];
-        	d.Year += 1911;
-        }
-        this.agricultureData.data = result.data;
-        Vue.set(this.agricultureData, "type", "灌溉用水");
+	var DrawData = function(){
+		this.minYear = this.agricultureData.minYear;
+		this.maxYear = this.agricultureData.maxYear;
+		this.BoundYear();
 
-        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
-        this.agricultureData.minYear = yearBound[0];
-        this.agricultureData.maxYear = yearBound[1];
-      }.bind(this)
-    });
-	}
-	if(!this.agricultureData.association){
-		$.ajax({
-      url:"/static/geo/irrigationAssociation.json",
-      async: false,
-      success: function(result){
-      	for(var i=0;i<result.length;i++){
-      		result[i].shape = "circle";
-      		result[i].radius = 5;
-      	}
-        this.agricultureData.association = result;
-      }.bind(this)
-    });
-	}
+		var yearData = d3.nest()
+	    .key(function(d){return d.Year;})
+	    .map(this.agricultureData.data);
 
-	this.minYear = this.agricultureData.minYear;
-	this.maxYear = this.agricultureData.maxYear;
-	this.BoundYear();
-
-	var yearData = d3.nest()
-    .key(function(d){return d.Year;})
-    .map(this.agricultureData.data);
-
-	//compute water consumption
-	var associationHash = {};
-	for(var i=0;i<this.agricultureData.association.length;i++){
-		var association = this.agricultureData.association[i];
-		associationHash[association.id] = association;
-	}
-	var data = yearData[this.year];
-	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  this.GetAgricultureUnit();
-	for(var i=0;i<data.length;i++){
-		var d = data[i];
-		d.value = this.GetAgricultureValue(d);
-		var sum = 0;
-		for(var j=0;j<d.value.length;j++){
-			sum += d.value[j];
+		//compute water consumption
+		var associationHash = {};
+		for(var i=0;i<this.agricultureData.association.length;i++){
+			var association = this.agricultureData.association[i];
+			associationHash[association.id] = association;
 		}
-		if(sum < minValue) minValue = sum;
-		if(sum > maxValue) maxValue = sum;
-		associationHash[d.IrrigationAssociation].value = sum;
-	}
-
-	//===================agriculture map===========================
-	var param = {};
-	param.selector = "#agricultureMap";
-	param.textInfo = "#agricultureMapText";
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: this.agricultureData.association.length
-	};
-	var agriMap = {
-		"type": "map",
-		"unit": unit,
-		"data": [
-			{
-				"name": "水利會位置",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"path": this.county,
-				"marker": this.agricultureData.association,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.agricultureData.select = select;
-					this.UpdateAgricultureDetail();
-				}.bind(this)
+		var data = yearData[this.year];
+		var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+		var unit =  this.GetAgricultureUnit();
+		for(var i=0;i<data.length;i++){
+			var d = data[i];
+			d.value = this.GetAgricultureValue(d);
+			var sum = 0;
+			for(var j=0;j<d.value.length;j++){
+				sum += d.value[j];
 			}
-		]
-	};
-	param.graph = [agriMap];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
+			if(sum < minValue) minValue = sum;
+			if(sum > maxValue) maxValue = sum;
+			associationHash[d.IrrigationAssociation].value = sum;
+		}
 
-	//===================agriculture rank===========================
-	param = {};
-	param.selector = "#agricultureRank";
-	param.textInfo = "#agricultureRankText";
-	param.padding = {
-		top: 10, bottom: 10, left: 10, right: 10
+		//===================agriculture map===========================
+		var param = {};
+		param.selector = "#agricultureMap";
+		param.textInfo = "#agricultureMapText";
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: this.agricultureData.association.length
+		};
+		var agriMap = {
+			"type": "map",
+			"unit": unit,
+			"data": [
+				{
+					"name": "水利會位置",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"path": this.county,
+					"marker": this.agricultureData.association,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.agricultureData.select = select;
+						this.UpdateAgricultureDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [agriMap];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//===================agriculture rank===========================
+		param = {};
+		param.selector = "#agricultureRank";
+		param.textInfo = "#agricultureRankText";
+		param.padding = {
+			top: 10, bottom: 10, left: 10, right: 10
+		}
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: this.agricultureData.association.length
+		};
+		var agriRank = {
+			"type": "rank",
+			"unit": unit,
+			"data": [
+				{
+					"name": "用水排名",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"value": this.agricultureData.association,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.agricultureData.select = select;
+						this.UpdateAgricultureDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [agriRank];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		this.UpdateAgricultureDetail();
+	}.bind(this);
+
+	if(!this.agricultureData.data){
+		$.get("/statistic/waterUseAgriculture", function(result){
+	        if(result.status != "ok"){
+	          return console.log(result.err);
+	        }
+	        for(var i=0;i<result.data.length;i++){
+	        	var d = result.data[i];
+	        	d.Year += 1911;
+	        }
+	        this.agricultureData.data = result.data;
+	        Vue.set(this.agricultureData, "type", "灌溉用水");
+
+	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
+	        this.agricultureData.minYear = yearBound[0];
+	        this.agricultureData.maxYear = yearBound[1];
+	        DrawData();
+	    }.bind(this));
 	}
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: this.agricultureData.association.length
-	};
-	var agriRank = {
-		"type": "rank",
-		"unit": unit,
-		"data": [
-			{
-				"name": "用水排名",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"value": this.agricultureData.association,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.agricultureData.select = select;
-					this.UpdateAgricultureDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [agriRank];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	this.UpdateAgricultureDetail();
+	else DrawData();
+	
 };
 
 WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
@@ -615,11 +613,110 @@ WaterUseStatistic.prototype.GetCultivationUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
+	var DrawData = function(){
+		this.minYear = this.cultivationData.minYear;
+		this.maxYear = this.cultivationData.maxYear;
+		this.BoundYear();
+
+		var yearData = d3.nest()
+	    .key(function(d){return d.Year;})
+	    .key(function(d){return d.County})
+	    .rollup(function(arr){
+	    	return d3.sum(arr, function(d){
+	    		return 	this.GetCultivationValue(d);
+	    	}.bind(this));
+	    }.bind(this))
+	    .map(this.cultivationData.data);
+
+		//compute water consumption
+		var data = yearData[this.year];
+		var dataArr = [];
+		var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+		var unit =  this.GetCultivationUnit();
+		for(var county in data){
+			var d = data[county];
+			dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+			if(d < minValue) minValue = d;
+			if(d > maxValue) maxValue = d;
+		}
+		
+		//===================cultivation map===========================
+		var param = {};
+		param.selector = "#cultivationMap";
+		param.textInfo = "#cultivationMapText";
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var cultiMap = {
+			"type": "map",
+			"unit": unit,
+			"data": [
+				{
+					"name": "縣市統計",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"path": this.county,
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.cultivationData.select = select;
+						this.UpdateCultivationDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [cultiMap];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//===================agriculture rank===========================
+		param = {};
+		param.selector = "#cultivationRank";
+		param.textInfo = "#cultivationRankText";
+		param.padding = {
+			top: 10, bottom: 10, left: 10, right: 10
+		}
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var cultiRank = {
+			"type": "rank",
+			"unit": unit,
+			"data": [
+				{
+					"name": "用水排名",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.cultivationData.select = select;
+						this.UpdateCultivationDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [cultiRank];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		this.UpdateCultivationDetail();
+	}.bind(this);
+
 	if(!this.cultivationData.data){
-		$.ajax({
-	      url:"/statistic/waterUseCultivation",
-	      async: false,
-	      success: function(result){
+		$.get("/statistic/waterUseCultivation",function(result){
 	        if(result.status != "ok"){
 	          return console.log(result.err);
 	        }
@@ -633,109 +730,11 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.cultivationData.minYear = yearBound[0];
 	        this.cultivationData.maxYear = yearBound[1];
-	      }.bind(this)
-	    });
+	        DrawData();
+	    }.bind(this));
 	}
-
-	this.minYear = this.cultivationData.minYear;
-	this.maxYear = this.cultivationData.maxYear;
-	this.BoundYear();
-
-	var yearData = d3.nest()
-    .key(function(d){return d.Year;})
-    .key(function(d){return d.County})
-    .rollup(function(arr){
-    	return d3.sum(arr, function(d){
-    		return 	this.GetCultivationValue(d);
-    	}.bind(this));
-    }.bind(this))
-    .map(this.cultivationData.data);
-
-	//compute water consumption
-	var data = yearData[this.year];
-	var dataArr = [];
-	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  this.GetCultivationUnit();
-	for(var county in data){
-		var d = data[county];
-		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
-		if(d < minValue) minValue = d;
-		if(d > maxValue) maxValue = d;
-	}
+	else DrawData();
 	
-	//===================cultivation map===========================
-	var param = {};
-	param.selector = "#cultivationMap";
-	param.textInfo = "#cultivationMapText";
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var cultiMap = {
-		"type": "map",
-		"unit": unit,
-		"data": [
-			{
-				"name": "縣市統計",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"path": this.county,
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.cultivationData.select = select;
-					this.UpdateCultivationDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [cultiMap];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	//===================agriculture rank===========================
-	param = {};
-	param.selector = "#cultivationRank";
-	param.textInfo = "#cultivationRankText";
-	param.padding = {
-		top: 10, bottom: 10, left: 10, right: 10
-	}
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var cultiRank = {
-		"type": "rank",
-		"unit": unit,
-		"data": [
-			{
-				"name": "用水排名",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.cultivationData.select = select;
-					this.UpdateCultivationDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [cultiRank];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	this.UpdateCultivationDetail();
 };
 
 WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
@@ -889,11 +888,110 @@ WaterUseStatistic.prototype.GetLivestockUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
+	var DrawData = function(){
+		this.minYear = this.livestockData.minYear;
+		this.maxYear = this.livestockData.maxYear;
+		this.BoundYear();
+
+		var yearData = d3.nest()
+	    .key(function(d){return d.Year;})
+	    .key(function(d){return d.County})
+	    .rollup(function(arr){
+	    	return d3.sum(arr, function(d){
+	    		return 	this.GetLivestockValue(d);
+	    	}.bind(this));
+	    }.bind(this))
+	    .map(this.livestockData.data);
+
+		//compute water consumption
+		var data = yearData[this.year];
+		var dataArr = [];
+		var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+		var unit =  this.GetLivestockUnit();
+		for(var county in data){
+			var d = data[county];
+			dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+			if(d < minValue) minValue = d;
+			if(d > maxValue) maxValue = d;
+		}
+		
+		//===================livestock map===========================
+		var param = {};
+		param.selector = "#livestockMap";
+		param.textInfo = "#livestockMapText";
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var livestockMap = {
+			"type": "map",
+			"unit": unit,
+			"data": [
+				{
+					"name": "縣市統計",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"path": this.county,
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.livestockData.select = select;
+						this.UpdateLivestockDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [livestockMap];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//===================livestock rank===========================
+		param = {};
+		param.selector = "#livestockRank";
+		param.textInfo = "#livestockRankText";
+		param.padding = {
+			top: 10, bottom: 10, left: 10, right: 10
+		}
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var livestockRank = {
+			"type": "rank",
+			"unit": unit,
+			"data": [
+				{
+					"name": "用水排名",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.livestockData.select = select;
+						this.UpdateLivestockDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [livestockRank];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		this.UpdateLivestockDetail();
+	}.bind(this);
+
 	if(!this.livestockData.data){
-		$.ajax({
-	      url:"/statistic/waterUseLivestock",
-	      async: false,
-	      success: function(result){
+		$.get("/statistic/waterUseLivestock",function(result){
 	        if(result.status != "ok"){
 	          return console.log(result.err);
 	        }
@@ -910,109 +1008,11 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.livestockData.minYear = yearBound[0];
 	        this.livestockData.maxYear = yearBound[1];
-	      }.bind(this)
-	    });
+	        DrawData();
+	    }.bind(this));
 	}
-
-	this.minYear = this.livestockData.minYear;
-	this.maxYear = this.livestockData.maxYear;
-	this.BoundYear();
-
-	var yearData = d3.nest()
-    .key(function(d){return d.Year;})
-    .key(function(d){return d.County})
-    .rollup(function(arr){
-    	return d3.sum(arr, function(d){
-    		return 	this.GetLivestockValue(d);
-    	}.bind(this));
-    }.bind(this))
-    .map(this.livestockData.data);
-
-	//compute water consumption
-	var data = yearData[this.year];
-	var dataArr = [];
-	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  this.GetLivestockUnit();
-	for(var county in data){
-		var d = data[county];
-		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
-		if(d < minValue) minValue = d;
-		if(d > maxValue) maxValue = d;
-	}
+	else DrawData();
 	
-	//===================livestock map===========================
-	var param = {};
-	param.selector = "#livestockMap";
-	param.textInfo = "#livestockMapText";
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var livestockMap = {
-		"type": "map",
-		"unit": unit,
-		"data": [
-			{
-				"name": "縣市統計",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"path": this.county,
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.livestockData.select = select;
-					this.UpdateLivestockDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [livestockMap];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	//===================livestock rank===========================
-	param = {};
-	param.selector = "#livestockRank";
-	param.textInfo = "#livestockRankText";
-	param.padding = {
-		top: 10, bottom: 10, left: 10, right: 10
-	}
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var livestockRank = {
-		"type": "rank",
-		"unit": unit,
-		"data": [
-			{
-				"name": "用水排名",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.livestockData.select = select;
-					this.UpdateLivestockDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [livestockRank];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	this.UpdateLivestockDetail();
 };
 
 WaterUseStatistic.prototype.UpdateLivestockDetail = function(){
@@ -1166,11 +1166,110 @@ WaterUseStatistic.prototype.GetIndustryUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
+	var DrawData = function(){
+		this.minYear = this.industryData.minYear;
+		this.maxYear = this.industryData.maxYear;
+		this.BoundYear();
+
+		var yearData = d3.nest()
+	    .key(function(d){return d.Year;})
+	    .key(function(d){return d.County})
+	    .rollup(function(arr){
+	    	return d3.sum(arr, function(d){
+	    		return 	this.GetIndustryValue(d);
+	    	}.bind(this));
+	    }.bind(this))
+	    .map(this.industryData.data);
+
+		//compute water consumption
+		var data = yearData[this.year];
+		var dataArr = [];
+		var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+		var unit =  this.GetIndustryUnit();
+		for(var county in data){
+			var d = data[county];
+			dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+			if(d < minValue) minValue = d;
+			if(d > maxValue) maxValue = d;
+		}
+		
+		//===================industry map===========================
+		var param = {};
+		param.selector = "#industryMap";
+		param.textInfo = "#industryMapText";
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var industryMap = {
+			"type": "map",
+			"unit": unit,
+			"data": [
+				{
+					"name": "縣市統計",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"path": this.county,
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.industryData.select = select;
+						this.UpdateIndustryDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [industryMap];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//===================industry rank===========================
+		param = {};
+		param.selector = "#industryRank";
+		param.textInfo = "#industryRankText";
+		param.padding = {
+			top: 10, bottom: 10, left: 10, right: 10
+		}
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var industryRank = {
+			"type": "rank",
+			"unit": unit,
+			"data": [
+				{
+					"name": "用水排名",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.industryData.select = select;
+						this.UpdateIndustryDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [industryRank];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		this.UpdateIndustryDetail();
+	}.bind(this);
+
 	if(!this.industryData.data){
-		$.ajax({
-	      url:"/statistic/waterUseIndustry",
-	      async: false,
-	      success: function(result){
+		$.get("/statistic/waterUseIndustry",function(result){
 	        if(result.status != "ok"){
 	          return console.log(result.err);
 	        }
@@ -1184,109 +1283,11 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.industryData.minYear = yearBound[0];
 	        this.industryData.maxYear = yearBound[1];
-	      }.bind(this)
-	    });
+	        DrawData();
+	    }.bind(this));
 	}
-
-	this.minYear = this.industryData.minYear;
-	this.maxYear = this.industryData.maxYear;
-	this.BoundYear();
-
-	var yearData = d3.nest()
-    .key(function(d){return d.Year;})
-    .key(function(d){return d.County})
-    .rollup(function(arr){
-    	return d3.sum(arr, function(d){
-    		return 	this.GetIndustryValue(d);
-    	}.bind(this));
-    }.bind(this))
-    .map(this.industryData.data);
-
-	//compute water consumption
-	var data = yearData[this.year];
-	var dataArr = [];
-	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  this.GetIndustryUnit();
-	for(var county in data){
-		var d = data[county];
-		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
-		if(d < minValue) minValue = d;
-		if(d > maxValue) maxValue = d;
-	}
+	else DrawData();
 	
-	//===================industry map===========================
-	var param = {};
-	param.selector = "#industryMap";
-	param.textInfo = "#industryMapText";
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var industryMap = {
-		"type": "map",
-		"unit": unit,
-		"data": [
-			{
-				"name": "縣市統計",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"path": this.county,
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.industryData.select = select;
-					this.UpdateIndustryDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [industryMap];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	//===================industry rank===========================
-	param = {};
-	param.selector = "#industryRank";
-	param.textInfo = "#industryRankText";
-	param.padding = {
-		top: 10, bottom: 10, left: 10, right: 10
-	}
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var industryRank = {
-		"type": "rank",
-		"unit": unit,
-		"data": [
-			{
-				"name": "用水排名",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.industryData.select = select;
-					this.UpdateIndustryDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [industryRank];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	this.UpdateIndustryDetail();
 };
 
 WaterUseStatistic.prototype.UpdateIndustryDetail = function(){
@@ -1457,11 +1458,110 @@ WaterUseStatistic.prototype.GetLivingUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphLiving = function(){
+	var DrawData = function(){
+		this.minYear = this.livingData.minYear;
+		this.maxYear = this.livingData.maxYear;
+		this.BoundYear();
+
+		var yearData = d3.nest()
+	    .key(function(d){return d.Year;})
+	    .key(function(d){return d.County})
+	    .rollup(function(arr){
+	    	return d3.sum(arr, function(d){
+	    		return 	this.GetLivingValue(d);
+	    	}.bind(this));
+	    }.bind(this))
+	    .map(this.livingData.data);
+
+		//compute water consumption
+		var data = yearData[this.year];
+		var dataArr = [];
+		var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
+		var unit =  this.GetLivingUnit();
+		for(var county in data){
+			var d = data[county];
+			dataArr.push({id: county, "name":this.countyMap[county],"value":d});
+			if(d < minValue) minValue = d;
+			if(d > maxValue) maxValue = d;
+		}
+		
+		//===================living map===========================
+		var param = {};
+		param.selector = "#livingMap";
+		param.textInfo = "#livingMapText";
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var livingMap = {
+			"type": "map",
+			"unit": unit,
+			"data": [
+				{
+					"name": "縣市統計",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"path": this.county,
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.livingData.select = select;
+						this.UpdateLivingDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [livingMap];
+		var graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		//===================living rank===========================
+		param = {};
+		param.selector = "#livingRank";
+		param.textInfo = "#livingRankText";
+		param.padding = {
+			top: 10, bottom: 10, left: 10, right: 10
+		}
+		param.axis = {
+			minX: minValue,
+			maxX: maxValue,
+			minY: 0,
+			maxY: dataArr.length
+		};
+		var livingRank = {
+			"type": "rank",
+			"unit": unit,
+			"data": [
+				{
+					"name": "用水排名",
+					"color": {
+						"minColor": "#888888",
+						"maxColor": "#333333"
+					},
+					"value": dataArr,
+					"clickFn": function(d){
+						this.openDetailPanel = true;
+						var select = {"id":d.id, "name":d.name};
+						this.livingData.select = select;
+						this.UpdateLivingDetail();
+					}.bind(this)
+				}
+			]
+		};
+		param.graph = [livingRank];
+		graph = new SvgGraph(param);
+		graph.DrawGraph();
+
+		this.UpdateLivingDetail();
+	}.bind(this);
+
 	if(!this.livingData.data){
-		$.ajax({
-	      url:"/statistic/waterUseLiving",
-	      async: false,
-	      success: function(result){
+		$.get("/statistic/waterUseLiving",function(result){
 	        if(result.status != "ok"){
 	          return console.log(result.err);
 	        }
@@ -1475,109 +1575,11 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.livingData.minYear = yearBound[0];
 	        this.livingData.maxYear = yearBound[1];
-	      }.bind(this)
-	    });
+	        DrawData();
+	    }.bind(this));
 	}
-
-	this.minYear = this.livingData.minYear;
-	this.maxYear = this.livingData.maxYear;
-	this.BoundYear();
-
-	var yearData = d3.nest()
-    .key(function(d){return d.Year;})
-    .key(function(d){return d.County})
-    .rollup(function(arr){
-    	return d3.sum(arr, function(d){
-    		return 	this.GetLivingValue(d);
-    	}.bind(this));
-    }.bind(this))
-    .map(this.livingData.data);
-
-	//compute water consumption
-	var data = yearData[this.year];
-	var dataArr = [];
-	var minValue = Number.MAX_VALUE, maxValue = Number.MIN_VALUE;
-	var unit =  this.GetLivingUnit();
-	for(var county in data){
-		var d = data[county];
-		dataArr.push({id: county, "name":this.countyMap[county],"value":d});
-		if(d < minValue) minValue = d;
-		if(d > maxValue) maxValue = d;
-	}
+	else DrawData();
 	
-	//===================living map===========================
-	var param = {};
-	param.selector = "#livingMap";
-	param.textInfo = "#livingMapText";
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var livingMap = {
-		"type": "map",
-		"unit": unit,
-		"data": [
-			{
-				"name": "縣市統計",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"path": this.county,
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.livingData.select = select;
-					this.UpdateLivingDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [livingMap];
-	var graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	//===================living rank===========================
-	param = {};
-	param.selector = "#livingRank";
-	param.textInfo = "#livingRankText";
-	param.padding = {
-		top: 10, bottom: 10, left: 10, right: 10
-	}
-	param.axis = {
-		minX: minValue,
-		maxX: maxValue,
-		minY: 0,
-		maxY: dataArr.length
-	};
-	var livingRank = {
-		"type": "rank",
-		"unit": unit,
-		"data": [
-			{
-				"name": "用水排名",
-				"color": {
-					"minColor": "#888888",
-					"maxColor": "#333333"
-				},
-				"value": dataArr,
-				"clickFn": function(d){
-					this.openDetailPanel = true;
-					var select = {"id":d.id, "name":d.name};
-					this.livingData.select = select;
-					this.UpdateLivingDetail();
-				}.bind(this)
-			}
-		]
-	};
-	param.graph = [livingRank];
-	graph = new SvgGraph(param);
-	graph.DrawGraph();
-
-	this.UpdateLivingDetail();
 };
 
 WaterUseStatistic.prototype.UpdateLivingDetail = function(){

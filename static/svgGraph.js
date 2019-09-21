@@ -12,8 +12,8 @@ function SvgGraph(param){
 	this.padding = {left: 20, right: 20, top: 20, bottom: 20};
 	if(param.padding) this.padding = param.padding;
 
-	this.w = graph.width();
-	this.h = graph.height();
+	this.w = graph.width() || 400;
+	this.h = graph.height() || 300;
 	if(this.axis){
 		this.scaleW = d3.scale.linear()
 			.domain([this.axis.minX,this.axis.maxX])
