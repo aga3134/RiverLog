@@ -82,7 +82,7 @@ class WaterData:
             #water level sites
             url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=28E06316-FE39-40E2-8C35-7BF070FD8697"
             r = requests.get(url,verify=False)
-            r.encoding = "utf-8"
+            r.encoding = "utf-8-sig"
             if r.status_code == requests.codes.all_okay:
                 data = json.loads(r.text)
                 for d in data["RiverStageObservatoryProfile_OPENDATA"]:
