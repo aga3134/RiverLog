@@ -1,4 +1,4 @@
-var moment = require('moment-timezone');
+var dayjs = require('dayjs');
 
 var util = {};
 var timeZone = "Asia/Taipei";
@@ -9,7 +9,7 @@ util.PadLeft = function(val, totalLen, ch){
 }
 
 util.DateToString = function (date,dateSep="-",timeSep=":"){
-	var t = moment(date).tz(timeZone);
+	var t = dayjs(date,{timeZone: timeZone});
 	var yyyy = date.get("year");
 	var mm = util.PadLeft(t.get("month")+1,2);
 	var dd = util.PadLeft(t.get("date"),2);
@@ -21,7 +21,7 @@ util.DateToString = function (date,dateSep="-",timeSep=":"){
 }
 
 util.DateToDateString = function(date,dateSep="-"){
-	var t = moment(date).tz(timeZone);
+	var t = dayjs(date,{timeZone: timeZone});
 	var yyyy = t.get("year");
 	var mm = util.PadLeft(t.get("month")+1,2);
 	var dd = util.PadLeft(t.get("date"),2);
@@ -30,7 +30,7 @@ util.DateToDateString = function(date,dateSep="-"){
 }
 
 util.DateToTimeString = function(date,timeSep=":"){
-	var t = moment(date).tz(timeZone);
+	var t = dayjs(date,{timeZone: timeZone});
 	var HH = util.PadLeft(t.get("hour"),2);
 	var MM = util.PadLeft(t.get("minute"),2);
 	var SS = util.PadLeft(t.get("second"),2);
