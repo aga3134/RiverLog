@@ -8,7 +8,7 @@ var meta = {};
 meta.version = Config.version;
 meta.hostname = Config.hostname;
 
-router.get("/site", function(req, res){
+router.get("/station", function(req, res){
 	var param = {};
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
@@ -16,7 +16,7 @@ router.get("/site", function(req, res){
 	param.failFunc = function(result){
 		res.status(200).json({"status": "fail","message": result.err});
 	};
-	FloodController.GetSite(param);
+	FloodController.GetStation(param);
 });
 
 router.get("/floodData", function(req, res){

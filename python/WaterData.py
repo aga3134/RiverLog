@@ -268,11 +268,13 @@ class WaterData:
             traceback.print_exc()
 
     def ProcessFlood(self, url):
+        print("process flood url: "+url)
         try:
             r = requests.get(url)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
-                data = r.json()["value"]
+                result = r.json()
+                data = result["value"]
                 #add site
                 for d in data:
                     if len(d["Thing"]["Locations"]) == 0:
@@ -299,6 +301,9 @@ class WaterData:
                     query = self.db["flood"+day].find_one(key)
                     if query is None:
                         self.db["flood"+day].insert_one(f)
+
+                if "@iot.nextLink" in result:
+                    self.ProcessFlood(result["@iot.nextLink"])
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

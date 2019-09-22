@@ -18,6 +18,7 @@ var g_APP = new Vue({
     rainData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}},
     waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}},
+    floodData: {station:{},data:{}},
     alertData: {},
     typhoonTrajectoryData: {},
     color: {},
@@ -28,6 +29,7 @@ var g_APP = new Vue({
     rainOption: {opacity:0.8, scale:1, show:true},
     waterLevelOption: {opacity:0.5, scale:1, show:true},
     reservoirOption: {opacity:0.5, scale:1, show:true},
+    floodOption: {opacity:0.5, scale:1, show:true},
     alertOption: {
       opacity:0.5,
       showFlow:false,
@@ -96,6 +98,22 @@ var g_APP = new Vue({
           stationHash[result.data[i].BasinIdentifier] = result.data[i];
         }
         this.waterLevelData.station = stationHash;
+      }.bind(this)
+    });
+
+    $.ajax({
+      url:"/flood/station",
+      async: false,
+      success: function(result){
+        if(result.status != "ok"){
+          return console.log(result.err);
+        }
+        var stationHash = {};
+        for(var i=0;i<result.data.length;i++){
+          stationHash[result.data[i]._id] = result.data[i];
+        }
+
+        this.floodData.station = stationHash;
       }.bind(this)
     });
 
@@ -231,14 +249,31 @@ var g_APP = new Vue({
           this.UpdateMapReservoir();
         }.bind(this));
 
+        $.get("/flood/floodData?date="+this.curYear+"-"+this.curDate,function(result){
+          if(result.status != "ok"){
+            return console.log(result.err);
+          }
+          var date = this.curYear+"-"+this.curDate;
+          this.floodData.data = d3.nest()
+            .key(function(d){
+              var t = dayjs(date+" "+d.time);
+              var m = t.minute();
+              m = m - m%10;
+              t = t.set('minute', m);
+              return t.format("HH:mm:00");
+            })
+            .map(result.data);
+          this.UpdateMapFlood();
+        }.bind(this));
+
         $.get("/alert/alertData?date="+this.curYear+"-"+this.curDate,function(result){
           if(result.status != "ok"){
             return console.log(result.err);
           }
           for(var i=0;i<result.data.length;i++){
             var alert = result.data[i];
-            alert.effective = moment(alert.effective);
-            alert.expires = moment(alert.expires);
+            alert.effective = dayjs(alert.effective);
+            alert.expires = dayjs(alert.expires);
           }
           this.alertData = d3.nest()
             .key(function(d){return d.eventcode;})
@@ -253,7 +288,7 @@ var g_APP = new Vue({
           }
           for(var i=0;i<result.data.length;i++){
             var typhoon = result.data[i];
-            var t = moment(typhoon.time);
+            var t = dayjs(typhoon.time);
             typhoon.time = t.format("HH:00:00");
             typhoon.circle_of_15ms = Math.max(0,typhoon.circle_of_15ms);
             typhoon.circle_of_25ms = Math.max(0,typhoon.circle_of_25ms);
@@ -473,6 +508,7 @@ var g_APP = new Vue({
       this.UpdateMapRain();
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
+      this.UpdateMapFlood();
       this.UpdateMapAlert();
       this.UpdateMapTyphoon();
     },
@@ -520,11 +556,17 @@ var g_APP = new Vue({
       if(!reservoirData || this.reservoirOption.show == false) return this.mapControl.ClearMapReservoir();
       this.mapControl.UpdateMapReservoir(reservoirData);
     },
+    UpdateMapFlood: function(){
+      if(!this.mapControl) return;
+      var floodData = this.GetDataFromTime(this.floodData.data,this.curTime);
+      if(!floodData || this.floodOption.show == false) return this.mapControl.ClearMapFlood();
+      this.mapControl.UpdateMapFlood(floodData);
+    },
     UpdateMapAlert: function(){
       if(!this.mapControl) return;
       this.mapControl.ClearMapAlert();
       //console.log(this.alertData);
-      var t = moment(this.curYear+"-"+this.curDate+" "+this.curTime);
+      var t = dayjs(this.curYear+"-"+this.curDate+" "+this.curTime);
       this.mapControl.UpdateMapAlert(this.alertData, t);
     },
     UpdateMapTyphoon: function(){

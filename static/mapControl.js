@@ -8,9 +8,11 @@ function MapControl(){
 	this.infoStorm = null;
 	this.infoTyphoon = null;
 	this.infoTyphoonTrajectory = null;
+  this.infoFlood = null;
 	this.layerRain = {};
   this.layerReservoir = {};
   this.layerWaterLevel = {};
+  this.layerFlood = {};
   this.layerThunderstorm = {};
   this.layerTyphoonTrajectory = {};
   this.infoRainID = "";
@@ -18,6 +20,7 @@ function MapControl(){
   this.infoWaterLevelID = "";
   this.infoAlertID = "";
   this.infoStormID = "";
+  this.infoFloodID = "";
   this.infoTyphoonTrajectoryID = "";
   this.geoDebris = {};
   this.geoCounty = {};
@@ -209,6 +212,7 @@ MapControl.prototype.InitMap = function(){
   this.infoAlert = new google.maps.InfoWindow();
   this.infoStorm = new google.maps.InfoWindow();
   this.infoTyphoon = new google.maps.InfoWindow();
+  this.infoFlood = new google.maps.InfoWindow();
   this.infoTyphoonTrajectory = new google.maps.InfoWindow();
 };
 
@@ -528,7 +532,7 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
 
   for(var i=0;i<reservoirData.length;i++){
     var station = g_APP.reservoirData.station[reservoirData[i].ReservoirIdentifier];
-    if(!station) continue;
+    if(!station || !this.map) continue;
     //info window有打開，更新資訊
     if(this.infoReservoir.getMap() && this.infoReservoirID == station.id){
       UpdateInfoReservoir(reservoirData[i]);
@@ -563,6 +567,66 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
       
       overlay.addListener('click', clickFn(reservoirData,i));
       this.layerReservoir[station.id] = overlay;
+    }
+  }
+};
+
+MapControl.prototype.UpdateMapFlood = function(floodData){
+
+  var UpdateInfoFlood = function(d){
+    var s = g_APP.floodData.station[d.stationID];
+    var str = "<p>"+s.stationName+"</p>";
+    str += "<p>淹水 "+d.value+" 公分</p>";
+    str += "<p>時間 "+d.time+" </p>";
+    var loc = new google.maps.LatLng(s.lat, s.lng);
+    this.infoFlood.setOptions({content: str, position: loc});
+  }.bind(this);
+
+  var clickFn = function(data,i){ 
+    return function() {
+      UpdateInfoFlood(data[i]);
+      this.infoFlood.open(this.map);
+      this.infoFloodID = data[i].stationID;
+    }.bind(this);
+  }.bind(this);
+
+  for(var i=0;i<floodData.length;i++){
+    var station = g_APP.floodData.station[floodData[i].stationID];
+
+    if(!station || !this.map) continue;
+    //info window有打開，更新資訊
+    if(this.infoFlood.getMap() && this.infoFloodID == station._id){
+      UpdateInfoFlood(floodData[i]);
+    }
+
+    var zoomLevel = this.map.getZoom();
+    var size = 10*(Math.pow(1.5,zoomLevel-7))*g_APP.floodOption.scale;
+    var d = floodData[i];
+    
+    if(this.layerFlood[station._id]){
+      var overlay = this.layerFlood[station._id];
+      var option = {
+        size: size,
+        value: d.value,
+        opacity: g_APP.floodOption.opacity
+      };
+      overlay.Update(option);
+      google.maps.event.clearListeners(overlay,"click");
+      overlay.addListener('click', clickFn(floodData,i));
+    }
+    else{
+      var overlay = new FloodOverlay({
+        map: this.map,
+        lat: station.lat,
+        lng: station.lng,
+        size: size,
+        svgID: "svg_"+station._id,
+        value: d.value,
+        opacity: g_APP.floodOption.opacity
+      });
+      
+      overlay.addListener('click', clickFn(floodData,i));
+      this.layerFlood[station._id] = overlay;
     }
   }
 };
@@ -880,6 +944,13 @@ MapControl.prototype.ClearMapReservoir = function(){
     this.layerReservoir[key].setMap(null);
   }
   this.layerReservoir = {};
+};
+
+MapControl.prototype.ClearMapFlood = function(){
+  for(var key in this.layerFlood){
+    this.layerFlood[key].setMap(null);
+  }
+  this.layerFlood = {};
 };
 
 MapControl.prototype.ClearMapAlert = function(){
