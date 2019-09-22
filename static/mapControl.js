@@ -507,12 +507,12 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
 
 	var UpdateInfoReservoir = function(d){
     var s = g_APP.reservoirData.station[d.ReservoirIdentifier];
-    var percent = (100*d.EffectiveWaterStorageCapacity/s.CurruntEffectiveCapacity).toFixed(2);
+    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
     var str = "<p>"+s.ReservoirName+"</p>";
     str += "<p>蓄水百分比 "+percent+" %</p>";
     str += "<p>水位/滿水位/死水位: </p>"
     str += d.WaterLevel+" / "+s.FullWaterLevel+" / "+s.DeadStorageLevel+" m</p>";
-    str += "<p>有效總容量 "+s.CurruntEffectiveCapacity+" m3</p>";
+    str += "<p>有效總容量 "+s.EffectiveCapacity+" m3</p>";
     str += "<p>時間 "+d.ObservationTime+" </p>";
     var loc = new google.maps.LatLng(s.lat, s.lng);
     this.infoReservoir.setOptions({content: str, position: loc});
@@ -537,12 +537,12 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
     var zoomLevel = this.map.getZoom();
     var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7))*g_APP.reservoirOption.scale;
     var d = reservoirData[i];
-    var percent = (100*d.EffectiveWaterStorageCapacity/station.CurruntEffectiveCapacity).toFixed(2);
+    var percent = (100*d.EffectiveWaterStorageCapacity/station.EffectiveCapacity).toFixed(2);
 
     if(this.layerReservoir[station.id]){
       var overlay = this.layerReservoir[station.id];
       var option = {
-        size: station.CurruntEffectiveCapacity*baseSize,
+        size: station.EffectiveCapacity*baseSize,
         percent: percent,
         opacity: g_APP.reservoirOption.opacity
       };
@@ -551,11 +551,11 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
       overlay.addListener('click', clickFn(reservoirData,i));
     }
     else{
-      var overlay = new SvgOverlay({
+      var overlay = new ReservoirOverlay({
         map: this.map,
         lat: station.lat,
         lng: station.lng,
-        size: station.CurruntEffectiveCapacity*baseSize,
+        size: station.EffectiveCapacity*baseSize,
         svgID: "svg_"+station.id,
         percent: percent,
         opacity: g_APP.reservoirOption.opacity

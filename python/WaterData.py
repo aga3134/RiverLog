@@ -290,11 +290,11 @@ class WaterData:
                         continue
                     f = {}
                     f["stationID"] = d["Thing"]["name"]
-                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=pytz.utc)
-                    f["time"] = t.isoformat()
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    f["time"] = t
                     f["value"] = d["Observations"][0]["result"]
                     key = {"stationID":f["stationID"],"time":f["time"]}
-                    t = t.astimezone(taiwan)
                     day = datetime.datetime.strftime(t,"%Y%m%d")
                     query = self.db["flood"+day].find_one(key)
                     if query is None:
@@ -313,7 +313,7 @@ class WaterData:
             for site in cursor:
                 siteHash[site["id"]] = site
                 
-            with open(file,"r",encoding="utf8") as f:
+            with open(file,"r",encoding="utf-8-sig") as f:
                 data = f.read()
                 reservoir = json.loads(data)
                 for r in reservoir["ReservoirConditionData_OPENDATA"]:
