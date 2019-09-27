@@ -3,6 +3,10 @@ class FloodOverlay extends SvgOverlay{
         super(option);
         this.value = option.value;
         this.opacity = option.opacity||1;
+
+        var domain = [0,30,60,90,120,150,180];
+        var range = ["#ffff00","#ffff00","#ff6600","#ff6600","#ff3300","#ff3300","#ff0000"];
+        this.color = d3.scale.linear().domain(domain).range(range);
     }
     Update(option){
         if(option){
@@ -15,6 +19,7 @@ class FloodOverlay extends SvgOverlay{
 
         var svg = d3.select("#"+this.svgID);
         svg.selectAll("*").remove();
+        if(this.value == 0) return;
 
         var DrawHumanShape = function(headR,bodyW,bodyH,legW,legH,padT){
             var halfSize = this.size*0.5;
@@ -46,7 +51,8 @@ class FloodOverlay extends SvgOverlay{
                 d: d
             });
 
-            var fillH = this.size*0.5;
+
+            var fillH = this.size*(1-Math.min(1,this.value/180));
             svg.append("rect").attr({
                 x: 0,
                 y: 0,
@@ -63,7 +69,7 @@ class FloodOverlay extends SvgOverlay{
                 width: this.size,
                 height: this.size,
                 "clip-path":"url(#"+clipID+")",
-                fill: "#ffff00",
+                fill: this.color(this.value),
                 opacity: this.opacity
             });
 
