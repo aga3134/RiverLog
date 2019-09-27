@@ -26,7 +26,8 @@ function MapControl(){
   this.geoCounty = {};
   this.geoTown = {};
   this.geoVillage = {};
-  this.openLineChart = false;
+  this.openDailyChart = false;
+  this.dailyChartTitle = "";
 };
 
 MapControl.prototype.InitMap = function(){
@@ -996,8 +997,8 @@ MapControl.prototype.ClearMapTyphoon = function(){
 
 
 MapControl.prototype.OpenLineChart = function(type){
-  this.openLineChart = true;
-  var unitX = "時", unitY = "", title="";
+  this.openDailyChart = true;
+  var unitX = "", unitY = "", title="";
   var data = [];
   var minY = Number.MAX_VALUE, maxY = Number.MIN_VALUE;
   var day = g_APP.curYear+"-"+g_APP.curDate;
@@ -1006,6 +1007,8 @@ MapControl.prototype.OpenLineChart = function(type){
       title = "雨量";
       unitY = "mm";
       minY = 0;
+      var s = g_APP.rainData.station[this.infoRainID];
+      this.dailyChartTitle = s.name+" 雨量站 今日變化";
       var arr = g_APP.rainData.daily[this.infoRainID];
       for(var i=0;i<arr.length;i++){
         if(arr[i].now > maxY) maxY = arr[i].now;
@@ -1018,6 +1021,8 @@ MapControl.prototype.OpenLineChart = function(type){
     case "waterLevel":
       title = "水位";
       unitY = "m";
+      var s = g_APP.waterLevelData.station[this.infoWaterLevelID];
+      this.dailyChartTitle = s.ObservatoryName+" 河川水位站 今日變化";
       var arr = g_APP.waterLevelData.daily[this.infoWaterLevelID];
       for(var i=0;i<arr.length;i++){
         if(arr[i].WaterLevel < minY) minY = arr[i].WaterLevel;
@@ -1034,9 +1039,10 @@ MapControl.prototype.OpenLineChart = function(type){
       minY = 0;
       maxY = 100;
       var s = g_APP.reservoirData.station[this.infoReservoirID];
+      this.dailyChartTitle = s.ReservoirName+" 蓄水百分比 今日變化";
       var arr = g_APP.reservoirData.daily[this.infoReservoirID];
       for(var i=0;i<arr.length;i++){
-        var percent = (100*arr[i].EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
+        var percent = (100*arr[i].EffectiveWaterStorageCapacity/s.EffectiveCapacity);
         data.push({
           x: new Date(day+" "+arr[i].ObservationTime),
           y: percent
@@ -1047,12 +1053,14 @@ MapControl.prototype.OpenLineChart = function(type){
       title = "淹水深度";
       unitY = "cm";
       minY = 0;
+      var s = g_APP.floodData.station[this.infoFloodID];
+      this.dailyChartTitle = s.stationName+" 淹水測站 今日變化";
       var arr = g_APP.floodData.daily[this.infoFloodID];
       for(var i=0;i<arr.length;i++){
         if(arr[i].value > maxY) maxY = arr[i].value;
         data.push({
           x: new Date(day+" "+arr[i].time),
-          y: arr[i].value
+          y: Math.max(0,arr[i].value)
         });
       }
       break;

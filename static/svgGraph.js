@@ -203,6 +203,10 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			return parseInt(this.scaleH(d.y))+this.padding.top;
 		}.bind(this));
 
+	var format = null;
+	if(this.axis.typeX == "time"){
+		format = d3.time.format(this.axis.format);
+	}
 
 	var textInfo = $(this.textInfo);
 	for(var i=0;i<graph.data.length;i++){
@@ -237,7 +241,11 @@ SvgGraph.prototype.DrawGraphLine = function(graph){
 			.on("mouseover",function(d){
 				var cur = d3.select(this);
 				cur.attr("opacity",0.5);
-				textInfo.text(d.x+graph.unitX+" "+cur.attr("data-name")+": "+d.y.toFixed(2)+graph.unitY);
+				var x = d.x;
+				if(format){
+					x = format(x);
+				}
+				textInfo.text(x+graph.unitX+" "+cur.attr("data-name")+": "+d.y.toFixed(2)+graph.unitY);
 			})
 			.on("mouseout",function(d){
 				d3.select(this).attr("opacity",0);

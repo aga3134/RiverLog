@@ -46,12 +46,12 @@
 
 				<div id="map" v-show="mapType == 'waterEvent' "></div>
 				
-				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openLineChart}">
-					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openLineChart = false;">
+				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openDailyChart}">
+					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openDailyChart = false;">
 					<div class="graph-content">
 						<div class="graph-container">
 							<div class="full-w">
-								<div class="graph-title">今日變化</div>
+								<div class="graph-title">{{mapControl.dailyChartTitle}}</div>
 								<div class="graph" id="dailyChart"></div>
 								<div class="graph-info" id="dailyChartText"></div>
 							</div>
