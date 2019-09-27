@@ -81,6 +81,24 @@ a {
         height: 100%; }
     .riverlog .main-content .info-title {
       font-weight: bold; }
+    .riverlog .main-content .info-bt-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap; }
+    .riverlog .main-content .info-bt {
+      text-align: center;
+      border: 1px solid #888888;
+      color: #555555;
+      font-weight: bold;
+      border-radius: 5px;
+      padding: 3px 5px;
+      margin: 5px;
+      cursor: pointer; }
+      .riverlog .main-content .info-bt:hover {
+        color: #ff5555;
+        border: 1px solid #ff8888; }
     .riverlog .main-content .graph-content {
       position: relative;
       display: flex;
@@ -122,19 +140,6 @@ a {
         .riverlog .main-content .graph-content .graph-container .graph-info {
           margin: 10px;
           text-align: center; }
-      .riverlog .main-content .graph-content .detail-panel {
-        position: fixed;
-        left: 100%;
-        padding: 40px 10px;
-        -webkit-transition: left .5s;
-        transition: left .5s;
-        top: 0px;
-        width: calc(100% - 40px);
-        height: 100%;
-        background-color: #feffe8;
-        box-shadow: 0px 0px 10px #888888; }
-        .riverlog .main-content .graph-content .detail-panel.open {
-          left: 40px; }
       .riverlog .main-content .graph-content .fix-bottom {
         position: fixed;
         bottom: 0px;
@@ -181,6 +186,20 @@ a {
             height: 20px;
             background: #333333;
             cursor: pointer; }
+  .riverlog .detail-panel {
+    position: fixed;
+    left: 100%;
+    padding: 40px 10px;
+    -webkit-transition: left .5s;
+    transition: left .5s;
+    top: 0px;
+    width: calc(100% - 40px);
+    height: 100%;
+    background-color: #feffe8;
+    box-shadow: 0px 0px 10px #888888;
+    z-index: 10; }
+    .riverlog .detail-panel.open {
+      left: 40px; }
   .riverlog .topbar {
     width: 100%;
     padding: 5px 10px;

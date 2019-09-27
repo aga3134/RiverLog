@@ -45,7 +45,20 @@
 				</div>
 
 				<div id="map" v-show="mapType == 'waterEvent' "></div>
-
+				
+				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openLineChart}">
+					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openLineChart = false;">
+					<div class="graph-content">
+						<div class="graph-container">
+							<div class="full-w">
+								<div class="graph-title">今日變化</div>
+								<div class="graph" id="dailyChart"></div>
+								<div class="graph-info" id="dailyChartText"></div>
+							</div>
+						</div>	
+					</div>
+				</div>
+				
 				<div class="graph-content" v-show="mapType == 'waterUse' " v-if="waterUse">
 					<select v-model="waterUse.type" v-on:change="waterUse.UpdateGraph();">
 						<option value="overview">總用水供需</option>

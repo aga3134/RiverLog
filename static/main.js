@@ -9,16 +9,16 @@ var g_APP = new Vue({
     openOption: false,
     openAbout: false,
     yearArr: [],
-    curYear: 2018,
+    curYear: 2019,
     curDate: "1-1",
     curTime: "0:0",
     dailySum: [],
     weekLabel: [],
     monthLabel: [],
-    rainData: {station:{},dayAvg:{},timeAvg:{},data:{}},
-    reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}},
-    waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}},
-    floodData: {station:{},data:{}},
+    rainData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
+    reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
+    waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
+    floodData: {station:{},data:{}, daily:{}},
     alertData: {},
     typhoonTrajectoryData: {},
     color: {},
@@ -228,6 +228,11 @@ var g_APP = new Vue({
           this.rainData.data = d3.nest()
             .key(function(d){return d.time;})
             .map(result.data);
+
+          this.rainData.daily = d3.nest()
+            .key(function(d){return d.stationID})
+            .map(result.data);
+
           this.UpdateMapRain();
         }.bind(this));
 
@@ -238,6 +243,11 @@ var g_APP = new Vue({
           this.waterLevelData.data = d3.nest()
             .key(function(d){return d.RecordTime;})
             .map(result.data);
+
+          this.waterLevelData.daily = d3.nest()
+            .key(function(d){return d.StationIdentifier})
+            .map(result.data);
+
           this.UpdateMapWaterLevel();
         }.bind(this));
 
@@ -248,6 +258,11 @@ var g_APP = new Vue({
           this.reservoirData.data = d3.nest()
             .key(function(d){return d.ObservationTime;})
             .map(result.data);
+
+          this.reservoirData.daily = d3.nest()
+            .key(function(d){return d.ReservoirIdentifier})
+            .map(result.data);
+
           this.UpdateMapReservoir();
         }.bind(this));
 
@@ -265,6 +280,11 @@ var g_APP = new Vue({
               return t.format("HH:mm:00");
             })
             .map(result.data);
+
+          this.floodData.daily = d3.nest()
+            .key(function(d){return d.stationID})
+            .map(result.data);
+            
           this.UpdateMapFlood();
         }.bind(this));
 

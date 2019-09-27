@@ -26,6 +26,7 @@ function MapControl(){
   this.geoCounty = {};
   this.geoTown = {};
   this.geoVillage = {};
+  this.openLineChart = false;
 };
 
 MapControl.prototype.InitMap = function(){
@@ -350,6 +351,7 @@ MapControl.prototype.UpdateMapRain = function(rainData){
     var str = "<p>"+s.name+"</p>";
     str += "<p>累積雨量 "+d.now+" mm</p>";
     str += "<p>時間 "+d.time+" </p>";
+    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"rain\");'>今日變化</div></div>";
     var loc = new google.maps.LatLng(s.lat, s.lon);
     this.infoRain.setOptions({content: str, position: loc});
   }.bind(this);
@@ -365,7 +367,7 @@ MapControl.prototype.UpdateMapRain = function(rainData){
   for(var i=0;i<rainData.length;i++){
     var station = g_APP.rainData.station[rainData[i].stationID];
     if(!station) continue;
-    if(rainData[i].now < 0) continue;
+    if(rainData[i].now <= 0) continue;
     //info window有打開，更新資訊
     if(this.infoRain.getMap() && this.infoRainID == station.stationID){
       UpdateInfoRain(rainData[i]);
@@ -419,6 +421,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData)
     str += "<p>警戒水位(三級/二級/一級):</p>";
     str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
     str += "<p>時間 "+d.RecordTime+" </p>";
+    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
     var loc = new google.maps.LatLng(s.lat, s.lon);
     this.infoWaterLevel.setOptions({content: str, position: loc});
   }.bind(this);
@@ -518,6 +521,7 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
     str += d.WaterLevel+" / "+s.FullWaterLevel+" / "+s.DeadStorageLevel+" m</p>";
     str += "<p>有效總容量 "+s.EffectiveCapacity+" m3</p>";
     str += "<p>時間 "+d.ObservationTime+" </p>";
+    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"reservoir\");'>今日變化</div></div>";
     var loc = new google.maps.LatLng(s.lat, s.lng);
     this.infoReservoir.setOptions({content: str, position: loc});
   }.bind(this);
@@ -578,6 +582,7 @@ MapControl.prototype.UpdateMapFlood = function(floodData){
     var str = "<p>"+s.stationName+"</p>";
     str += "<p>淹水 "+d.value+" 公分</p>";
     str += "<p>時間 "+d.time+" </p>";
+    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"flood\");'>今日變化</div></div>";
     var loc = new google.maps.LatLng(s.lat, s.lng);
     this.infoFlood.setOptions({content: str, position: loc});
   }.bind(this);
@@ -987,4 +992,108 @@ MapControl.prototype.ClearMapTyphoon = function(){
     graph.center.setMap(null);
   }
   this.layerTyphoonTrajectory = {};
+};
+
+
+MapControl.prototype.OpenLineChart = function(type){
+  this.openLineChart = true;
+  var unitX = "時", unitY = "", title="";
+  var data = [];
+  var minY = Number.MAX_VALUE, maxY = Number.MIN_VALUE;
+  var day = g_APP.curYear+"-"+g_APP.curDate;
+  switch(type){
+    case "rain":
+      title = "雨量";
+      unitY = "mm";
+      minY = 0;
+      var arr = g_APP.rainData.daily[this.infoRainID];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].now > maxY) maxY = arr[i].now;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: arr[i].now
+        });
+      }
+      break;
+    case "waterLevel":
+      title = "水位";
+      unitY = "m";
+      var arr = g_APP.waterLevelData.daily[this.infoWaterLevelID];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].WaterLevel < minY) minY = arr[i].WaterLevel;
+        if(arr[i].WaterLevel > maxY) maxY = arr[i].WaterLevel;
+        data.push({
+          x: new Date(day+" "+arr[i].RecordTime),
+          y: arr[i].WaterLevel
+        });
+      }
+      break;
+    case "reservoir":
+      title = "蓄水百分比";
+      unitY = "%";
+      minY = 0;
+      maxY = 100;
+      var s = g_APP.reservoirData.station[this.infoReservoirID];
+      var arr = g_APP.reservoirData.daily[this.infoReservoirID];
+      for(var i=0;i<arr.length;i++){
+        var percent = (100*arr[i].EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
+        data.push({
+          x: new Date(day+" "+arr[i].ObservationTime),
+          y: percent
+        });
+      }
+      break;
+    case "flood":
+      title = "淹水深度";
+      unitY = "cm";
+      minY = 0;
+      var arr = g_APP.floodData.daily[this.infoFloodID];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].value > maxY) maxY = arr[i].value;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: arr[i].value
+        });
+      }
+      break;
+  }
+
+  data.sort(function(a,b){
+    return a.x - b.x;
+  });
+
+  var param = {};
+  param.selector = "#dailyChart";
+  param.textInfo = "#dailyChartText";
+  param.padding = {
+    left: 50,
+    right: 20,
+    top: 20,
+    bottom: 20
+  };
+  param.axis = {
+    minX: new Date(day+" 00:00:00"),
+    maxX: new Date(day+" 23:59:59"),
+    minY: minY,
+    maxY: maxY,
+    curX: new Date(day+" "+g_APP.curTime),
+    draw: true,
+    typeX: "time",
+    format: "%H:%M"
+  };
+  var lineData = {
+    "type": "line",
+    "unitX": unitX,
+    "unitY": unitY,
+    "data": [
+      {
+        "name": title,
+        "color": "#ff3333",
+        "value": data
+      }
+    ]
+  };
+  param.graph = [lineData];
+  var graph = new SvgGraph(param);
+  graph.DrawGraph();
 };

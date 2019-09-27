@@ -15,9 +15,16 @@ function SvgGraph(param){
 	this.w = graph.width() || 400;
 	this.h = graph.height() || 300;
 	if(this.axis){
-		this.scaleW = d3.scale.linear()
-			.domain([this.axis.minX,this.axis.maxX])
-			.range([0,this.w-this.padding.left-this.padding.right]);
+		if(this.axis.typeX == "time"){
+			this.scaleW = d3.time.scale()
+				.domain([this.axis.minX,this.axis.maxX])
+				.range([0,this.w-this.padding.left-this.padding.right]);
+		}
+		else{
+			this.scaleW = d3.scale.linear()
+				.domain([this.axis.minX,this.axis.maxX])
+				.range([0,this.w-this.padding.left-this.padding.right]);
+		}
 		this.scaleH = d3.scale.linear()
 			.domain([this.axis.minY,this.axis.maxY])
 			.range([this.h-this.padding.bottom-this.padding.top,0]);
@@ -58,8 +65,13 @@ SvgGraph.prototype.DrawGraph = function(){
 
 SvgGraph.prototype.DrawAxis = function(){
 	if(!this.axis || !this.axis.draw) return;
-	var xAxis = d3.svg.axis().orient("bottom").scale(this.scaleW)
-		.tickFormat(function(d){return d;});;
+	var xAxis = d3.svg.axis().orient("bottom").scale(this.scaleW);
+	if(this.axis.typeX == "time"){
+		var format = d3.time.format(this.axis.format);
+		xAxis.tickFormat(function(d){return format(d)});
+	}
+	else xAxis.tickFormat(function(d){return d;});
+	
 	var yAxis = d3.svg.axis().orient("left").scale(this.scaleH);
 	var offsetY = this.axis.alignZero?this.scaleH(0):this.h-this.padding.bottom;
 
