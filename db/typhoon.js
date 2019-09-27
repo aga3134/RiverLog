@@ -4,6 +4,7 @@ var TyphoonSchema = new mongoose.Schema({
 	_id : String,
 	typhoon_name: String,		//颱風英文名稱
 	cwb_typhoon_name: String,	//颱風中文名稱
+	cwb_td_no: String,			//颱風編號
 	time: Date,					//定位時間
 	lat: Number,				//位置緯度
 	lng: Number,				//位置經度

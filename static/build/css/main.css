@@ -301,6 +301,11 @@ a {
       .riverlog .side-panel .option-item input[type="checkbox"] {
         width: 16px;
         height: 16px; }
+      .riverlog .side-panel .option-item select {
+        margin: 0px;
+        padding: 2px;
+        font-size: 0.8em;
+        border-radius: 3px; }
     .riverlog .side-panel .option-label {
       padding: 5px; }
     .riverlog .side-panel .date-selection {

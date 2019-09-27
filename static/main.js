@@ -31,6 +31,8 @@ var g_APP = new Vue({
     reservoirOption: {opacity:0.5, scale:1, show:true},
     floodOption: {opacity:0.5, scale:1, show:true},
     alertOption: {
+      certainty: "All",
+      severity: "All",
       opacity:0.5,
       showFlow:false,
       showReservoirDis:false,

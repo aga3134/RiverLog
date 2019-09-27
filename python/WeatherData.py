@@ -149,13 +149,27 @@ class WeatherData:
                 for tp in typhoon:
                     for pos in tp.analysis_data.find_all("fix"):
                         data = {}
-                        data["typhoon_name"] = tp.typhoon_name.string
-                        data["cwb_typhoon_name"] = tp.cwb_typhoon_name.string
+                        if not tp.typhoon_name is None:
+                            data["typhoon_name"] = tp.typhoon_name.string
+                        if not tp.cwb_typhoon_name is None:
+                            data["cwb_typhoon_name"] = tp.cwb_typhoon_name.string
+                        if not tp.cwb_td_no is None:
+                            data["cwb_td_no"] = tp.cwb_td_no.string
+
                         dateStr = pos.fix_time.string
                         dateStr = ''.join(dateStr.rsplit(':', 1))   #去掉時區的:
                         dateObj = datetime.datetime.strptime(dateStr, "%Y-%m-%dT%H:%M:%S%z")
                         data["time"] = dateObj
-                        data["_id"] = data["typhoon_name"]+"_"+dateStr
+
+                        tpID = ""
+                        if "typhoon_name" in data:
+                            tpID += data["typhoon_name"]
+                        if "cwb_typhoon_name" in data:
+                            tpID += data["cwb_typhoon_name"]
+                        if "cwb_td_no" in data:
+                            tpID += data["cwb_td_no"]
+                        data["_id"] = tpID+"_"+dateStr
+                        
                         latlng = pos.coordinate.string.split(",")
                         data["lat"] = util.ToFloat(latlng[1])
                         data["lng"] = util.ToFloat(latlng[0])

@@ -361,6 +361,28 @@
 						<input type="checkbox" v-model="alertOption.showTyphoon" v-on:change="UpdateMapAlert();">
 					</div>
 					<div class="option-item">
+						<div class="option-label">發生機率</div>
+						<select v-model="alertOption.certainty" v-on:change="UpdateMapAlert();">
+							<option value="All">全部</option>
+							<option value="Observed">已發生</option>
+							<option value="Likely">很可能發生</option>
+							<option value="Possible">可能發生</option>
+							<option value="Unlikely">不太會發生</option>
+							<option value="Unknown">未知</option>
+						</select>
+					</div>
+					<div class="option-item">
+						<div class="option-label">嚴重程度</div>
+						<select v-model="alertOption.severity" v-on:change="UpdateMapAlert();">
+							<option value="All">全部</option>
+							<option value="Extreme">嚴重威脅</option>
+							<option value="Severe">有威脅</option>
+							<option value="Moderate">可能有威脅</option>
+							<option value="Minor">不太有威脅</option>
+							<option value="Unknown">未知</option>
+						</select>
+					</div>
+					<div class="option-item">
 						<input type="range" min="0" max="1" step="0.1" v-model="alertOption.opacity" v-on:change="UpdateMapAlert();">
 						<div class="option-label">透明度</div>
 					</div>

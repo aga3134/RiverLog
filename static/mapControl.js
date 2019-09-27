@@ -636,6 +636,9 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
 	AddAlert = function(type, alertData){
     for(var i=0;i<alertData.length;i++){
       var alert = alertData[i];
+      if(g_APP.alertOption.certainty != "All" && alert.certainty != g_APP.alertOption.certainty) continue;
+      if(g_APP.alertOption.severity != "All" && alert.severity != g_APP.alertOption.severity) continue;
+
       if(t >= alert.effective && t < alert.expires){
         for(var j=0;j<alert.geocode.length;j++){
           switch(type){

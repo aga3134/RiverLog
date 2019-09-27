@@ -91,6 +91,8 @@ class AlertData:
         try:
             with open(file,"r",encoding="utf8") as f:
                 soup = BeautifulSoup(f.read(), 'html.parser')
+                if soup.status.string != "Actual":  #keep only actual alert
+                    return
                 id = soup.identifier.string
                 day = (soup.sent.string.split("T")[0]).replace("-","")
                 infoArr = soup.find_all("info")
@@ -100,6 +102,10 @@ class AlertData:
                     query = self.db["alert"+day].find_one({"_id":data["_id"]})
                     if not query is None:
                         continue
+                    data["msgType"] = soup.msgtype.string
+                    if not soup.reference is None:
+                        data["reference"] = soup.reference.string
+
                     data["eventcode"] = info.eventcode.value.string
                     data["effective"] = info.effective.string
                     data["expires"] = info.expires.string
