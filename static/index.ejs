@@ -610,11 +610,34 @@
 								<li>土石流潛勢溪流位置: <a href="https://246.swcb.gov.tw/Service/OpenData" target="_blank">土石流防災資訊網-土石流潛勢溪流基本資料</a></li>
 							</ul>
 						</div>
+
+						<div v-if="mapType == 'waterUse' ">
+							<div class="content-title">資料來源</div>
+							<ul>
+								<li>總供/用水量: <a href="https://erdb.epa.gov.tw/DataRepository/Statistics/StatSceWaterrecNew.aspx" target="_blank">環境資源資料庫 - 水資源供需</a></li>
+								<li>灌溉用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencyirrigationareaandwaterconsumptionstatisticsforagriculturalusage" target="_blank">水資料分享站 - 灌溉面積與灌溉用水量統計</a></li>
+								<li>養殖用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencycultivaionareaandwaterconsumptionstatisticsforagriculturalusage" target="_blank">水資料分享站 - 養殖面積與養殖用水量統計</a></li>
+								<li>畜牧用水量: <a href="https://scidm.nchc.org.tw/en/dataset/waterresourcesagencylivestockquantityandwaterconsumptionstatisticsforagriculturalusage" target="_blank">資料集平台 - 畜牧數與畜牧用水量統計</a></li>
+								<li>工業用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencywaterconsumptionandareaforindustrialusage" target="_blank">水資料分享站 - 工業用水量與工業面積</a></li>
+								<li>生活用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencywaterconsumptionstatisticsfordomesticusage" target="_blank">水資料分享站 - 生活用水量統計</a></li>
+								<li>自來水每月用水量: <a href="http://wise.wra.gov.tw/dataset/theconsumptionofwater" target="_blank">水資料分享站 - 自來水用水量</a></li>
+								<li>水庫統計:
+									<a href="http://wise.wra.gov.tw/dataset/reservoirsoperationstatisticaldata" target="_blank">水資料分享站 - 水庫營運</a>，
+									<a href="http://wise.wra.gov.tw/dataset/reservoirssedimentationstatisticaldata" target="_blank">水資料分享站 - 水庫淤積量</a>
+								</li>
+								<li>水利會位置: <a href="https://www.google.com.tw/maps" target="_blank">google map搜尋</a></li>
+								<li>工業業別: <a href="https://www.stat.gov.tw/ct.asp?mp=4&xItem=42276&ctNode=1309" target="_blank">中華民國統計資訊網 - 第10次修訂行業分類查詢</a></li>
+								<li>縣市界線: <a href="https://data.gov.tw/dataset/7442" target="_blank">政府資料開放平台-直轄市、縣市界線(TWD97經緯度)</a></li>
+								<li>鄉鎮界線: <a href="https://data.gov.tw/dataset/7441" target="_blank">政府資料開放平台-鄉鎮市區界線(TWD97經緯度)</a></li>
+							</ul>
+						</div>
+
 						<div class="content-title">參考文件</div>
 						<ul>
 							<li><a href="https://ci.taiwan.gov.tw/dsp/sta_guide.aspx" target="_blank">民生公共物聯網 - API說明</a></li>
 							<li><a href="https://ci.taiwan.gov.tw/creativity/index.aspx#relative-music" target="_blank">民生公共物聯網 - 相關影音</a></li>
-							<li><a href="https://alerts.ncdr.nat.gov.tw/AnnouncementFactory.aspx?EditorContentPK=100106" target="_blank">民生示警公開資料平台簡介</a></li>
+							<li><a href="https://alerts.ncdr.nat.gov.tw/Document/%E6%B0%91%E7%94%9F%E7%A4%BA%E8%AD%A6%E5%85%AC%E9%96%8B%E8%B3%87%E6%96%99%E5%B9%B3%E5%8F%B0.pdf" target="_blank">民生示警公開資料平台簡介</a></li>
+							<li><a href="https://alerts.ncdr.nat.gov.tw/platformInfo.aspx" target="_blank">民生示警公開資料平台 - 示警簡介</a></li>
 							<li><a href="https://water.taiwanstat.com/" target="_blank">用數據看台灣 - 台灣水庫即時水情</a></li>
 							<li><a href="https://www.books.com.tw/products/0010829596" target="_blank">颱風：在下一次巨災來臨前</a></li>
 							<li><a href="https://www.books.com.tw/products/0010723018" target="_blank">台灣的十大地理議題</a></li>
