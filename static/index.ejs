@@ -490,9 +490,143 @@
 				<div class="full-panel" v-if="openAbout">
 					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openAbout=false;">
 					<div class="content-area">
-						<div class="content-title">圖示說明</div>
-						<div class="content-title">資料來源</div>
+						<div v-if="mapType == 'waterEvent' ">
+							<div class="content-title">圖示說明</div>
+							<ul>
+								<li>操作介面: <a href="" target="_blank">說明</a></li>
+								<li>日期與時間框<div class="time-block"></div>從上到下分成三個區塊，顏色分別代表台灣北中南部的平均數值</li>
+								<li>
+									<div class="content">
+										日累積雨量: 以柱狀圖
+										<img class="content-icon" src="/static/Image/icon-rain.png">
+										高度表示雨量大小。越高代表雨量越多，顏色依
+										<a href="https://www.cwb.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
+										顏色內插顯示(單位mm)：
+									</div>
+								</li>
+								<div class="h-scroll">
+									<table>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.rainRange" v-if="i<color.rainRange.length-1" v-bind:style="{background: 'linear-gradient(90deg,'+color.rainRange[i]+','+color.rainRange[i+1]+')'}">&nbsp;</td>
+										</tr>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.rainDomain" v-if="i<color.rainRange.length-1">{{color.rainDomain[i]}}~{{color.rainDomain[i+1]}}</td>
+										</tr>
+									</table>
+								</div>
+
+								<li>
+									<div class="content">
+										河川水位: 水位持平以菱形
+										<img class="content-icon" src="/static/Image/icon-water-level.png">
+										表示，水位上昇以向上箭頭
+										<img class="content-icon" src="/static/Image/icon-water-level-up.png">
+										表示，水位下降以向下箭頭
+										<img class="content-icon" src="/static/Image/icon-water-level-down.png">
+										表示。箭頭越長表示水位變化越大。顏色顯示意義如下：
+									</div>
+								</li>
+								<div class="h-scroll">
+									<table>
+										<tr>
+											<td class="color-block" style="background-color:#37cc00;">&nbsp;</td>
+											<td class="color-block" style="background-color:#ffcc00;">&nbsp;</td>
+											<td class="color-block" style="background-color:#ff6600;">&nbsp;</td>
+											<td class="color-block" style="background-color:#ff0000;">&nbsp;</td>
+										</tr>
+										<tr>
+											<td class="color-block">未超過警戒線</td>
+											<td class="color-block">超過三級警戒線</td>
+											<td class="color-block">超過二級警戒線</td>
+											<td class="color-block">超過一級警戒線</td>
+										</tr>
+									</table>
+								</div>
+
+								<li>
+									<div class="content">
+										水庫水位: 以圓餅填滿高度
+										<img class="content-icon" src="/static/Image/icon-reservoir.png">
+										表示水庫蓄水比例(單位%)。圓餅面積越大表示總蓄水量越大，顏色顯示意義如下(單位%)：
+									</div>
+								</li>
+								<div class="h-scroll">
+									<table>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.reservoirRange" v-if="i<color.reservoirRange.length-1" v-bind:style="{background: 'linear-gradient(90deg,'+color.reservoirRange[i]+','+color.reservoirRange[i+1]+')'}">&nbsp;</td>
+										</tr>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.reservoirDomain" v-if="i<color.reservoirRange.length-1">{{color.reservoirDomain[i]*100}}~{{color.reservoirDomain[i+1]*100}}</td>
+										</tr>
+									</table>
+								</div>
+
+								<li>
+									<div class="content">
+										淹水深度: 以人形填滿高度
+										<img class="content-icon" src="/static/Image/icon-flood.png">
+										表示淹水深度。人形完全被填滿之高度為180cm，顏色顯示意義如下(單位cm)：
+									</div>
+								</li>
+								<div class="h-scroll">
+									<table>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.floodRange" v-if="i<color.floodRange.length-1" v-bind:style="{background: 'linear-gradient(90deg,'+color.floodRange[i]+','+color.floodRange[i+1]+')'}">&nbsp;</td>
+										</tr>
+										<tr>
+											<td class="color-block" v-for="(d,i) in color.floodDomain" v-if="i<color.floodRange.length-1">{{color.floodDomain[i]}}~{{color.floodDomain[i+1]}}</td>
+										</tr>
+									</table>
+								</div>
+
+								<li>
+									<div class="content">
+										颱風路徑: 以雙同心圓
+										<img class="content-icon" src="/static/Image/icon-typhoon.png">
+										表示颱風位置。紅色內圈大小表示10級陣風半徑，黃色外圈大小表示7級陣風半徑。
+									</div>
+								</li>
+
+								<li>
+									<div class="content">
+										災害警戒: 依警戒類別不同會以紅色區塊填滿縣市邊界或鄉鎮邊界；土石流警戒以黃色(黃色警戒)或紅色(紅色警戒)畫出土石流潛勢溪流；雷雨則是以黑色多邊形填滿雷雨區域。
+									</div>
+								</li>
+
+							</ul>
+							<div class="content-title">資料來源</div>
+							<ul>
+								<li>雨量: <a href="https://opendata.cwb.gov.tw/dataset/observation/O-A0002-001" target="_blank">氣象資料開放平台-雨量觀測資料</a></li>
+								<li>河川水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra.aspx" target="_blank">民生公共物聯網-河川水位資料</a>，<a href="http://fhy.wra.gov.tw/fhy/Monitor/Water" target="_blank">防災資訊服務網-即時水位</a></li>
+								<li>水庫水位: <a href="http://wise.wra.gov.tw/dataset/reservoirconditiondata" target="_blank">水資料分享站-水庫水情資料</a></li>
+								<li>淹水深度: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_flood.aspx" target="_blank">民生公共物聯網-淹水測站資料</a></li>
+								<li>颱風路徑: <a href="https://opendata.cwb.gov.tw/dataset/warning/W-C0034-005" target="_blank">氣象資料開放平台-熱帶氣旋路徑</a></li>
+								<li>災害警示: <a href="https://ci.taiwan.gov.tw/dsp/environmental_cap.aspx" target="_blank">民生公共物聯網-災害示警資料</a></li>
+								
+								<li>河川水位測站位置: <a href="http://wise.wra.gov.tw/dataset/riverstageobservatoryprofile" target="_blank">水資料分享站-河川水位測站站況</a></li>
+								<li>水庫基本資料: <a href="http://wise.wra.gov.tw/dataset/reservoirsinformation" target="_blank">水資料分享站-水庫基本資料</a></li>
+								<li>縣市界線: <a href="https://data.gov.tw/dataset/7442" target="_blank">政府資料開放平台-直轄市、縣市界線(TWD97經緯度)</a></li>
+								<li>鄉鎮界線: <a href="https://data.gov.tw/dataset/7441" target="_blank">政府資料開放平台-鄉鎮市區界線(TWD97經緯度)</a></li>
+								<li>土石流潛勢溪流位置: <a href="https://246.swcb.gov.tw/Service/OpenData" target="_blank">土石流防災資訊網-土石流潛勢溪流基本資料</a></li>
+							</ul>
+						</div>
+						<div class="content-title">參考文件</div>
+						<ul>
+							<li><a href="https://ci.taiwan.gov.tw/dsp/sta_guide.aspx" target="_blank">民生公共物聯網 - API說明</a></li>
+							<li><a href="https://ci.taiwan.gov.tw/creativity/index.aspx#relative-music" target="_blank">民生公共物聯網 - 相關影音</a></li>
+							<li><a href="https://alerts.ncdr.nat.gov.tw/AnnouncementFactory.aspx?EditorContentPK=100106" target="_blank">民生示警公開資料平台簡介</a></li>
+							<li><a href="https://water.taiwanstat.com/" target="_blank">用數據看台灣 - 台灣水庫即時水情</a></li>
+							<li><a href="https://www.books.com.tw/products/0010829596" target="_blank">颱風：在下一次巨災來臨前</a></li>
+							<li><a href="https://www.books.com.tw/products/0010723018" target="_blank">台灣的十大地理議題</a></li>
+							<li><a href="https://www.books.com.tw/products/0010790443" target="_blank">真確：扭轉十大直覺偏誤，發現事情比你想的美好</a></li>
+						</ul>
 						<div class="content-title">關於山河事件簿</div>
+						<ul>
+							<li><a href="https://github.com/aga3134/RiverLog" target="_blank">網站開源程式碼</a></li>
+							<li>參與第二屆<a href="https://ci.taiwan.gov.tw/creativity/index.aspx" target="_blank">民生公共物聯網 資料應用競賽</a></li>
+							<li><a href="https://agawork.tw/" target="_blank">其他專案</a></li>
+							<li>若您對本站有任何建議或合作需求，歡迎來信討論 aga3134@gmail.com</li>
+						</ul>
 					</div>
 				</div>
 			</transition>

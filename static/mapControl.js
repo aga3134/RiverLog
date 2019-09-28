@@ -628,7 +628,8 @@ MapControl.prototype.UpdateMapFlood = function(floodData){
         size: size,
         svgID: "svg_"+station._id,
         value: d.value,
-        opacity: g_APP.floodOption.opacity
+        opacity: g_APP.floodOption.opacity,
+        color: g_APP.color.flood
       });
       
       overlay.addListener('click', clickFn(floodData,i));

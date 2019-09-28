@@ -70,6 +70,10 @@ a{
   overflow-x: auto;
 }
 
+.bold{
+	font-weight: bold;
+}
+
 .riverlog{
 	width: 100%;
 	height: 100%;
@@ -480,11 +484,41 @@ a{
 		.content-area{
 			background-color: #feffe8;
 			border-radius: 5px;
+			padding: 5px;
 			width: 100%;
 			height: 100%;
+			overflow: auto;
 			.content-title{
 				font-size: 1.5em;
 				padding: 10px;
+			}
+			.content-icon{
+				text-align: center;
+				height: 30px;
+				margin: 10px 5px;
+			}
+			ul{
+				margin: 0px;
+			}
+			li{
+				padding: 5px;
+				.content{
+					display: flex;
+					justify-content: flex-start;
+					align-items: center;
+					flex-wrap: wrap;
+				}
+			}
+			.time-block{
+				display: inline;
+				margin: 0px 5px;
+				padding: 5px 10px;
+				background: linear-gradient(#00ff00, #ffff00, #ff0000);
+			}
+			.color-block{
+				width: 100px;
+				text-align: center;
+				font-size: 0.7em;
 			}
 		}
 	}

@@ -139,14 +139,25 @@ var g_APP = new Vue({
   },
   methods: {
     InitColor: function(){
-      this.color.rain = d3.scale.linear()
-        .domain([0,1,2,6,10,15,20,30,40,50,70,90,110,130,150,200,300])
-        .range(["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
+      this.color.rainDomain = [0,1,2,6,10,15,20,30,40,50,70,90,110,130,150,200,300];
+      this.color.rainRange = ["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
               "#33ff00","#ff0","#fc0","#ff9900","#ff0000","#cc0000",
-              "#990000","#990099","#cc00cc","#ff00ff","#ffccff"]);
+              "#990000","#990099","#cc00cc","#ff00ff","#ffccff"];
+      this.color.rain = d3.scale.linear()
+        .domain(this.color.rainDomain)
+        .range(this.color.rainRange);
+      
+      this.color.reservoirDomain = [0,0.25,0.5,0.75,1];
+      this.color.reservoirRange = ["#ff3333","#ff6633","#33ff33","#3366ff","#3333ff"];
       this.color.reservoir = d3.scale.linear()
-        .domain([0,0.25,0.5,0.75,1])
-        .range(["#ff3333","#ff6633","#33ff33","#3366ff","#3333ff"]);
+        .domain(this.color.reservoirDomain)
+        .range(this.color.reservoirRange);
+
+      this.color.floodDomain = [0,30,60,90,120,150,180];
+      this.color.floodRange = ["#ffff00","#ffff00","#ff6600","#ff6600","#ff3300","#ff3300","#ff0000"];
+      this.color.flood = d3.scale.linear()
+        .domain(this.color.floodDomain)
+        .range(this.color.floodRange);
     },
     InitMap: function(){
       this.mapControl = new MapControl();

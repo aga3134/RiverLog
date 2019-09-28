@@ -36,6 +36,9 @@ a {
   width: 100%;
   overflow-x: auto; }
 
+.bold {
+  font-weight: bold; }
+
 .riverlog {
   width: 100%;
   height: 100%;
@@ -362,11 +365,35 @@ a {
     .riverlog .full-panel .content-area {
       background-color: #feffe8;
       border-radius: 5px;
+      padding: 5px;
       width: 100%;
-      height: 100%; }
+      height: 100%;
+      overflow: auto; }
       .riverlog .full-panel .content-area .content-title {
         font-size: 1.5em;
         padding: 10px; }
+      .riverlog .full-panel .content-area .content-icon {
+        text-align: center;
+        height: 30px;
+        margin: 10px 5px; }
+      .riverlog .full-panel .content-area ul {
+        margin: 0px; }
+      .riverlog .full-panel .content-area li {
+        padding: 5px; }
+        .riverlog .full-panel .content-area li .content {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          flex-wrap: wrap; }
+      .riverlog .full-panel .content-area .time-block {
+        display: inline;
+        margin: 0px 5px;
+        padding: 5px 10px;
+        background: linear-gradient(#00ff00, #ffff00, #ff0000); }
+      .riverlog .full-panel .content-area .color-block {
+        width: 100px;
+        text-align: center;
+        font-size: 0.7em; }
 
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.5s; }

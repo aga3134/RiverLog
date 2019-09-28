@@ -4,9 +4,7 @@ class FloodOverlay extends SvgOverlay{
         this.value = option.value;
         this.opacity = option.opacity||1;
 
-        var domain = [0,30,60,90,120,150,180];
-        var range = ["#ffff00","#ffff00","#ff6600","#ff6600","#ff3300","#ff3300","#ff0000"];
-        this.color = d3.scale.linear().domain(domain).range(range);
+        this.color = option.color;
     }
     Update(option){
         if(option){
