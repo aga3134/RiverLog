@@ -148,7 +148,8 @@ a {
         bottom: 0px;
         left: 0px;
         width: 100%;
-        background-color: rgba(255, 255, 255, 0.7); }
+        background-color: rgba(255, 255, 255, 0.7);
+        z-index: 12; }
       .riverlog .main-content .graph-content .time-bar {
         display: flex;
         justify-content: center;
@@ -273,7 +274,7 @@ a {
     position: fixed;
     left: -250px;
     bottom: 0px;
-    z-index: 2;
+    z-index: 15;
     width: 250px;
     max-width: 100%;
     max-height: 100%;

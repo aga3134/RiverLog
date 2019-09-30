@@ -407,8 +407,8 @@ SvgGraph.prototype.DrawGraphPie = function(graph){
 		.on("mouseover",function(d){
 			var cur = d3.select(this);
 			cur.style("stroke-width",2);
-
-			var str = d.data.name+": "+d.data.value.toFixed(2)+graph.unit;
+			var percent = (100*(d.endAngle-d.startAngle)/(2*Math.PI)).toFixed(2)
+			var str = d.data.name+": "+d.data.value.toFixed(2)+graph.unit+"("+percent+"%)";
 			textInfo.text(str);
 		})
 		.on("mouseout",function(d){

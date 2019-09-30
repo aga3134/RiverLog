@@ -215,6 +215,14 @@
 								<div class="graph-info" id="industryRatioText"></div>
 							</div>
 						</div>
+
+						<div class="graph-container" v-if="waterUse.type == 'living' ">
+							<div class="full-w">
+								<div class="graph-title" v-if="waterUse.livingData.select">{{waterUse.livingData.select.name}} 每人每日生活用水量</div>
+								<div class="graph" id="monthUse"></div>
+								<div class="graph-info" id="monthUseText"></div>
+							</div>
+						</div>
 					</div>
 
 					<div class="fix-bottom">
@@ -477,6 +485,26 @@
 						</div>
 					</div>
 
+					<div v-show="waterUse.type == 'reservoir'">
+						<div class="option-category">水庫統計</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.reservoirData.type" v-on:change="waterUse.UpdateGraph();">
+								<option value="進水量">進水量</option>
+								<option value="各標的用水量總計">各標的用水量總計</option>
+								<option value="農業用水量">農業用水量</option>
+								<option value="工業用水量">工業用水量</option>
+								<option value="生活用水量">生活用水量</option>
+								<option value="洩洪量">洩洪量</option>
+								<option value="損耗水量">損耗水量</option>
+								<option value="其他放流量">其他放流量</option>
+								<option value="淤積增減量">淤積增減量</option>
+								<option value="發電水量回流">發電水量回流</option>
+								<option value="發電水量放流">發電水量放流</option>
+							</select>
+						</div>
+					</div>
+
 					<div class="option-category">動態播放</div>
 					<div class="option-item">
 						<input type="range" min="1" max="10" step="1" v-model="waterUse.playSpeed" v-on:change="waterUse.UpdatePlaySpeed();">
@@ -547,7 +575,7 @@
 									<div class="content">
 										水庫水位: 以圓餅填滿高度
 										<img class="content-icon" src="/static/Image/icon-reservoir.png">
-										表示水庫蓄水比例(單位%)。圓餅面積越大表示總蓄水量越大，顏色顯示意義如下(單位%)：
+										表示水庫蓄水比例。圓餅面積越大表示總蓄水量越大，顏色顯示意義如下(單位%)：
 									</div>
 								</li>
 								<div class="h-scroll">
@@ -589,7 +617,7 @@
 
 								<li>
 									<div class="content">
-										災害警戒: 依警戒類別不同會以紅色區塊填滿縣市邊界或鄉鎮邊界；土石流警戒以黃色(黃色警戒)或紅色(紅色警戒)畫出土石流潛勢溪流；雷雨則是以黑色多邊形填滿雷雨區域。
+										災害警示: 依警示類別不同會以紅色區塊填滿縣市邊界或鄉鎮邊界；土石流警戒以黃色(黃色警戒)或紅色(紅色警戒)畫出土石流潛勢溪流；雷雨則是以黑色多邊形填滿雷雨區域。
 									</div>
 								</li>
 
@@ -632,13 +660,15 @@
 							</ul>
 						</div>
 
-						<div class="content-title">參考文件</div>
+						<div class="content-title">參考資料</div>
 						<ul>
 							<li><a href="https://ci.taiwan.gov.tw/dsp/sta_guide.aspx" target="_blank">民生公共物聯網 - API說明</a></li>
 							<li><a href="https://ci.taiwan.gov.tw/creativity/index.aspx#relative-music" target="_blank">民生公共物聯網 - 相關影音</a></li>
 							<li><a href="https://alerts.ncdr.nat.gov.tw/Document/%E6%B0%91%E7%94%9F%E7%A4%BA%E8%AD%A6%E5%85%AC%E9%96%8B%E8%B3%87%E6%96%99%E5%B9%B3%E5%8F%B0.pdf" target="_blank">民生示警公開資料平台簡介</a></li>
 							<li><a href="https://alerts.ncdr.nat.gov.tw/platformInfo.aspx" target="_blank">民生示警公開資料平台 - 示警簡介</a></li>
 							<li><a href="https://water.taiwanstat.com/" target="_blank">用數據看台灣 - 台灣水庫即時水情</a></li>
+							<li><a href="https://purbao.lass-net.org/" target="_blank">紫豹在哪裡</a></li>
+							<li><a href="https://deathnote.agawork.tw/" target="_blank">台灣の死亡筆記本</a></li>
 							<li><a href="https://www.books.com.tw/products/0010829596" target="_blank">颱風：在下一次巨災來臨前</a></li>
 							<li><a href="https://www.books.com.tw/products/0010723018" target="_blank">台灣的十大地理議題</a></li>
 							<li><a href="https://www.books.com.tw/products/0010790443" target="_blank">真確：扭轉十大直覺偏誤，發現事情比你想的美好</a></li>

@@ -1,7 +1,7 @@
 var g_APP = new Vue({
   el: "#app",
   data: {
-    mapType: "waterEvent",
+    mapType: "waterUse",
     sumType: "rain",
     timeStr: "",
     timebar: [],
