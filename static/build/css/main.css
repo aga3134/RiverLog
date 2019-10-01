@@ -131,6 +131,9 @@ a {
           margin: 10px;
           font-size: 1.2em;
           text-align: center; }
+        .riverlog .main-content .graph-content .graph-container .graph-border {
+          border-radius: 5px;
+          border: 1px solid #ffffff; }
         .riverlog .main-content .graph-content .graph-container .graph {
           margin: 10px;
           height: 320px; }

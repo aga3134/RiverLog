@@ -114,8 +114,8 @@ SvgGraph.prototype.DrawAxis = function(){
 
 SvgGraph.prototype.DrawGraphMap = function(graph){
 	var proj = d3.geo.mercator()
-   			.center([120.7764642,23.682094])
-   			.scale(4800)
+   			.center([120.7764642,23.622094])
+   			.scale(4500)
    			.translate([this.w*0.5, this.h*0.5]);
 
     var pathFn = d3.geo.path().projection(proj);
