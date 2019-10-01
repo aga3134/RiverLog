@@ -23,6 +23,7 @@ router.get("/alertData", function(req, res){
 router.get("/typhoonData", function(req, res){
 	var param = {};
 	param.date = req.query.date;
+	param.year = req.query.year;
 	param.succFunc = function(result){
 		res.status(200).json({"status":"ok","data": result});
 	};

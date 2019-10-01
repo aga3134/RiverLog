@@ -266,10 +266,7 @@
 				<select v-model="curYear">
 					<option v-for="y in yearArr" v-bind:value="y">{{y}}年</option>
 				</select>
-				<select v-model="sumType" v-on:change="ChangeYear(curYear);">
-					<option value="rain">雨量</option>
-					<option value="reservoir">水庫水位</option>
-				</select>
+				
 				<div class="date-selection">
 					<div class="week-label" v-for="w in weekLabel" v-bind:style="{left:w.x+'px', top:w.y+'px'}">{{w.text}}</div>
 					<div class="month-label" v-for="m in monthLabel" v-bind:style="{left:m.x+'px', top:m.y+'px'}">{{m.text}}</div>
@@ -290,6 +287,13 @@
 					<div class="option-item">
 						<div class="option-label">顯示</div>
 						<input type="checkbox" v-model="rainOption.show" v-on:change="UpdateMapRain();">
+					</div>
+					<div class="option-item">
+						<div class="option-label">類型</div>
+						<select v-model="rainOption.type" v-on:change="UpdateMapRain();">
+							<option value="daily">日累積雨量</option>
+							<option value="diff">雨量變化</option>
+						</select>
 					</div>
 					<div class="option-item">
 						<input type="range" min="0" max="1" step="0.1" v-model="rainOption.opacity" v-on:change="UpdateMapRain();">
@@ -353,6 +357,10 @@
 					</div>
 
 					<div class="option-category">災害警示</div>
+					<div class="option-item">
+						<div class="option-label">大雨</div>
+						<input type="checkbox" v-model="alertOption.showRainFall" v-on:change="UpdateMapAlert();">
+					</div>
 					<div class="option-item">
 						<div class="option-label">淹水</div>
 						<input type="checkbox" v-model="alertOption.showFlow" v-on:change="UpdateMapAlert();">

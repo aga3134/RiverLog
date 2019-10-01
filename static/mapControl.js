@@ -62,8 +62,8 @@ MapControl.prototype.InitMap = function(){
       if(floodArr && floodArr.length > 0) alert = true;
       var reservoirDisArr = feature.getProperty('ReservoirDis');
       if(reservoirDisArr && reservoirDisArr.length > 0) alert = true;
-      //var rainfallArr = feature.getProperty('rainfall');
-      //if(rainfallArr && rainfallArr.length > 0) alert = true;
+      var rainfallArr = feature.getProperty('rainfall');
+      if(rainfallArr && rainfallArr.length > 0) alert = true;
       var highWaterArr = feature.getProperty('highWater');
       if(highWaterArr && highWaterArr.length > 0) alert = true;
       var waterArr = feature.getProperty('water');
@@ -274,7 +274,7 @@ MapControl.prototype.GenAlertContent = function(feature){
     content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
   }
 
-  /*var rainfallArr = feature.getProperty("rainfall");
+  var rainfallArr = feature.getProperty("rainfall");
   for(var i=0;i<rainfallArr.length;i++){
     var rainFall = rainfallArr[i];
     alert = true;
@@ -283,7 +283,7 @@ MapControl.prototype.GenAlertContent = function(feature){
     var start = rainFall.effective.format("YYYY-MM-DD HH:mm");
     var end = rainFall.expires.format("YYYY-MM-DD HH:mm");
     content += "<p>警戒期間 "+start+" ~ "+end+"</p>";
-  }*/
+  }
 
   var highWaterArr = feature.getProperty("highWater");
   for(var i=0;i<highWaterArr.length;i++){
@@ -345,12 +345,13 @@ MapControl.prototype.ToggleSatellite = function(useSatellite){
   }
 };
 
-MapControl.prototype.UpdateMapRain = function(rainData){
+MapControl.prototype.UpdateMapRain = function(preDataHash,rainData){
 
 	var UpdateInfoRain = function(d){
     var s = g_APP.rainData.station[d.stationID];
     var str = "<p>"+s.name+"</p>";
     str += "<p>累積雨量 "+d.now+" mm</p>";
+    str += "<p>雨量變化 "+d.diff+" mm</p>";
     str += "<p>時間 "+d.time+" </p>";
     str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"rain\");'>今日變化</div></div>";
     var loc = new google.maps.LatLng(s.lat, s.lon);
@@ -366,22 +367,43 @@ MapControl.prototype.UpdateMapRain = function(rainData){
   }.bind(this);
 
   for(var i=0;i<rainData.length;i++){
+    var sID = rainData[i].stationID
     var station = g_APP.rainData.station[rainData[i].stationID];
     if(!station) continue;
     if(rainData[i].now <= 0) continue;
+
+    rainData[i].diff = 0;
+    if(preDataHash[sID]){
+      if(preDataHash[sID].now && rainData[i].now){
+        rainData[i].diff = rainData[i].now-preDataHash[sID].now;
+      }
+    }
+    var value = 0, scale = 0;
+    switch(g_APP.rainOption.type){
+      case "daily":
+        value = rainData[i].now;
+        scale = 0.0005;
+        break;
+      case "diff":
+        value = rainData[i].diff;
+        scale =0.005;
+        break;
+    }
+
     //info window有打開，更新資訊
     if(this.infoRain.getMap() && this.infoRainID == station.stationID){
       UpdateInfoRain(rainData[i]);
     }
+
     var rectW = 0.01*g_APP.rainOption.scale;
-    var rectH = 0.0005*g_APP.rainOption.scale;
+    var rectH = scale*g_APP.rainOption.scale;
     if(this.layerRain[station.stationID]){
       var rect = this.layerRain[station.stationID];
       rect.setOptions({
-        fillColor: g_APP.color.rain(rainData[i].now),
+        fillColor: g_APP.color.rain(value),
         fillOpacity: g_APP.rainOption.opacity,
         bounds: {
-          north: station.lat+rainData[i].now*rectH,
+          north: station.lat+value*rectH,
           south: station.lat,
           east: station.lon+rectW,
           west: station.lon-rectW
@@ -393,12 +415,12 @@ MapControl.prototype.UpdateMapRain = function(rainData){
     else{
       var rect = new google.maps.Rectangle({
         strokeWeight: 0,
-        fillColor: g_APP.color.rain(rainData[i].now),
+        fillColor: g_APP.color.rain(value),
         fillOpacity: g_APP.rainOption.opacity,
         map: this.map,
         zIndex: 1,
         bounds: {
-          north: station.lat+rainData[i].now*rectH,
+          north: station.lat+value*rectH,
           south: station.lat,
           east: station.lon+rectW,
           west: station.lon-rectW
@@ -651,7 +673,7 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
           switch(type){
             case "Flood": //淹水
             case "ReservoirDis": //水庫放流
-            //case "rainfall": //降雨
+            case "rainfall": //降雨
             case "highWater": //河川高水位
             case "water": //停水
               var id = alert.geocode[j]+"0";
@@ -664,6 +686,7 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
                 this.map.data.addGeoJson(this.geoTown[id]);
                 feature = this.map.data.getFeatureById(id);
               }
+              if(type == "rainfall" && (!g_APP.alertOption.showRainFall)) continue;
               if(type == "Flood" && (!g_APP.alertOption.showFlow)) continue;
               if(type == "ReservoirDis" && (!g_APP.alertOption.showReservoirDis)) continue;
               if(type == "highWater" && (!g_APP.alertOption.showHighWater)) continue;

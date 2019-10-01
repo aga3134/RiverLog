@@ -1,8 +1,7 @@
 var g_APP = new Vue({
   el: "#app",
   data: {
-    mapType: "waterUse",
-    sumType: "rain",
+    mapType: "waterEvent",
     timeStr: "",
     timebar: [],
     openDateSelect: false,
@@ -25,8 +24,7 @@ var g_APP = new Vue({
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
     mapControl: null,
-    
-    rainOption: {opacity:0.8, scale:1, show:true},
+    rainOption: {opacity:0.8, scale:1, show:true, type:"daily"},
     waterLevelOption: {opacity:0.5, scale:1, show:true},
     reservoirOption: {opacity:0.5, scale:1, show:true},
     floodOption: {opacity:0.5, scale:1, show:true},
@@ -34,6 +32,7 @@ var g_APP = new Vue({
       certainty: "All",
       severity: "All",
       opacity:0.5,
+      showRainFall: false,
       showFlow:false,
       showReservoirDis:false,
       showHighWater:false,
@@ -185,14 +184,14 @@ var g_APP = new Vue({
     },
     ChangeYear: function(year){
       this.curYear = year;
-      $.get("/"+this.sumType+"/dailySum?year="+year,function(result){
+      $.get("/rain/dailySum?year="+year,function(result){
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this[this.sumType+"Data"].dayAvg = {};
+        this["rainData"].dayAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this[this.sumType+"Data"].dayAvg[d.time] = d;
+          this["rainData"].dayAvg[d.time] = d;
         }
         this.UpdateDailySum();
         Vue.nextTick(function(){
@@ -210,25 +209,18 @@ var g_APP = new Vue({
       selectDate.css("left",x);
       selectDate.css("top",y);
 
-      var url = "";
-      switch(this.sumType){
-        case "rain":
-          url = "/rain/10minSum?date="+this.curYear+"-"+this.curDate;
-          break;
-        case "reservoir":
-          url = "/reservoir/hourSum?date="+this.curYear+"-"+this.curDate;
-          break;
-      }
+      var url = "/rain/10minSum?date="+this.curYear+"-"+this.curDate;
+      
       $.get(url,function(result){
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this[this.sumType+"Data"].timeAvg = {};
+        this["rainData"].timeAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this[this.sumType+"Data"].timeAvg[d.time] = d;
+          this["rainData"].timeAvg[d.time] = d;
         }
-        //console.log(this[this.sumType+"Data"].timeAvg);
+        //console.log(this["rainData"].timeAvg);
         this.UpdateTimebar();
         this.ChangeTime("00:00");
 
@@ -441,12 +433,6 @@ var g_APP = new Vue({
 
         var avg = this.rainData.dayAvg[t];
         var color = this.color.rain;
-        switch(this.sumType){
-          case "reservoir":
-            avg = this.reservoirData.dayAvg[t];
-            color = this.color.reservoir;
-            break;
-        }
 
         var bt = {};
         bt.y = (w-1)*cellSize+offsetY;
@@ -514,12 +500,6 @@ var g_APP = new Vue({
 
         var avg = this.rainData.timeAvg[t+":00"];
         var color = this.color.rain;
-        switch(this.sumType){
-          case "reservoir":
-            avg = this.reservoirData.timeAvg[g_Util.PadLeft(h,2)+":00:00"];
-            color = this.color.reservoir;
-            break;
-        }
 
         var bt = {};
         bt.x = i*cellW;
@@ -558,9 +538,23 @@ var g_APP = new Vue({
     },
     UpdateMapRain: function(){
       if(!this.mapControl) return;
+      //compute data hash in previous time
+      var offset = this.TimeToOffset(this.curTime);
+      offset -= 1;
+      if(offset < 0) offset = 0;
+      var preData = this.GetDataFromTime(this.rainData.data,this.OffsetToTime(offset));
+
       var rainData = this.GetDataFromTime(this.rainData.data,this.curTime);
       if(!rainData || this.rainOption.show == false) return this.mapControl.ClearMapRain();
-      this.mapControl.UpdateMapRain(rainData);
+      
+      var preDataHash = {};
+      if(preData){
+        for(var i=0;i<preData.length;i++){
+          var s = preData[i].stationID;
+          preDataHash[s] = preData[i];
+        }
+      }
+      this.mapControl.UpdateMapRain(preDataHash, rainData);
     },
     UpdateMapWaterLevel: function(){
       if(!this.mapControl) return;

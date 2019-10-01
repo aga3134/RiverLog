@@ -20,12 +20,19 @@ ac.GetData = function(param){
 };
 
 ac.GetTyphoonData = function(param){
-	if(!param.date) return param.failFunc({err:"no date"});
+	if(!param.date && !param.year) return param.failFunc({err:"no date"});
 
 	var conditions = [];
-	conditions.push({time: {$gte: new Date(param.date+" 00:00")}});
-	conditions.push({time: {$lte: new Date(param.date+" 23:59")}});
-	var query   = {$and: conditions};
+	
+	if(param.date){
+		conditions.push({time: {$gte: new Date(param.date+" 00:00")}});
+		conditions.push({time: {$lte: new Date(param.date+" 23:59")}});
+	}
+	else if(param.year){
+		conditions.push({time: {$gte: new Date(param.year+"-1-1 00:00")}});
+		conditions.push({time: {$lte: new Date(param.year+"-12-31 23:59")}});
+	}
+	var query = {$and: conditions};
 
 	Typhoon.find(query, {__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
