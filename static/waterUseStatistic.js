@@ -115,7 +115,13 @@ WaterUseStatistic.prototype.BoundYear = function(){
 	else if(this.year > this.maxYear) this.year = this.maxYear;
 };
 
+WaterUseStatistic.prototype.ClearGraph = function(graphID){
+	d3.select(graphID).selectAll("*").remove();
+};
+
 WaterUseStatistic.prototype.UpdateGraphOverview = function(){
+	this.ClearGraph("#overviewConsumption");
+
 	var DrawData = function(){
 		this.minYear = this.overviewData.minYear;
 		this.maxYear = this.overviewData.maxYear;
@@ -321,6 +327,8 @@ WaterUseStatistic.prototype.GetAgricultureUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
+	this.ClearGraph("#agricultureMap");
+	this.ClearGraph("#agricultureRank");
 	var minColor = "#71D17B";
 	var maxColor = "#417846";
 	var DrawData = function(){
@@ -451,6 +459,8 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 };
 
 WaterUseStatistic.prototype.UpdateAgricultureDetail = function(){
+	this.ClearGraph("#agricultureCategory");
+	this.ClearGraph("#agricultureRatio");
 	if(!this.agricultureData.select) return;
 	var associationData = d3.nest()
     .key(function(d){return d.IrrigationAssociation;})
@@ -615,6 +625,8 @@ WaterUseStatistic.prototype.GetCultivationUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
+	this.ClearGraph("#cultivationMap");
+	this.ClearGraph("#cultivationRank");
 	var minColor = "#719ED1";
 	var maxColor = "#415A78";
 	var DrawData = function(){
@@ -742,8 +754,10 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 };
 
 WaterUseStatistic.prototype.UpdateCultivationDetail = function(){
+	this.ClearGraph("#cultivationCategory");
+	this.ClearGraph("#cultivationRatio");
 	if(!this.cultivationData.select) return;
-
+	
 	var countyData = d3.nest()
     .key(function(d){return d.County;})
     .map(this.cultivationData.data);
@@ -895,6 +909,8 @@ WaterUseStatistic.prototype.GetLivestockUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
+	this.ClearGraph("#livestockMap");
+	this.ClearGraph("#livestockRank");
 	var minColor = "#D17171";
 	var maxColor = "#784141";
 	var DrawData = function(){
@@ -1025,6 +1041,8 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 };
 
 WaterUseStatistic.prototype.UpdateLivestockDetail = function(){
+	this.ClearGraph("#livestockCategory");
+	this.ClearGraph("#livestockRatio");
 	if(!this.livestockData.select) return;
 
 	var countyData = d3.nest()
@@ -1178,6 +1196,8 @@ WaterUseStatistic.prototype.GetIndustryUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
+	this.ClearGraph("#industryMap");
+	this.ClearGraph("#industryRank");
 	var minColor = "#cccccc";
 	var maxColor = "#555555";
 	var DrawData = function(){
@@ -1305,6 +1325,8 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 };
 
 WaterUseStatistic.prototype.UpdateIndustryDetail = function(){
+	this.ClearGraph("#industryCategory");
+	this.ClearGraph("#industryRatio");
 	if(!this.industryData.select) return;
 
 	var countyData = d3.nest()
@@ -1475,6 +1497,8 @@ WaterUseStatistic.prototype.GetLivingUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphLiving = function(){
+	this.ClearGraph("#livingMap");
+	this.ClearGraph("#livingRank");
 	var minColor = "#FFB373";
 	var maxColor = "#7A5537";
 	var DrawData = function(){
@@ -1602,6 +1626,7 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 };
 
 WaterUseStatistic.prototype.UpdateLivingDetail = function(){
+	this.ClearGraph("#monthUse");
 	if(!this.livingData.select) return;
 	var DrawData = function(){
 		var data = this.livingData.monthUse[this.year];
@@ -1702,6 +1727,8 @@ WaterUseStatistic.prototype.GetReservoirUnit = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
+	this.ClearGraph("#reservoirMap");
+	this.ClearGraph("#reservoirRank");
 	var minColor = "#71D17B";
 	var maxColor = "#417846";
 	var DrawData = function(){
@@ -1769,12 +1796,12 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 					},
 					"path": this.county,
 					"marker": data,
-					"clickFn": function(d){
+					/*"clickFn": function(d){
 						this.openDetailPanel = true;
 						var select = {"id":d.id, "name":d.name};
 						this.reservoirData.select = select;
 						this.UpdateReservoirDetail();
-					}.bind(this)
+					}.bind(this)*/
 				}
 			]
 		};
@@ -1806,12 +1833,12 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 						"maxColor": maxColor
 					},
 					"value": data,
-					"clickFn": function(d){
+					/*"clickFn": function(d){
 						this.openDetailPanel = true;
 						var select = {"id":d.id, "name":d.name};
 						this.reservoirData.select = select;
 						this.UpdateReservoirDetail();
-					}.bind(this)
+					}.bind(this)*/
 				}
 			]
 		};

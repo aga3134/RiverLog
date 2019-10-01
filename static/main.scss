@@ -441,6 +441,9 @@ a{
 		.option-label{
 			padding: 5px;
 		}
+		.full-w-label{
+			width: 100%;
+		}
 
 		.date-selection{
 			position: relative;
@@ -485,7 +488,7 @@ a{
 		.content-area{
 			background-color: #feffe8;
 			border-radius: 5px;
-			padding: 5px;
+			padding: 5px 5px 40px 5px;
 			width: 100%;
 			height: 100%;
 			overflow: auto;

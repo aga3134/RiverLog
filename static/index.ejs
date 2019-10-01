@@ -317,6 +317,11 @@
 						<input type="range" min="0.1" max="2" step="0.1" v-model="waterLevelOption.scale" v-on:change="UpdateMapWaterLevel();">
 						<div class="option-label">縮放</div>
 					</div>
+					<div class="option-item">
+						<div class="option-label full-w-label">閥值設定</div>
+						<input type="range" min="1" max="30" step="1" v-model="waterLevelOption.thresh" v-on:change="UpdateMapWaterLevel();">
+						<div class="option-label">{{waterLevelOption.thresh}}cm</div>
+					</div>
 
 					<div class="option-category">水庫水位</div>
 					<div class="option-item">
@@ -530,10 +535,10 @@
 							<div class="content-title">圖示說明</div>
 							<ul>
 								<li>操作介面: <a href="" target="_blank">說明</a></li>
-								<li>日期與時間框<div class="time-block"></div>從上到下分成三個區塊，顏色分別代表台灣北中南部的平均數值</li>
+								<li>日期與時間框<div class="time-block"></div>從上到下分成三個區塊，顏色分別代表台灣北中南部的日累積雨量平均值。</li>
 								<li>
 									<div class="content">
-										日累積雨量: 以柱狀圖
+										日累積雨量、雨量變化: 以柱狀圖
 										<img class="content-icon" src="/static/Image/icon-rain.png">
 										高度表示雨量大小。越高代表雨量越多，顏色依
 										<a href="https://www.cwb.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
@@ -555,9 +560,9 @@
 									<div class="content">
 										河川水位: 水位持平以菱形
 										<img class="content-icon" src="/static/Image/icon-water-level.png">
-										表示，水位上昇以向上箭頭
+										表示，水位若上升超過閥值設定則以向上箭頭
 										<img class="content-icon" src="/static/Image/icon-water-level-up.png">
-										表示，水位下降以向下箭頭
+										表示，水位若下降超過閥值設定以向下箭頭
 										<img class="content-icon" src="/static/Image/icon-water-level-down.png">
 										表示。箭頭越長表示水位變化越大。顏色顯示意義如下：
 									</div>

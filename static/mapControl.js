@@ -346,6 +346,7 @@ MapControl.prototype.ToggleSatellite = function(useSatellite){
 };
 
 MapControl.prototype.UpdateMapRain = function(preDataHash,rainData){
+  this.ClearMapRain(true);
 
 	var UpdateInfoRain = function(d){
     var s = g_APP.rainData.station[d.stationID];
@@ -400,6 +401,7 @@ MapControl.prototype.UpdateMapRain = function(preDataHash,rainData){
     if(this.layerRain[station.stationID]){
       var rect = this.layerRain[station.stationID];
       rect.setOptions({
+        map: this.map,
         fillColor: g_APP.color.rain(value),
         fillOpacity: g_APP.rainOption.opacity,
         bounds: {
@@ -433,6 +435,7 @@ MapControl.prototype.UpdateMapRain = function(preDataHash,rainData){
 };
 
 MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData){
+  this.ClearMapWaterLevel(true);
 
 	var UpdateInfoWaterLevel = function(d){
     var s = g_APP.waterLevelData.station[d.StationIdentifier];
@@ -460,7 +463,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData)
   var DrawArrow = function(lat,lng,value){
     var scale = 0.01*g_APP.waterLevelOption.scale;
     var valueScale = 0.1*g_APP.waterLevelOption.scale;
-    var thresh = 0.01;
+    var thresh = g_APP.waterLevelOption.thresh*0.01;
     var arr = [];
     if(Math.abs(value) < thresh){
       arr.push({lat: lat-scale*0.5, lng: lng});
@@ -508,6 +511,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData)
     if(this.layerWaterLevel[station.BasinIdentifier]){
       var arrow = this.layerWaterLevel[station.BasinIdentifier];
       arrow.setOptions({
+        map: this.map,
         fillColor: color,
         strokeOpacity: g_APP.waterLevelOption.opacity,
         fillOpacity: g_APP.waterLevelOption.opacity,
@@ -534,6 +538,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData)
 };
 
 MapControl.prototype.UpdateMapReservoir = function(reservoirData){
+  this.ClearMapReservoir(true);
 
 	var UpdateInfoReservoir = function(d){
     var s = g_APP.reservoirData.station[d.ReservoirIdentifier];
@@ -573,6 +578,7 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
     if(this.layerReservoir[station.id]){
       var overlay = this.layerReservoir[station.id];
       var option = {
+        map: this.map,
         size: station.EffectiveCapacity*baseSize,
         percent: percent,
         opacity: g_APP.reservoirOption.opacity
@@ -599,6 +605,7 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
 };
 
 MapControl.prototype.UpdateMapFlood = function(floodData){
+  this.ClearMapFlood(true);
 
   var UpdateInfoFlood = function(d){
     var s = g_APP.floodData.station[d.stationID];
@@ -634,6 +641,7 @@ MapControl.prototype.UpdateMapFlood = function(floodData){
     if(this.layerFlood[station._id]){
       var overlay = this.layerFlood[station._id];
       var option = {
+        map: this.map,
         size: size,
         value: d.value,
         opacity: g_APP.floodOption.opacity
@@ -661,6 +669,7 @@ MapControl.prototype.UpdateMapFlood = function(floodData){
 };
 
 MapControl.prototype.UpdateMapAlert = function(alertData, t){
+  this.ClearMapAlert(true);
 
 	AddAlert = function(type, alertData){
     for(var i=0;i<alertData.length;i++){
@@ -783,6 +792,7 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
 
             if(this.layerThunderstorm[alert._id]){
               this.layerThunderstorm[alert._id].setOptions({
+                map: this.map,
                 fillOpacity: g_APP.alertOption.opacity,
                 paths: coord
               });
@@ -846,6 +856,7 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
 };
 
 MapControl.prototype.UpdateMapTyphoon = function(typhoonData){
+  this.ClearMapTyphoon(true);
 
 	var UpdateInfoTyphoon = function(d){
     var str = "<p class='info-title'>"+d.cwb_typhoon_name+"颱風</p>";
@@ -881,18 +892,21 @@ MapControl.prototype.UpdateMapTyphoon = function(typhoonData){
       var graph = this.layerTyphoonTrajectory[typhoon.typhoon_name];
 
       graph.level7.setOptions({
+        map: this.map,
         fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
         center: {lat:typhoon.lat, lng:typhoon.lng},
         radius: typhoon.circle_of_15ms*scale
       });
 
       graph.level10.setOptions({
+        map: this.map,
         fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
         center: {lat:typhoon.lat, lng:typhoon.lng},
         radius: typhoon.circle_of_25ms*scale
       });
 
       graph.center.setOptions({
+        map: this.map,
         fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
         center: {lat:typhoon.lat, lng:typhoon.lng},
         radius: 1*scale
@@ -958,35 +972,35 @@ MapControl.prototype.ClearMap = function(){
   this.ClearMapTyphoon();
 };
 
-MapControl.prototype.ClearMapRain = function(){
+MapControl.prototype.ClearMapRain = function(keepLayer){
 	for(var key in this.layerRain){
     this.layerRain[key].setMap(null);
   }
-  this.layerRain = {};
+  if(!keepLayer) this.layerRain = {};
 };
 
-MapControl.prototype.ClearMapWaterLevel = function(){
+MapControl.prototype.ClearMapWaterLevel = function(keepLayer){
 	for(var key in this.layerWaterLevel){
     this.layerWaterLevel[key].setMap(null);
   }
-  this.layerWaterLevel = {};
+  if(!keepLayer) this.layerWaterLevel = {};
 };
 
-MapControl.prototype.ClearMapReservoir = function(){
+MapControl.prototype.ClearMapReservoir = function(keepLayer){
 	for(var key in this.layerReservoir){
     this.layerReservoir[key].setMap(null);
   }
-  this.layerReservoir = {};
+  if(!keepLayer) this.layerReservoir = {};
 };
 
-MapControl.prototype.ClearMapFlood = function(){
+MapControl.prototype.ClearMapFlood = function(keepLayer){
   for(var key in this.layerFlood){
     this.layerFlood[key].setMap(null);
   }
-  this.layerFlood = {};
+  if(!keepLayer) this.layerFlood = {};
 };
 
-MapControl.prototype.ClearMapAlert = function(){
+MapControl.prototype.ClearMapAlert = function(keepLayer){
   if(!this.map) return;
 	this.map.data.forEach(function(feature){
     feature.setProperty("Flood",[]);
@@ -1001,22 +1015,22 @@ MapControl.prototype.ClearMapAlert = function(){
   for(var key in this.layerThunderstorm){
     this.layerThunderstorm[key].setMap(null);
   }
-  this.layerThunderstorm = {};
+  if(!keepLayer) this.layerThunderstorm = {};
 
   for(var key in this.layerTyphoon){
     this.layerTyphoon[key].setMap(null);
   }
-  this.layerTyphoon = {};
+  if(!keepLayer) this.layerTyphoon = {};
 };
 
-MapControl.prototype.ClearMapTyphoon = function(){
+MapControl.prototype.ClearMapTyphoon = function(keepLayer){
 	for(var key in this.layerTyphoonTrajectory){
     var graph = this.layerTyphoonTrajectory[key];
     graph.level7.setMap(null);
     graph.level10.setMap(null);
     graph.center.setMap(null);
   }
-  this.layerTyphoonTrajectory = {};
+  if(!keepLayer) this.layerTyphoonTrajectory = {};
 };
 
 

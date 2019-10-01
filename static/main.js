@@ -25,7 +25,7 @@ var g_APP = new Vue({
     playIcon: "/static/Image/icon-play.png",
     mapControl: null,
     rainOption: {opacity:0.8, scale:1, show:true, type:"daily"},
-    waterLevelOption: {opacity:0.5, scale:1, show:true},
+    waterLevelOption: {opacity:0.5, scale:1, show:true, thresh: 10},
     reservoirOption: {opacity:0.5, scale:1, show:true},
     floodOption: {opacity:0.5, scale:1, show:true},
     alertOption: {

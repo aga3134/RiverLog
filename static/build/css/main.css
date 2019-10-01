@@ -331,6 +331,8 @@ a {
         border-radius: 3px; }
     .riverlog .side-panel .option-label {
       padding: 5px; }
+    .riverlog .side-panel .full-w-label {
+      width: 100%; }
     .riverlog .side-panel .date-selection {
       position: relative;
       width: 100%;
@@ -366,7 +368,7 @@ a {
     .riverlog .full-panel .content-area {
       background-color: #feffe8;
       border-radius: 5px;
-      padding: 5px;
+      padding: 5px 5px 40px 5px;
       width: 100%;
       height: 100%;
       overflow: auto; }
