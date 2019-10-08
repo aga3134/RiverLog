@@ -10,6 +10,7 @@ class ReservoirOverlay extends SvgOverlay{
             if(option.size) this.size = option.size;
             if(option.percent) this.percent = option.percent;
             if(option.opacity) this.opacity = option.opacity;
+            if(option.map) this.map = option.map;
         }
 
         this.UpdateDivSize();

@@ -11,6 +11,7 @@ class FloodOverlay extends SvgOverlay{
             if(option.size) this.size = option.size;
             if(option.value) this.value = option.value;
             if(option.opacity) this.opacity = option.opacity;
+            if(option.map) this.map = option.map;
         }
 
         this.UpdateDivSize();
@@ -50,7 +51,7 @@ class FloodOverlay extends SvgOverlay{
             });
 
 
-            var fillH = this.size*(1-Math.min(1,this.value/180));
+            var fillH = this.size*(1-Math.min(1,this.value/180.0));
             svg.append("rect").attr({
                 x: 0,
                 y: 0,

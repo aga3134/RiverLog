@@ -970,6 +970,7 @@ MapControl.prototype.ClearMap = function(){
   this.ClearMapReservoir();
   this.ClearMapAlert();
   this.ClearMapTyphoon();
+  this.ClearMapFlood();
 };
 
 MapControl.prototype.ClearMapRain = function(keepLayer){

@@ -83,6 +83,8 @@ class WeatherData:
                     dateStr = location.find(ns+"time").find(ns+"obsTime").text
                     dateStr = ''.join(dateStr.rsplit(':', 1))   #去掉時區的:
                     dateObj = datetime.datetime.strptime(dateStr, "%Y-%m-%dT%H:%M:%S%z")
+                    #雨量從00:10累積到隔天00:00，原始資料以累積結束時間當資料時間，這邊減10分鐘以累積起始時間當資料時間
+                    dateObj = dateObj - datetime.timedelta(minutes=10)
                     data["time"] = dateObj
                     sID = location.find(ns+"stationId").text
                     sName = location.find(ns+"locationName").text

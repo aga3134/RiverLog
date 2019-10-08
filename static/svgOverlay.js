@@ -35,6 +35,7 @@ class SvgOverlay extends google.maps.OverlayView {
     }
 
     UpdateDivSize(){
+        this.setMap(this.map);
         var overlayProjection = this.getProjection();
         if(!overlayProjection) return;
         var pos = new google.maps.LatLng(this.lat, this.lng);
