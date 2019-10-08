@@ -270,9 +270,23 @@
 				<div class="date-selection">
 					<div class="week-label" v-for="w in weekLabel" v-bind:style="{left:w.x+'px', top:w.y+'px'}">{{w.text}}</div>
 					<div class="month-label" v-for="m in monthLabel" v-bind:style="{left:m.x+'px', top:m.y+'px'}">{{m.text}}</div>
-					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style" v-bind:data-date="d.date" v-on:click="ChangeDate(d.date);"></div>
+					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style" v-bind:data-date="d.date" v-on:click="ChangeDate(d.date);" v-on:mouseover="ShowDateInfo(d);" v-on:mouseout="HideDateInfo();">
+						<div v-if="d.alert">o</div>
+					</div>
 					<div class="select-date"></div>
+					<div class="float-window">
+						<div class="title">{{dateInfo.date}}</div>
+						<div v-if="dateInfo.alert.rainfall>0">大雨警報: {{dateInfo.alert.rainfall}}</div>
+						<div v-if="dateInfo.alert.Flood>0">淹水警報: {{dateInfo.alert.Flood}}</div>
+						<div v-if="dateInfo.alert.ReservoirDis>0">水庫放流警報: {{dateInfo.alert.ReservoirDis}}</div>
+						<div v-if="dateInfo.alert.highWater>0">河川高水位警報: {{dateInfo.alert.highWater}}</div>
+						<div v-if="dateInfo.alert.water>0">停水警報: {{dateInfo.alert.water}}</div>
+						<div v-if="dateInfo.alert.debrisFlow>0">土石流警報: {{dateInfo.alert.debrisFlow}}</div>
+						<div v-if="dateInfo.alert.thunderstorm>0">雷雨警報: {{dateInfo.alert.thunderstorm}}</div>
+						<div v-if="dateInfo.alert.typhoon>0">颱風警報: {{dateInfo.alert.typhoon}}</div>
+					</div>
 				</div>
+				
 			</div>
 
 			<div class="side-panel" v-bind:class="{open: openOption}">

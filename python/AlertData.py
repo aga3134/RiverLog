@@ -149,6 +149,16 @@ class AlertData:
                         data["polygon"].append(polygon.string)
 
                     self.db["alert"+day].insert_one(data)
+
+                    #add to daily statistic
+                    sta = {}
+                    k = data["effective"].rfind(":")
+                    tStr = data["effective"][:k]+data["effective"][k+1:]
+                    t = datetime.datetime.strptime(tStr, "%Y-%m-%dT%H:%M:%S%z")
+                    tday = t.replace(hour=0, minute=0,second=0)
+                    inc = {}
+                    inc[data["eventcode"]] = 1
+                    self.db["alertStatistic"].update({"time":tday},{"$inc":inc},upsert=True)
                 
         except:
             print(sys.exc_info()[0])

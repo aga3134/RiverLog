@@ -351,13 +351,25 @@ a {
         width: 20px;
         height: 20px;
         border: 1px solid #9c9c9c;
-        cursor: pointer; }
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center; }
       .riverlog .side-panel .date-selection .select-date {
         position: absolute;
         width: 20px;
         height: 20px;
         cursor: pointer;
         border: 2px solid #0000ff; }
+      .riverlog .side-panel .date-selection .float-window {
+        position: absolute;
+        padding: 5px;
+        border-radius: 3px;
+        background-color: rgba(255, 255, 255, 0.8);
+        font-size: 0.8em;
+        display: none; }
+        .riverlog .side-panel .date-selection .float-window .title {
+          font-weight: bold; }
   .riverlog .full-panel {
     position: fixed;
     top: 0px;

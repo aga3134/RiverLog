@@ -19,6 +19,7 @@ var g_APP = new Vue({
     waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
     floodData: {station:{},data:{}, daily:{}},
     alertData: {},
+    alertStatistic: {},
     typhoonTrajectoryData: {},
     color: {},
     playTimer: null,
@@ -45,6 +46,7 @@ var g_APP = new Vue({
     useSatellite: false,
     playSpeed: 5,
     waterUse: null,
+    dateInfo: {date: "", alert: ""}
   },
   created: function () {
     this.InitColor();
@@ -185,17 +187,27 @@ var g_APP = new Vue({
     ChangeYear: function(year){
       this.curYear = year;
       $.get("/rain/dailySum?year="+year,function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
+        if(result.status != "ok") return;
         this["rainData"].dayAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
           this["rainData"].dayAvg[d.time] = d;
         }
-        this.UpdateDailySum();
-        Vue.nextTick(function(){
-          this.ChangeDate(this.curDate);
+
+        $.get("/alert/alertStatistic?year="+year, function(result){
+          if(result.status != "ok") return;
+
+          this.alertStatistic = {};
+          for(var i=0;i<result.data.length;i++){
+            var d = result.data[i];
+            var t = dayjs(d.time,{timeZone:"Asia/Taipei"});
+            this.alertStatistic[t.format("YYYY-MM-DD")] = d;
+          }
+
+          this.UpdateDailySum();
+          Vue.nextTick(function(){
+            this.ChangeDate(this.curDate);
+          }.bind(this));
         }.bind(this));
         
       }.bind(this));
@@ -435,6 +447,9 @@ var g_APP = new Vue({
         var color = this.color.rain;
 
         var bt = {};
+        if(this.alertStatistic[t]){
+          bt.alert = this.alertStatistic[t];
+        }
         bt.y = (w-1)*cellSize+offsetY;
         bt.x = weekDay*cellSize+offsetX;
         if(avg){
@@ -618,6 +633,28 @@ var g_APP = new Vue({
       }
       if(!typhoonData || this.typhoonTrajectoryOption.show == false) return this.mapControl.ClearMapTyphoon();
       this.mapControl.UpdateMapTyphoon(typhoonData);
+    },
+    ShowDateInfo: function(d){
+      this.dateInfo.date = d.date;
+      this.dateInfo.alert = d.alert || {};
+      var container = $(".date-selection");
+      var w = container.width();
+      var h = container.height();
+      var scroll = container.scrollTop();
+      var css = {display:"block", top:"auto", bottom:"auto", left:"auto", right:"auto"};
+      if(d.x < 0.5*w) css.left = d.x+20;
+      else css.right = w-d.x;
+      if(d.y-scroll < 0.5*h) css.top = d.y;
+      else css.bottom = h-d.y-20;
+
+      var floatWindow = $(".float-window");
+      floatWindow.css(css);
+    },
+    HideDateInfo: function(){
+      var floatWindow = $(".float-window");
+      floatWindow.css({
+        display: "none",
+      });
     }
   }
 });

@@ -467,6 +467,9 @@ a{
 				height: 20px;
 				border: 1px solid #9c9c9c;
 				cursor: pointer;
+				display: flex;
+				justify-content: center;
+				align-items: center;
 			}
 			.select-date{
 				position: absolute;
@@ -474,6 +477,17 @@ a{
 				height: 20px;
 				cursor: pointer;
 				border: 2px solid #0000ff;
+			}
+			.float-window{
+				position: absolute;
+				padding: 5px;
+				border-radius: 3px;
+				background-color: rgba(255,255,255,0.8);
+				font-size: 0.8em;
+				display: none;
+				.title{
+					font-weight: bold;
+				}
 			}
 		}
 	}
