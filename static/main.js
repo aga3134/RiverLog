@@ -536,6 +536,17 @@ var g_APP = new Vue({
       }
       return null;
     },
+    GetDataAfterTime: function(data,time){
+      var timeOffset = this.TimeToOffset(time);
+      for(var i=timeOffset;i<24*6;i++){
+        var t = this.OffsetToTime(i);
+        var key = t+":00";
+        if(key in data){
+          return data[key];
+        }
+      }
+      return null;
+    },
     UpdateMapRain: function(){
       if(!this.mapControl) return;
       //compute data hash in previous time
@@ -600,6 +611,11 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       var hour = this.curTime.split(":")[0];
       var typhoonData = this.typhoonTrajectoryData[hour+":00:00"];
+      if(!typhoonData){
+        //颱風未靠近台灣時是6小時更新一次，這邊確認若颱風資料有持續更新，就拿前幾個小時的資料來顯示，避免颱風圖示一下消失一下出現
+        var futureData = this.GetDataAfterTime(this.typhoonTrajectoryData,this.curTime);
+        if(futureData) typhoonData = this.GetDataFromTime(this.typhoonTrajectoryData,this.curTime);
+      }
       if(!typhoonData || this.typhoonTrajectoryOption.show == false) return this.mapControl.ClearMapTyphoon();
       this.mapControl.UpdateMapTyphoon(typhoonData);
     }

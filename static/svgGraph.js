@@ -12,8 +12,10 @@ function SvgGraph(param){
 	this.padding = {left: 20, right: 20, top: 20, bottom: 20};
 	if(param.padding) this.padding = param.padding;
 
-	this.w = graph.width() || 400;
-	this.h = graph.height() || 300;
+	this.w = graph.width();
+	this.h = graph.height();
+	if(this.w <= 0) this.w = 400;
+	if(this.h <= 0) this.h = 300;
 	if(this.axis){
 		if(this.axis.typeX == "time"){
 			this.scaleW = d3.time.scale()
