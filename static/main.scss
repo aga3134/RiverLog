@@ -477,6 +477,7 @@ a{
 				height: 20px;
 				cursor: pointer;
 				border: 2px solid #0000ff;
+				pointer-events: none;	//allow event pass through
 			}
 			.float-window{
 				position: absolute;
