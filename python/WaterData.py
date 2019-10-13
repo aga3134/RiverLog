@@ -51,6 +51,7 @@ class WaterData:
             self.ProcessWaterLevelFromWebsite()
 
             self.ProcessFlood("https://sta.ci.taiwan.gov.tw/STA_WaterResource_lastest/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B7%B1%E5%BA%A6%27,Datastream/name)%20&$count=true")
+            self.ProcessWaterLevel("https://sta.ci.taiwan.gov.tw/STA_WaterLevel_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)&$count=true")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -157,7 +158,7 @@ class WaterData:
             print(sys.exc_info()[0])
             traceback.print_exc()
     
-    def ProcessWaterLevel(self,file):
+    """def ProcessWaterLevel(self,file):
         print("process file %s" % file)
         try:
             #map site info from id
@@ -207,6 +208,64 @@ class WaterData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+    """
+    def ProcessWaterLevel(self, url):
+        print("process water level url: "+url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["value"]
+                #add site
+                for d in data:
+                    if len(d["Thing"]["Locations"]) == 0:
+                        continue
+                    prop = d["Thing"]["properties"]
+                    basin = prop["basin"]
+                    site = {}
+                    site["BasinIdentifier"] = prop["stationID"]
+                    site["AffiliatedBasin"] = basin["AffiliatedBasin"]
+                    site["AffiliatedSubsidiaryBasin"] = basin["AffiliatedSubsidiaryBasin"]
+                    site["AffiliatedSubSubsidiaryBasin"] = basin["AffiliatedSubSubsidiaryBasin"]
+                    if "AlertLevel1" in prop:
+                        site["AlertLevel1"] = util.ToFloat(prop["AlertLevel1"])
+                    if "AlertLevel2" in prop:
+                        site["AlertLevel2"] = util.ToFloat(prop["AlertLevel2"])
+                    if "AlertLevel3" in prop:
+                        site["AlertLevel3"] = util.ToFloat(prop["AlertLevel3"])
+                    loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                    site["lat"] = loc[1]
+                    site["lon"] = loc[0]
+                    site["ObservatoryName"] = d["Thing"]["name"]
+                    site["RiverName"] = prop["RiverName"]
+                    site["TownIdentifier"] = prop["TownIdentifier"]
+                    
+                    key = {"BasinIdentifier":site["BasinIdentifier"]}
+                    self.db["waterLevelStation"].update(key,site,upsert=True)
+
+                #add data
+                for d in data:
+                    if len(d["Observations"]) == 0:
+                        continue
+                    prop = d["Thing"]["properties"]
+                    w = {}
+                    w["StationIdentifier"] = prop["stationID"]
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    w["RecordTime"] = t
+                    w["WaterLevel"] = d["Observations"][0]["result"]
+                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":w["RecordTime"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["waterLevel"+day].find_one(key)
+                    if query is None:
+                        self.db["waterLevel"+day].insert_one(w)
+
+                if "@iot.nextLink" in result:
+                    self.ProcessWaterLevel(result["@iot.nextLink"])
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
 
     def ProcessWaterLevelFromWebsite(self):
         try:
@@ -248,7 +307,7 @@ class WaterData:
                         self.db["waterLevel"+day].insert_one(w)
                     
                         #計算北中南平均警戒程度
-                        inc = {}
+                        """inc = {}
                         loc = siteHash[name]
                         area = util.LatToArea(loc["lat"])
                         v = 0
@@ -262,7 +321,7 @@ class WaterData:
                         inc[area+"Num"] = 1
                         
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
-                        self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
+                        self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -339,7 +398,7 @@ class WaterData:
                         self.db["reservoir"+day].insert_one(data)
                         
                         #計算北中南蓄水百分比
-                        if r["ReservoirIdentifier"] not in siteHash:
+                        """if r["ReservoirIdentifier"] not in siteHash:
                             #print("reservoir %s not found" % r["ReservoirIdentifier"])
                             continue
                         
@@ -353,7 +412,7 @@ class WaterData:
                         tday = datetime.datetime.strptime(day, "%Y%m%d")
                         t10min = t.replace(minute=(t.minute-t.minute%10),second=0)
                         self.db["reservoirDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
-                        self.db["reservoirHourSum"].update({"time":t10min},{"$inc":inc},upsert=True)
+                        self.db["reservoirHourSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
