@@ -366,7 +366,7 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 		param.selector = "#agricultureMap";
 		param.textInfo = "#agricultureMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: this.agricultureData.association.length
@@ -378,6 +378,8 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 				{
 					"name": "水利會位置",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -404,7 +406,7 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: this.agricultureData.association.length
@@ -416,6 +418,8 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -661,7 +665,7 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 		param.selector = "#cultivationMap";
 		param.textInfo = "#cultivationMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -673,6 +677,8 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 				{
 					"name": "縣市統計",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -699,7 +705,7 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -711,6 +717,8 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -945,7 +953,7 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 		param.selector = "#livestockMap";
 		param.textInfo = "#livestockMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -957,6 +965,8 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 				{
 					"name": "縣市統計",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -983,7 +993,7 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -995,6 +1005,8 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1232,7 +1244,7 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 		param.selector = "#industryMap";
 		param.textInfo = "#industryMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -1244,6 +1256,8 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 				{
 					"name": "縣市統計",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1270,7 +1284,7 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -1282,6 +1296,8 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1533,7 +1549,7 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 		param.selector = "#livingMap";
 		param.textInfo = "#livingMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -1545,6 +1561,8 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 				{
 					"name": "縣市統計",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1571,7 +1589,7 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: dataArr.length
@@ -1583,6 +1601,8 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1630,9 +1650,9 @@ WaterUseStatistic.prototype.UpdateLivingDetail = function(){
 	if(!this.livingData.select) return;
 	var DrawData = function(){
 		var data = this.livingData.monthUse[this.year];
-		if(!data) return;
+		if(!data) data = [];
 		data = data[this.livingData.select.name];
-		if(!data) return;
+		if(!data) data = [];
 
 		var graphData = [];
 		for(var town in data){
@@ -1779,7 +1799,7 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 		param.selector = "#reservoirMap";
 		param.textInfo = "#reservoirMapText";
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: Math.min(20,data.length)
@@ -1791,6 +1811,8 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 				{
 					"name": "水庫位置",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
@@ -1817,7 +1839,7 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 			top: 10, bottom: 10, left: 10, right: 10
 		}
 		param.axis = {
-			minX: minValue,
+			minX: 0,
 			maxX: maxValue,
 			minY: 0,
 			maxY: Math.min(20,data.length)
@@ -1829,6 +1851,8 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 				{
 					"name": "用水排名",
 					"color": {
+						"minValue": minValue,
+						"maxValue": maxValue,
 						"minColor": minColor,
 						"maxColor": maxColor
 					},
