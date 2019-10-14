@@ -9,13 +9,13 @@ from math import sin,cos,tan,pow,pi
 
 def ToFloat(s):
     try:
-        return float(s)
+        return float(s.replace(",",""))
     except ValueError:
         return float('NaN')
 
 def ToInt(s):
     try:
-        return int(s)
+        return int(s.replace(",",""))
     except ValueError:
         return float('NaN')
 

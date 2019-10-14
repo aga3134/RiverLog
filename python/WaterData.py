@@ -69,6 +69,8 @@ class WaterData:
             file = folder+"reservoir_"+t+".json"
             urllib.request.urlretrieve(url, file)
             self.ProcessReservoir(file)
+
+            self.ProcessReservoirFromWebsite()
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -416,6 +418,49 @@ class WaterData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+
+    def ProcessReservoirFromWebsite(self):
+        print("process reservoir from website")
+        try:
+            #map site info from name
+            attr = {"id":1,"ReservoirName":1}
+            cursor = self.db["reservoirInfo"].find({},attr)
+            siteHash = {}
+            for site in cursor:
+                siteHash[site["ReservoirName"]] = site
+
+            r = requests.get("https://fhy.wra.gov.tw/ReservoirPage_2011/Statistics.aspx")
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                #print(r.text)
+                soup = BeautifulSoup(r.text, 'html.parser')
+                tr = soup.find_all('tr')
+                for i in range(2,len(tr)):
+                    td = tr[i].find_all("td")
+                    if(len(td) < 7):
+                        continue
+                    day = (td[1].string.split(" ")[0]).replace("-","")
+                    data = {}
+                    reservoirName = td[0].find_all('a')[0].string
+                    if not reservoirName in siteHash:
+                        continue
+                    data["ReservoirIdentifier"] = siteHash[reservoirName]["id"]
+                    t = datetime.datetime.strptime(td[1].string+"+0800", "%Y-%m-%d %H:%M:%S%z")
+                    data["ObservationTime"] = t
+                    key = {"ReservoirIdentifier":data["ReservoirIdentifier"],"ObservationTime":data["ObservationTime"]}
+                    query = self.db["reservoir"+day].find_one(key)
+                    if query is None:
+                        data["WaterLevel"] = util.ToFloat(td[4].string)
+                        if math.isnan(data["WaterLevel"]) or data["WaterLevel"] < 0:
+                            continue
+                        data["EffectiveWaterStorageCapacity"] = util.ToFloat(td[6].string)
+                        if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
+                            continue
+                        self.db["reservoir"+day].insert_one(data)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
             
     def ProcessHistory(self):
         batchNum = 16

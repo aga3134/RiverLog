@@ -277,7 +277,6 @@ var g_APP = new Vue({
           this.reservoirData.daily = d3.nest()
             .key(function(d){return d.ReservoirIdentifier})
             .map(result.data);
-
           this.UpdateMapReservoir();
         }.bind(this));
 
