@@ -36,7 +36,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"agriculture.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessAgriculture(file)
 
             #養殖用水
@@ -44,15 +44,15 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"cultivation.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessCultivation(file)
 
             #畜牧用水
-            url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=csv&amp=&id=C3F0A488-9773-49A2-97EF-CB31A39A2509"
+            url = "https://scidm.nchc.org.tw/en/dataset/313200000g-000317/resource/1f5b8f34-85fa-4097-9ac4-b7778e717d69/nchcproxy"
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"livestock.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessLivestock(file)
 
             #生活用水
@@ -60,7 +60,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"living.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessLiving(file)
 
             #工業用水
@@ -68,7 +68,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"industry.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessIndustry(file)
 
             #overview 無直接api網址，需至https://erdb.epa.gov.tw/DataRepository/Statistics/StatSceWaterrecNew.aspx自行下載
@@ -80,7 +80,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"monthWaterUse.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessMonthWaterUse(file)
 
             #水庫營運
@@ -88,7 +88,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"reservoirUse.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessReservoirUse(file)
 
             #水庫淤積
@@ -96,7 +96,7 @@ class StatisticData:
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"reservoirSiltation.csv"
-            #urllib.request.urlretrieve(url, file)
+            urllib.request.urlretrieve(url, file)
             self.ProcessReservoirSiltation(file)
 
         except:
