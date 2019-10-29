@@ -579,14 +579,15 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
     var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7))*g_APP.reservoirOption.scale;
     var d = reservoirData[i];
     var percent = (100*d.EffectiveWaterStorageCapacity/station.EffectiveCapacity).toFixed(2);
-
+    
     if(this.layerReservoir[station.id]){
       var overlay = this.layerReservoir[station.id];
       var option = {
         map: this.map,
         size: station.EffectiveCapacity*baseSize,
         percent: percent,
-        opacity: g_APP.reservoirOption.opacity
+        opacity: g_APP.reservoirOption.opacity,
+        color: g_APP.color.reservoir(percent*0.01)
       };
       overlay.Update(option);
       google.maps.event.clearListeners(overlay,"click");
@@ -600,7 +601,8 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
         size: station.EffectiveCapacity*baseSize,
         svgID: "svg_"+station.id,
         percent: percent,
-        opacity: g_APP.reservoirOption.opacity
+        opacity: g_APP.reservoirOption.opacity,
+        color: g_APP.color.reservoir(percent*0.01)
       });
       
       overlay.addListener('click', clickFn(reservoirData,i));

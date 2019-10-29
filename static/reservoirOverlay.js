@@ -3,6 +3,7 @@ class ReservoirOverlay extends SvgOverlay{
         super(option);
         this.percent = option.percent;
         this.opacity = option.opacity||1;
+        this.color = null;
     }
 
     Update(option){
@@ -11,6 +12,7 @@ class ReservoirOverlay extends SvgOverlay{
             if(option.percent) this.percent = option.percent;
             if(option.opacity) this.opacity = option.opacity;
             if(option.map) this.map = option.map;
+            if(option.color) this.color = option.color;
         }
 
         this.UpdateDivSize();
@@ -28,9 +30,13 @@ class ReservoirOverlay extends SvgOverlay{
         }
         else if(this.percent < 50){
             waveColor = "rgba(245,151,111,"+this.opacity+")";
-            textColor = "rgb(255,100,100)";
-            circleColor = "rgb(255,100,100)";
-            backgroundColor = "rgba(255,230,230,"+this.opacity+")";
+            textColor = "rgb(255,230,150)";
+            circleColor = "rgb(255,230,150)";
+            backgroundColor = "rgba(150,150,150,"+this.opacity+")";
+        }
+        if(this.color){
+            var rgb = g_Util.HexToRGB(this.color);
+            waveColor = "rgba("+rgb.r+","+rgb.g+","+rgb.b+","+this.opacity+")";
         }
 
         var config = {

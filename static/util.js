@@ -40,11 +40,31 @@ var g_Util = function(){
 		var SS = PadLeft(date.getSeconds(),2);
 		return HH+timeSep+MM+timeSep+SS;
 	}
+
+	var RGBToHex = function(r,g,b){
+		function componentToHex(c) {
+			var hex = c.toString(16);
+			return hex.length == 1 ? "0" + hex : hex;
+		}
+		return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	}
+
+	var HexToRGB = function(hex){
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
+	}
+
 	return {
 		GetUrlParameter: GetUrlParameter,
 		PadLeft: PadLeft,
 		DateToString: DateToString,
 		DateToDateString: DateToDateString,
-		DateToTimeString: DateToTimeString
+		DateToTimeString: DateToTimeString,
+		RGBToHex: RGBToHex,
+		HexToRGB: HexToRGB
 	};
 }();
