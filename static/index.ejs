@@ -44,7 +44,7 @@
 					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
 				</div>
 
-				<div id="map" v-show="mapType == 'waterEvent' "></div>
+				<div id="map" v-show="mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
 				
 				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openDailyChart}">
 					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openDailyChart = false;">
@@ -444,6 +444,9 @@
 						<input type="range" min="1" max="10" step="1" v-model="playSpeed" v-on:change="UpdatePlaySpeed();">
 						<div class="option-label">播放速度</div>
 					</div>
+					<div class="option-item">
+						<div class="action-bt" v-on:click="CopySpaceTimeUrl();">複製時間地點網址</div>
+					</div>
 				</div>
 
 				<div class="option-container" v-if="mapType == 'waterUse' && waterUse">
@@ -702,8 +705,9 @@
 						</ul>
 						<div class="content-title">關於山河事件簿</div>
 						<ul>
+							<li>本專案為<a href="https://www.facebook.com/groups/LASSnet/" target="_blank">LASS社群</a>的水議題開源專案</li>
 							<li><a href="https://github.com/aga3134/RiverLog" target="_blank">網站開源程式碼</a></li>
-							<li>參與第二屆<a href="https://ci.taiwan.gov.tw/creativity/index.aspx" target="_blank">民生公共物聯網 資料應用競賽</a></li>
+							<li>參與2019年<a href="https://ci.taiwan.gov.tw/creativity/index.aspx" target="_blank">民生公共物聯網 資料應用競賽</a></li>
 							<li><a href="https://agawork.tw/" target="_blank">其他專案</a></li>
 							<li>若您對本站有任何建議或合作需求，歡迎來信討論 aga3134@gmail.com</li>
 						</ul>

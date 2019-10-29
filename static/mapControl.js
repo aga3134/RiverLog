@@ -30,8 +30,13 @@ function MapControl(){
   this.dailyChartTitle = "";
 };
 
-MapControl.prototype.InitMap = function(){
+MapControl.prototype.InitMap = function(initLoc){
 	var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
+  if(initLoc){
+    if(initLoc.lat) loc.lat = initLoc.lat;
+    if(initLoc.lng) loc.lng = initLoc.lng;
+    if(initLoc.zoom) loc.zoom = initLoc.zoom;
+  }
   var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
   $.get("/static/mapStyle.json",function(style){
@@ -1143,4 +1148,10 @@ MapControl.prototype.OpenLineChart = function(type){
   param.graph = [lineData];
   var graph = new SvgGraph(param);
   graph.DrawGraph();
+};
+
+MapControl.prototype.GetLocation = function(keepLayer){
+  if(!this.map) return;
+  var center = this.map.getCenter();
+  return {lat: center.lat(), lng: center.lng(), zoom: this.map.getZoom()};
 };

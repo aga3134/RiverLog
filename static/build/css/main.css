@@ -332,6 +332,13 @@ a {
         padding: 2px;
         font-size: 0.8em;
         border-radius: 3px; }
+      .riverlog .side-panel .option-item .action-bt {
+        margin: 10px 0px;
+        padding: 5px 10px;
+        background-color: #716242;
+        border-radius: 3px;
+        color: #ffffff;
+        cursor: pointer; }
     .riverlog .side-panel .option-label {
       padding: 5px; }
     .riverlog .side-panel .full-w-label {

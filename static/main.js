@@ -11,6 +11,7 @@ var g_APP = new Vue({
     curYear: 2019,
     curDate: "1-1",
     curTime: "0:0",
+    initLoc: {},
     dailySum: [],
     weekLabel: [],
     monthLabel: [],
@@ -135,10 +136,55 @@ var g_APP = new Vue({
       }.bind(this)
     });
 
+    this.ParseParameter();
     this.ChangeYear(this.curYear);
     google.maps.event.addDomListener(window, 'load', this.InitMap);
   },
   methods: {
+    ParseParameter: function(){
+      var param = g_Util.GetUrlParameter();
+      if(param.year){
+        this.curYear = parseInt(param.year);
+      }
+      if(param.date){
+        this.curDate = param.date;
+      }
+      if(param.time){
+        this.curTime = param.time;
+      }
+      if(param.time){
+        this.curTime = param.time;
+      }
+      if(param.lat){
+        this.initLoc.lat = parseFloat(param.lat);
+      }
+      if(param.lng){
+        this.initLoc.lng = parseFloat(param.lng);
+      }
+      if(param.zoom){
+        this.initLoc.zoom = parseInt(param.zoom);
+      }
+    },
+    CopySpaceTimeUrl: function(){
+      var url = $("link[rel='canonical']").attr("href");
+      url += "?year="+this.curYear;
+      url += "&date="+this.curDate;
+      url += "&time="+this.curTime;
+
+      var loc = this.mapControl.GetLocation();
+      url += "&lat="+loc.lat;
+      url += "&lng="+loc.lng;
+      url += "&zoom="+loc.zoom;
+
+      var aux = document.createElement("input");
+      aux.setAttribute("value", url);
+      document.body.appendChild(aux);
+      aux.select();
+      document.execCommand("copy");
+
+      document.body.removeChild(aux);
+      alert("已複製目前時間地點的網址至剪貼簿");
+    },
     InitColor: function(){
       this.color.rainDomain = [0,1,2,6,10,15,20,30,40,50,70,90,110,130,150,200,300];
       this.color.rainRange = ["#c1c1c1","#99ffff","#0cf","#09f","#0166ff","#329900",
@@ -162,7 +208,7 @@ var g_APP = new Vue({
     },
     InitMap: function(){
       this.mapControl = new MapControl();
-      this.mapControl.InitMap();
+      this.mapControl.InitMap(this.initLoc);
 
       this.waterUse = new WaterUseStatistic();
       this.waterUse.InitMap();
@@ -237,7 +283,7 @@ var g_APP = new Vue({
         }
         //console.log(this["rainData"].timeAvg);
         this.UpdateTimebar();
-        this.ChangeTime("00:00");
+        this.ChangeTime(this.curTime);
 
         $.get("/rain/rainData?date="+this.curYear+"-"+this.curDate,function(result){
           if(result.status != "ok"){
@@ -515,6 +561,7 @@ var g_APP = new Vue({
         }
         bt.date = t.substr(5);
         this.dailySum.push(bt);
+
       }
 
       this.weekLabel = [];
@@ -541,6 +588,7 @@ var g_APP = new Vue({
         m.y = (i*(53/12)+2)*cellSize+offsetY;
         this.monthLabel.push(m);
       }
+
     },
     UpdateTimebar: function(){
       var numPerHour = 6;
