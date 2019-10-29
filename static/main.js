@@ -221,6 +221,9 @@ var g_APP = new Vue({
       selectDate.css("left",x);
       selectDate.css("top",y);
 
+      var scrollY = parseInt(y) - $("body").height()*0.5;
+      $(".date-selection").parent(".side-panel").animate({scrollTop: scrollY}, 500);
+
       var url = "/rain/10minSum?date="+this.curYear+"-"+this.curDate;
       
       $.get(url,function(result){
@@ -344,6 +347,12 @@ var g_APP = new Vue({
       var selectElement = $(".select-element");
       var x = this.TimeToOffset(time)*parseInt(selectElement.css("width"));
       selectElement.css("left",x+"px");
+
+      var scrollX = parseInt(x) - $("body").width()*0.5;
+      var speed = 1000 / $("#playSpeed").val();
+      if(this.playTimer == null) speed = 500;
+      $(".timebar").parent(".h-scroll").animate({scrollLeft: scrollX}, speed);
+
       this.UpdateMap();
     },
     TimeToOffset: function(time){
