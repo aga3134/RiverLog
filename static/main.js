@@ -277,6 +277,26 @@ var g_APP = new Vue({
             .key(function(d){return d.ObservationTime;})
             .map(result.data);
 
+          //expend data to later hours
+          var prev = {};
+          for(var i=0;i<24;i++){
+            var t = g_Util.PadLeft(i,2)+":00:00";
+            if(!this.reservoirData.data[t]) continue;
+            var hasData = {};
+            for(var j=0;j<this.reservoirData.data[t].length;j++){
+              var r = this.reservoirData.data[t][j];
+              if(r){
+                prev[r.ReservoirIdentifier] = r;
+                hasData[r.ReservoirIdentifier] = true;
+              }
+            }
+            for(var key in prev){
+              if(!hasData[key]){
+                this.reservoirData.data[t].push(prev[key]);
+              }
+            }
+          }
+
           this.reservoirData.daily = d3.nest()
             .key(function(d){return d.ReservoirIdentifier})
             .map(result.data);
@@ -461,9 +481,18 @@ var g_APP = new Vue({
         bt.y = (w-1)*cellSize+offsetY;
         bt.x = weekDay*cellSize+offsetX;
         if(avg){
-          if(avg.northNum) bt.north = color(avg.northSum/avg.northNum);
-          if(avg.centralNum) bt.center = color(avg.centralSum/avg.centralNum);
-          if(avg.southNum) bt.south = color(avg.southSum/avg.southNum);
+          if(avg.northNum){
+            bt.northValue = parseInt(avg.northSum/avg.northNum);
+            bt.northColor = color(bt.northValue);
+          }
+          if(avg.centralNum){
+            bt.centralValue = parseInt(avg.centralSum/avg.centralNum);
+            bt.centralColor = color(bt.centralValue);
+          }
+          if(avg.southNum){
+            bt.southValue = parseInt(avg.southSum/avg.southNum);
+            bt.southColor = color(bt.southValue);
+          }
         }
 
         //add month border
@@ -481,8 +510,8 @@ var g_APP = new Vue({
         if(bt.bt) bt.style["border-top"] = borderStyle;
         if(bt.bl) bt.style["border-left"] = borderStyle;
         if(bt.bb) bt.style["border-bottom"] = borderStyle;
-        if(bt.north && bt.center && bt.south){
-          bt.style["background"] = "linear-gradient("+bt.north+","+bt.center+","+bt.south+")";
+        if(bt.northColor && bt.centralColor && bt.southColor){
+          bt.style["background"] = "linear-gradient("+bt.northColor+","+bt.centralColor+","+bt.southColor+")";
         }
         bt.date = t.substr(5);
         this.dailySum.push(bt);
@@ -528,14 +557,23 @@ var g_APP = new Vue({
         bt.x = i*cellW;
         bt.time = t;
         if(avg){
-          if(avg.northNum) bt.north = color(avg.northSum/avg.northNum);
-          if(avg.centralNum) bt.center = color(avg.centralSum/avg.centralNum);
-          if(avg.southNum) bt.south = color(avg.southSum/avg.southNum);
+          if(avg.northNum){
+            bt.northValue = parseInt(avg.northSum/avg.northNum);
+            bt.northColor = color(bt.northValue);
+          }
+          if(avg.centralNum){
+            bt.centralValue = parseInt(avg.centralSum/avg.centralNum);
+            bt.centralColor = color(bt.centralValue);
+          }
+          if(avg.southNum){
+            bt.southValue = parseInt(avg.southSum/avg.southNum);
+            bt.southColor = color(bt.southValue);
+          }
         }
         bt.style = {left:bt.x+'px'};
         if(m == 0) bt.style["border-left"] = "1px solid #c8c8c8";
-        if(bt.north && bt.center && bt.south){
-          bt.style["background"] = "linear-gradient("+bt.north+","+bt.center+","+bt.south+")";
+        if(bt.northColor && bt.centralColor && bt.southColor){
+          bt.style["background"] = "linear-gradient("+bt.northColor+","+bt.centralColor+","+bt.southColor+")";
         }
         this.timebar.push(bt);
       }
@@ -644,6 +682,9 @@ var g_APP = new Vue({
     },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;
+      this.dateInfo.northValue = d.northValue;
+      this.dateInfo.centerValue = d.centerValue;
+      this.dateInfo.southValue = d.southValue;
       this.dateInfo.alert = d.alert || {};
       var container = $(".date-selection");
       var w = container.width();
