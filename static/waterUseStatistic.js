@@ -3,7 +3,7 @@ function WaterUseStatistic(){
 	this.minYear = 2010;
 	this.maxYear = 2019;
 	this.year = 2010;
-	this.type = "agriculture";
+	this.type = "overview";
 	this.yearTimer = null;
 	this.isPlay = false;
 	this.playSpeed = 2;
