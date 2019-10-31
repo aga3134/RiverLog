@@ -579,7 +579,8 @@ MapControl.prototype.UpdateMapReservoir = function(reservoirData){
     var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7))*g_APP.reservoirOption.scale;
     var d = reservoirData[i];
     var percent = (100*d.EffectiveWaterStorageCapacity/station.EffectiveCapacity).toFixed(2);
-    
+    if(isNaN(percent)) continue;
+
     if(this.layerReservoir[station.id]){
       var overlay = this.layerReservoir[station.id];
       var option = {
