@@ -3,7 +3,7 @@ class ReservoirOverlay extends SvgOverlay{
         super(option);
         this.percent = option.percent;
         this.opacity = option.opacity||1;
-        this.color = null;
+        this.color = option.color;
     }
 
     Update(option){
@@ -20,7 +20,7 @@ class ReservoirOverlay extends SvgOverlay{
         var circleColor = "#dddddd";
         var textColor = "#ffffff";
         var waveTextColor = "#eeeeee";
-        var waveColor = "rgba(23,139,202,"+this.opacity+")";
+        var waveColor = "rgba(0,0,0,0)";
         var backgroundColor = "rgba(150,150,150,"+this.opacity+")";
         if(this.percent < 25){
             waveColor = "rgba(255,50,50,"+this.opacity+")";

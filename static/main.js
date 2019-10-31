@@ -195,7 +195,7 @@ var g_APP = new Vue({
         .range(this.color.rainRange);
       
       this.color.reservoirDomain = [0,0.25,0.5,0.75,1];
-      this.color.reservoirRange = ["#FF3232","#F5976F","#FFEE74","#1CB0FF","#178BCA"];
+      this.color.reservoirRange = ["#FF3333","#FF6666","#FFFF00","#178BCA","#178BCA"];
       this.color.reservoir = d3.scale.linear()
         .domain(this.color.reservoirDomain)
         .range(this.color.reservoirRange);
