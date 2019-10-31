@@ -376,9 +376,9 @@ var g_APP = new Vue({
             return console.log(result.err);
           }
           for(var i=0;i<result.data.length;i++){
-            var alert = result.data[i];
-            alert.effective = dayjs(alert.effective);
-            alert.expires = dayjs(alert.expires);
+            var alertInfo = result.data[i];
+            alertInfo.effective = dayjs(alertInfo.effective);
+            alertInfo.expires = dayjs(alertInfo.expires);
           }
           this.alertData = d3.nest()
             .key(function(d){return d.eventcode;})
