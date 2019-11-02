@@ -30,7 +30,9 @@
 
 		<div id="app" class="riverlog">
 			<div class="topbar">
-				<img class="logo" src="/static/Image/logo-text.png">
+				<a href="/">
+					<img class="logo" src="/static/Image/logo-text.png">
+				</a>
 				<img class="logo-mobile" src="/static/Image/logo.png">
 				<select v-model="mapType" v-on:change="UpdateMapType();">
 					<option value="waterEvent">水事件地圖</option>
@@ -270,7 +272,7 @@
 				<div class="date-selection">
 					<div class="week-label" v-for="w in weekLabel" v-bind:style="{left:w.x+'px', top:w.y+'px'}">{{w.text}}</div>
 					<div class="month-label" v-for="m in monthLabel" v-bind:style="{left:m.x+'px', top:m.y+'px'}">{{m.text}}</div>
-					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style" v-bind:data-date="d.date" v-on:click="ChangeDate(d.date);" v-on:mouseover="ShowDateInfo(d);" v-on:mouseout="HideDateInfo();">
+					<div class="date-bt" v-for="d in dailySum" v-bind:style="d.style" v-bind:data-date="d.date" v-on:click="curTime='0:0';ChangeDate(d.date);" v-on:mouseover="ShowDateInfo(d);" v-on:mouseout="HideDateInfo();">
 						<div v-if="d.alert">o</div>
 					</div>
 					<div class="select-date"></div>
@@ -445,7 +447,7 @@
 						<div class="option-label">播放速度</div>
 					</div>
 					<div class="option-item">
-						<div class="action-bt" v-on:click="CopySpaceTimeUrl();">複製時間地點網址</div>
+						<div class="action-bt" v-on:click="CopySpaceTimeUrl();">複製此時此地網址</div>
 					</div>
 				</div>
 

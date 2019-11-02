@@ -367,7 +367,7 @@ a {
         width: 20px;
         height: 20px;
         cursor: pointer;
-        border: 2px solid #0000ff;
+        border: 2px solid #ff0000;
         pointer-events: none; }
       .riverlog .side-panel .date-selection .float-window {
         position: absolute;
