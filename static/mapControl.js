@@ -28,6 +28,7 @@ function MapControl(){
   this.geoVillage = {};
   this.openDailyChart = false;
   this.dailyChartTitle = "";
+  this.lineChartType = "";
 };
 
 MapControl.prototype.InitMap = function(initLoc){
@@ -1042,14 +1043,20 @@ MapControl.prototype.ClearMapTyphoon = function(keepLayer){
   if(!keepLayer) this.layerTyphoonTrajectory = {};
 };
 
-
 MapControl.prototype.OpenLineChart = function(type){
   this.openDailyChart = true;
+  this.lineChartType = type;
+  this.UpdateLineChart();
+}
+
+MapControl.prototype.UpdateLineChart = function(){
+  if(!this.openDailyChart) return;
+
   var unitX = "", unitY = "", title="";
   var data = [];
   var minY = Number.MAX_VALUE, maxY = Number.MIN_VALUE;
   var day = g_APP.curYear+"-"+g_APP.curDate;
-  switch(type){
+  switch(this.lineChartType){
     case "rain":
       title = "雨量";
       unitY = "mm";
@@ -1083,13 +1090,15 @@ MapControl.prototype.OpenLineChart = function(type){
     case "reservoir":
       title = "蓄水百分比";
       unitY = "%";
-      minY = 0;
-      maxY = 100;
+      //minY = 0;
+      //maxY = 100;
       var s = g_APP.reservoirData.station[this.infoReservoirID];
       this.dailyChartTitle = s.ReservoirName+" 蓄水百分比 今日變化";
       var arr = g_APP.reservoirData.daily[this.infoReservoirID];
       for(var i=0;i<arr.length;i++){
         var percent = (100*arr[i].EffectiveWaterStorageCapacity/s.EffectiveCapacity);
+        if(percent < minY) minY = percent;
+        if(percent > maxY) maxY = percent;
         data.push({
           x: new Date(day+" "+arr[i].ObservationTime),
           y: percent

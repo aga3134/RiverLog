@@ -633,6 +633,7 @@ var g_APP = new Vue({
       this.UpdateMapFlood();
       this.UpdateMapAlert();
       this.UpdateMapTyphoon();
+      this.mapControl.UpdateLineChart();
     },
     GetDataFromTime: function(data,time){
       var timeOffset = this.TimeToOffset(time);
