@@ -49,7 +49,31 @@ var g_APP = new Vue({
       playSpeed: 5,
     },
     waterUse: null,
-    dateInfo: {date: "", alert: ""}
+    dateInfo: {date: "", alert: ""},
+    opMapType: [
+      {name: "水事件地圖", value:"waterEvent"},
+      {name: "用水統計", value:"waterUse"},
+    ],
+    opRainType: [
+      {name: "日累積雨量", value:"daily"},
+      {name: "雨量變化", value:"diff"},
+    ],
+    opAlertCertainty: [
+      {name: "全部", value:"All"},
+      {name: "已發生", value:"Observed"},
+      {name: "很可能發生", value:"Likely"},
+      {name: "可能發生", value:"Possible"},
+      {name: "不太會發生", value:"Unlikely"},
+      {name: "未知", value:"Unknown"},
+    ],
+    opAlertSeverity: [
+      {name: "全部", value:"All"},
+      {name: "嚴重威脅", value:"Extreme"},
+      {name: "有威脅", value:"Severe"},
+      {name: "可能有威脅", value:"Moderate"},
+      {name: "不太有威脅", value:"Minor"},
+      {name: "未知", value:"Unknown"},
+    ]
   },
   created: function () {
     this.InitColor();
@@ -184,11 +208,20 @@ var g_APP = new Vue({
       location.hash = hash;
     },
     EncodeOptionString: function(){
+      function OpValueToIndex(opArr, value){
+        var index = 0;
+        for(var i=0;i<opArr.length;i++){
+          var op = opArr[i];
+          if(value == op.value){
+            index = i&15;
+          }
+        }
+        return index;
+      }
       var rainOpacity = Math.round(this.rainOption.opacity/0.1) & 255;
       var rainScale = Math.round(this.rainOption.scale/0.1) & 255;
       var rainShow = (this.rainOption.show?1:0) & 1;
-      var type = ["daily","diff"];
-      var rainType = type.indexOf(this.rainOption.type) & 15;
+      var rainType = OpValueToIndex(this.opRainType,this.rainOption.type);
       var rainEncode = rainType + (rainShow<<4) + (rainScale<<5) + (rainOpacity<<13);
       rainEncode = g_Util.PadLeft(rainEncode.toString(16),8);
 
@@ -216,10 +249,8 @@ var g_APP = new Vue({
       var typhoonEncode = typhoonShow + (typhoonOpacity<<1);
       typhoonEncode = g_Util.PadLeft(typhoonEncode.toString(16),8);
 
-      var certainty = ["All","Observed","Likely","Possible","Unlikely","Unknown"];
-      var alertCertainty = certainty.indexOf(this.alertOption.certainty) & 15;
-      var severity = ["All","Extreme","Severe","Moderate","Minor","Unknown"];
-      var alertSeverity = severity.indexOf(this.alertOption.severity) & 15;
+      var alertCertainty = OpValueToIndex(this.opAlertCertainty,this.alertOption.certainty);
+      var alertSeverity = OpValueToIndex(this.opAlertSeverity,this.alertOption.severity);
       var alertOpacity = Math.round(this.alertOption.opacity/0.1) & 255;
       var alertShowRainFall = (this.alertOption.showRainFall?1:0) & 1;
       var alertShowFlow = (this.alertOption.showFlow?1:0) & 1;
@@ -235,8 +266,7 @@ var g_APP = new Vue({
           +(alertSeverity<<16)+(alertCertainty<<20);
       alertEncode = g_Util.PadLeft(alertEncode.toString(16),8);
 
-      var type = ["waterEvent","waterUse"];
-      var mapType = type.indexOf(this.mapOption.mapType) & 15;
+      var mapType = OpValueToIndex(this.opMapType,this.mapOption.mapType);
       var mapPlaySpeed = this.mapOption.playSpeed & 255;
       var mapUseSatellite = (this.mapOption.useSatellite?1:0) & 1;
       var mapEncode = mapUseSatellite+(mapPlaySpeed<<1)+(mapType<<9);
@@ -253,8 +283,7 @@ var g_APP = new Vue({
       var rainShow = (rainEncode>>4) & 1;
       var rainScale = (rainEncode>>5) & 255;
       var rainOpacity = (rainEncode>>13) & 255;
-      var type = ["daily","diff"];
-      this.rainOption.type = type[rainType];
+      this.rainOption.type = this.opRainType[rainType].value;
       this.rainOption.show = rainShow==1?true:false;
       this.rainOption.scale = rainScale*0.1;
       this.rainOption.opacity = rainOpacity*0.1;
@@ -317,10 +346,8 @@ var g_APP = new Vue({
       this.alertOption.showFlow = alertShowFlow;
       this.alertOption.showRainFall = alertShowRainFall;
       this.alertOption.opacity = alertOpacity*0.1;
-      var severity = ["All","Extreme","Severe","Moderate","Minor","Unknown"];
-      this.alertOption.severity = severity[alertSeverity];
-      var certainty = ["All","Observed","Likely","Possible","Unlikely","Unknown"];
-      this.alertOption.certainty = certainty[alertCertainty];
+      this.alertOption.severity = this.opAlertSeverity[alertSeverity].value;
+      this.alertOption.certainty = this.opAlertCertainty[alertCertainty].value;
 
       var mapEncode = option.substr(48,8);
       mapEncode = parseInt(mapEncode,16);
@@ -329,8 +356,7 @@ var g_APP = new Vue({
       var mapType = (mapEncode>>9) & 15;
       this.mapOption.useSatellite = mapUseSatellite==1?true:false;
       this.mapOption.playSpeed = mapPlaySpeed;
-      var type = ["waterEvent","waterUse"];
-      this.mapOption.mapType = type[mapType];
+      this.mapOption.mapType = this.opMapType[mapType].value;
     },
     CopySpaceTimeUrl: function(){
       var url = $("link[rel='canonical']").attr("href");

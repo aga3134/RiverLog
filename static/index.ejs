@@ -35,8 +35,7 @@
 				</a>
 				<img class="logo-mobile" src="/static/Image/logo.png">
 				<select v-model="mapOption.mapType" v-on:change="UpdateMapType();">
-					<option value="waterEvent">水事件地圖</option>
-					<option value="waterUse">用水統計</option>
+					<option v-for="op in opMapType" v-bind:value="op.value">{{op.name}}</option>
 				</select>
 			</div>
 			<div class="main-content">
@@ -307,8 +306,7 @@
 					<div class="option-item">
 						<div class="option-label">類型</div>
 						<select v-model="rainOption.type" v-on:change="UpdateMapRain();">
-							<option value="daily">日累積雨量</option>
-							<option value="diff">雨量變化</option>
+							<option v-for="op in opRainType" v-bind:value="op.value">{{op.name}}</option>
 						</select>
 					</div>
 					<div class="option-item">
@@ -413,23 +411,13 @@
 					<div class="option-item">
 						<div class="option-label">發生機率</div>
 						<select v-model="alertOption.certainty" v-on:change="UpdateMapAlert();">
-							<option value="All">全部</option>
-							<option value="Observed">已發生</option>
-							<option value="Likely">很可能發生</option>
-							<option value="Possible">可能發生</option>
-							<option value="Unlikely">不太會發生</option>
-							<option value="Unknown">未知</option>
+							<option v-for="op in opAlertCertainty" v-bind:value="op.value">{{op.name}}</option>
 						</select>
 					</div>
 					<div class="option-item">
 						<div class="option-label">嚴重程度</div>
 						<select v-model="alertOption.severity" v-on:change="UpdateMapAlert();">
-							<option value="All">全部</option>
-							<option value="Extreme">嚴重威脅</option>
-							<option value="Severe">有威脅</option>
-							<option value="Moderate">可能有威脅</option>
-							<option value="Minor">不太有威脅</option>
-							<option value="Unknown">未知</option>
+							<option v-for="op in opAlertSeverity" v-bind:value="op.value">{{op.name}}</option>
 						</select>
 					</div>
 					<div class="option-item">
