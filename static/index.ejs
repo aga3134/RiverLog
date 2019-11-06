@@ -34,19 +34,19 @@
 					<img class="logo" src="/static/Image/logo-text.png">
 				</a>
 				<img class="logo-mobile" src="/static/Image/logo.png">
-				<select v-model="mapType" v-on:change="UpdateMapType();">
+				<select v-model="mapOption.mapType" v-on:change="UpdateMapType();">
 					<option value="waterEvent">水事件地圖</option>
 					<option value="waterUse">用水統計</option>
 				</select>
 			</div>
 			<div class="main-content">
 				<div class="icon-container">
-					<img class="icon" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="openDateSelect=true;" v-if="mapType == 'waterEvent' ">
+					<img class="icon" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="openDateSelect=true;" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="icon" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="openOption=true;">
 					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
 				</div>
 
-				<div id="map" v-show="mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
+				<div id="map" v-show="mapOption.mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
 				
 				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openDailyChart}">
 					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openDailyChart = false;">
@@ -61,7 +61,7 @@
 					</div>
 				</div>
 				
-				<div class="graph-content" v-show="mapType == 'waterUse' " v-if="waterUse">
+				<div class="graph-content" v-show="mapOption.mapType == 'waterUse' " v-if="waterUse">
 					<select v-model="waterUse.type" v-on:change="waterUse.UpdateGraph();">
 						<option value="overview">總用水供需</option>
 						<option value="agriculture">灌溉用水</option>
@@ -243,7 +243,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="playbar" v-if="mapType == 'waterEvent' ">
+			<div class="playbar" v-if="mapOption.mapType == 'waterEvent' ">
 				<div class="h-scroll">
 					<div class="timebar">
 						<div v-for="t in timebar" class="element" v-bind:style="t.style" v-on:click="ChangeTime(t.time);"></div>
@@ -294,11 +294,11 @@
 			<div class="side-panel" v-bind:class="{open: openOption}">
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
-					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapType == 'waterEvent' ">
+					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
 				
-				<div class="option-container" v-if="mapType == 'waterEvent' ">
+				<div class="option-container" v-if="mapOption.mapType == 'waterEvent' ">
 					<div class="option-category">雨量</div>
 					<div class="option-item">
 						<div class="option-label">顯示</div>
@@ -440,18 +440,15 @@
 					<div class="option-category">地圖</div>
 					<div class="option-item">
 						<div class="option-label">衛星檢視</div>
-						<input type="checkbox" v-model="useSatellite" v-on:change="ToggleSatellite()">
+						<input type="checkbox" v-model="mapOption.useSatellite" v-on:change="ToggleSatellite()">
 					</div>
 					<div class="option-item">
-						<input type="range" min="1" max="10" step="1" v-model="playSpeed" v-on:change="UpdatePlaySpeed();">
+						<input type="range" min="1" max="10" step="1" v-model="mapOption.playSpeed" v-on:change="UpdatePlaySpeed();">
 						<div class="option-label">播放速度</div>
-					</div>
-					<div class="option-item">
-						<div class="action-bt" v-on:click="CopySpaceTimeUrl();">複製此時此地網址</div>
 					</div>
 				</div>
 
-				<div class="option-container" v-if="mapType == 'waterUse' && waterUse">
+				<div class="option-container" v-if="mapOption.mapType == 'waterUse' && waterUse">
 					<div v-show="waterUse.type == 'agriculture'">
 						<div class="option-category">灌溉用水</div>
 						<div class="option-item">
@@ -550,7 +547,7 @@
 				<div class="full-panel" v-if="openAbout">
 					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openAbout=false;">
 					<div class="content-area">
-						<div v-if="mapType == 'waterEvent' ">
+						<div v-if="mapOption.mapType == 'waterEvent' ">
 							<div class="content-title">圖示說明</div>
 							<ul>
 								<li>操作介面: <a href="" target="_blank">說明</a></li>
@@ -671,7 +668,7 @@
 							</ul>
 						</div>
 
-						<div v-if="mapType == 'waterUse' ">
+						<div v-if="mapOption.mapType == 'waterUse' ">
 							<div class="content-title">資料來源</div>
 							<ul>
 								<li>總供/用水量: <a href="https://erdb.epa.gov.tw/DataRepository/Statistics/StatSceWaterrecNew.aspx" target="_blank">環境資源資料庫 - 水資源供需</a></li>

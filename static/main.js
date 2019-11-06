@@ -1,7 +1,6 @@
 var g_APP = new Vue({
   el: "#app",
   data: {
-    mapType: "waterEvent",
     timeStr: "",
     timebar: [],
     openDateSelect: false,
@@ -30,6 +29,7 @@ var g_APP = new Vue({
     waterLevelOption: {opacity:0.5, scale:1, show:true, thresh: 10},
     reservoirOption: {opacity:0.5, scale:1, show:true},
     floodOption: {opacity:0.5, scale:1, show:true},
+    typhoonTrajectoryOption:{opacity:0.3, show:true},
     alertOption: {
       certainty: "All",
       severity: "All",
@@ -43,9 +43,11 @@ var g_APP = new Vue({
       showThunderstorm:false,
       showTyphoon:false
     },
-    typhoonTrajectoryOption:{opacity:0.3, show:true},
-    useSatellite: false,
-    playSpeed: 5,
+    mapOption: {
+      mapType: "waterEvent",
+      useSatellite: false,
+      playSpeed: 5,
+    },
     waterUse: null,
     dateInfo: {date: "", alert: ""}
   },
@@ -142,7 +144,7 @@ var g_APP = new Vue({
   },
   methods: {
     ParseParameter: function(){
-      var param = g_Util.GetUrlParameter();
+      var param = g_Util.GetUrlHash();
       if(param.year){
         this.curYear = parseInt(param.year);
       }
@@ -164,10 +166,175 @@ var g_APP = new Vue({
       if(param.zoom){
         this.initLoc.zoom = parseInt(param.zoom);
       }
+      if(param.option){
+        this.DecodeOptionString(param.option);
+      }
+    },
+    UpdateUrl: function(){
+      if(!this.mapControl) return;
+      var loc = this.mapControl.GetLocation();
+      if(!loc) return;
+      var hash = "year="+this.curYear;
+      hash += "&date="+this.curDate;
+      hash += "&time="+this.curTime;
+      hash += "&lat="+loc.lat.toFixed(6);
+      hash += "&lng="+loc.lng.toFixed(6);
+      hash += "&zoom="+loc.zoom;
+      hash += "&option="+this.EncodeOptionString();
+      location.hash = hash;
+    },
+    EncodeOptionString: function(){
+      var rainOpacity = Math.round(this.rainOption.opacity/0.1) & 255;
+      var rainScale = Math.round(this.rainOption.scale/0.1) & 255;
+      var rainShow = (this.rainOption.show?1:0) & 1;
+      var type = ["daily","diff"];
+      var rainType = type.indexOf(this.rainOption.type) & 15;
+      var rainEncode = rainType + (rainShow<<4) + (rainScale<<5) + (rainOpacity<<13);
+      rainEncode = g_Util.PadLeft(rainEncode.toString(16),8);
+
+      var waterLevelOpacity = Math.round(this.waterLevelOption.opacity/0.1) & 255;
+      var waterLevelScale = Math.round(this.waterLevelOption.scale/0.1) & 255;
+      var waterLevelShow = (this.waterLevelOption.show?1:0) & 1;
+      var waterLevelThresh = this.waterLevelOption.thresh & 255;
+      var waterLevelEncode = waterLevelThresh + (waterLevelShow<<8) + (waterLevelScale<<9) + (waterLevelOpacity<<17);
+      waterLevelEncode = g_Util.PadLeft(waterLevelEncode.toString(16),8);
+
+      var reservoirOpacity = Math.round(this.reservoirOption.opacity/0.1) & 255;
+      var reservoirScale = Math.round(this.reservoirOption.scale/0.1) & 255;
+      var reservoirShow = (this.reservoirOption.show?1:0) & 1;
+      var reservoirEncode = reservoirShow + (reservoirScale<<1) + (reservoirOpacity<<9);
+      reservoirEncode = g_Util.PadLeft(reservoirEncode.toString(16),8);
+
+      var floodOpacity = Math.round(this.floodOption.opacity/0.1) & 255;
+      var floodScale = Math.round(this.floodOption.scale/0.1) & 255;
+      var floodShow = (this.floodOption.show?1:0) & 1;
+      var floodEncode = floodShow + (floodScale<<1) + (floodOpacity<<9);
+      floodEncode = g_Util.PadLeft(floodEncode.toString(16),8);
+
+      var typhoonOpacity = Math.round(this.typhoonTrajectoryOption.opacity/0.1) & 255;
+      var typhoonShow = (this.typhoonTrajectoryOption.show?1:0) & 1;
+      var typhoonEncode = typhoonShow + (typhoonOpacity<<1);
+      typhoonEncode = g_Util.PadLeft(typhoonEncode.toString(16),8);
+
+      var certainty = ["All","Observed","Likely","Possible","Unlikely","Unknown"];
+      var alertCertainty = certainty.indexOf(this.alertOption.certainty) & 15;
+      var severity = ["All","Extreme","Severe","Moderate","Minor","Unknown"];
+      var alertSeverity = severity.indexOf(this.alertOption.severity) & 15;
+      var alertOpacity = Math.round(this.alertOption.opacity/0.1) & 255;
+      var alertShowRainFall = (this.alertOption.showRainFall?1:0) & 1;
+      var alertShowFlow = (this.alertOption.showFlow?1:0) & 1;
+      var alertShowReservoirDis = (this.alertOption.showReservoirDis?1:0) & 1;
+      var alertShowHighWater = (this.alertOption.showHighWater?1:0) & 1;
+      var alertShowWater = (this.alertOption.showWater?1:0) & 1;
+      var alertShowDebrisFlow = (this.alertOption.showDebrisFlow?1:0) & 1;
+      var alertShowThunderstorm = (this.alertOption.showThunderstorm?1:0) & 1;
+      var alertShowTyphoon = (this.alertOption.showTyphoon?1:0) & 1;
+      var alertEncode = alertShowTyphoon+(alertShowThunderstorm<<1)+(alertShowDebrisFlow<<2)
+          +(alertShowWater<<3)+(alertShowHighWater<<4)+(alertShowReservoirDis<<5)
+          +(alertShowFlow<<6)+(alertShowRainFall<<7)+(alertOpacity<<8)
+          +(alertSeverity<<16)+(alertCertainty<<20);
+      alertEncode = g_Util.PadLeft(alertEncode.toString(16),8);
+
+      var type = ["waterEvent","waterUse"];
+      var mapType = type.indexOf(this.mapOption.mapType) & 15;
+      var mapPlaySpeed = this.mapOption.playSpeed & 255;
+      var mapUseSatellite = (this.mapOption.useSatellite?1:0) & 1;
+      var mapEncode = mapUseSatellite+(mapPlaySpeed<<1)+(mapType<<9);
+      mapEncode = g_Util.PadLeft(mapEncode.toString(16),8);
+
+      return rainEncode+waterLevelEncode+reservoirEncode+floodEncode
+          +typhoonEncode+alertEncode+mapEncode;
+      
+    },
+    DecodeOptionString: function(option){
+      var rainEncode = option.substr(0,8);
+      rainEncode = parseInt(rainEncode,16);
+      var rainType = rainEncode & 15;
+      var rainShow = (rainEncode>>4) & 1;
+      var rainScale = (rainEncode>>5) & 255;
+      var rainOpacity = (rainEncode>>13) & 255;
+      var type = ["daily","diff"];
+      this.rainOption.type = type[rainType];
+      this.rainOption.show = rainShow==1?true:false;
+      this.rainOption.scale = rainScale*0.1;
+      this.rainOption.opacity = rainOpacity*0.1;
+
+      var waterLevelEncode = option.substr(8,8);
+      waterLevelEncode = parseInt(waterLevelEncode,16);
+      var waterLevelThresh = waterLevelEncode & 255;
+      var waterLevelShow = (waterLevelEncode>>8) & 1;
+      var waterLevelScale = (waterLevelEncode>>9) & 255;
+      var waterLevelOpacity = (waterLevelEncode>>17) & 255;
+      this.waterLevelOption.thresh = waterLevelThresh;
+      this.waterLevelOption.show = waterLevelShow==1?true:false;
+      this.waterLevelOption.scale = waterLevelScale*0.1;
+      this.waterLevelOption.opacity = waterLevelOpacity*0.1;
+
+      var reservoirEncode = option.substr(16,8);
+      reservoirEncode = parseInt(reservoirEncode,16);
+      var reservoirShow = reservoirEncode & 1;
+      var reservoirScale = (reservoirEncode>>1) & 255;
+      var reservoirOpacity = (reservoirEncode>>9) & 255;
+      this.reservoirOption.show = reservoirShow==1?true:false;
+      this.reservoirOption.scale = reservoirScale*0.1;
+      this.reservoirOption.opacity = reservoirOpacity*0.1;
+
+      var floodEncode = option.substr(24,8);
+      floodEncode = parseInt(floodEncode,16);
+      var floodShow = floodEncode & 1;
+      var floodScale = (floodEncode>>1) & 255;
+      var floodOpacity = (floodEncode>>9) & 255;
+      this.floodOption.show = floodShow==1?true:false;
+      this.floodOption.scale = floodScale*0.1;
+      this.floodOption.opacity = floodOpacity*0.1;
+
+      var typhoonEncode = option.substr(32,8);
+      typhoonEncode = parseInt(typhoonEncode,16);
+      var typhoonShow = typhoonEncode & 1;
+      var typhoonOpacity = (typhoonEncode>>1) & 255;
+      this.typhoonTrajectoryOption.show = typhoonShow==1?true:false;
+      this.typhoonTrajectoryOption.opacity = typhoonOpacity*0.1;
+
+      var alertEncode = option.substr(40,8);
+      alertEncode = parseInt(alertEncode,16);
+      var alertShowTyphoon = alertEncode & 1;
+      var alertShowThunderstorm = (alertEncode>>1) & 1;
+      var alertShowDebrisFlow = (alertEncode>>2) & 1;
+      var alertShowWater = (alertEncode>>3) & 1;
+      var alertShowHighWater = (alertEncode>>4) & 1;
+      var alertShowReservoirDis = (alertEncode>>5) & 1;
+      var alertShowFlow = (alertEncode>>6) & 1;
+      var alertShowRainFall = (alertEncode>>7) & 1;
+      var alertOpacity = (alertEncode>>8) & 255;
+      var alertSeverity = (alertEncode>>16) & 15;
+      var alertCertainty = (alertEncode>>20) & 15;
+      this.alertOption.showTyphoon = alertShowTyphoon;
+      this.alertOption.showThunderstorm = alertShowThunderstorm;
+      this.alertOption.showDebrisFlow = alertShowDebrisFlow;
+      this.alertOption.showWater = alertShowWater;
+      this.alertOption.showHighWater = alertShowHighWater;
+      this.alertOption.showReservoirDis = alertShowReservoirDis;
+      this.alertOption.showFlow = alertShowFlow;
+      this.alertOption.showRainFall = alertShowRainFall;
+      this.alertOption.opacity = alertOpacity*0.1;
+      var severity = ["All","Extreme","Severe","Moderate","Minor","Unknown"];
+      this.alertOption.severity = severity[alertSeverity];
+      var certainty = ["All","Observed","Likely","Possible","Unlikely","Unknown"];
+      this.alertOption.certainty = certainty[alertCertainty];
+
+      var mapEncode = option.substr(48,8);
+      mapEncode = parseInt(mapEncode,16);
+      var mapUseSatellite = mapEncode & 1;
+      var mapPlaySpeed = (mapEncode>>1) & 255;
+      var mapType = (mapEncode>>9) & 15;
+      this.mapOption.useSatellite = mapUseSatellite==1?true:false;
+      this.mapOption.playSpeed = mapPlaySpeed;
+      var type = ["waterEvent","waterUse"];
+      this.mapOption.mapType = type[mapType];
     },
     CopySpaceTimeUrl: function(){
       var url = $("link[rel='canonical']").attr("href");
-      url += "?year="+this.curYear;
+      url += "#year="+this.curYear;
       url += "&date="+this.curDate;
       url += "&time="+this.curTime;
 
@@ -208,16 +375,23 @@ var g_APP = new Vue({
     },
     InitMap: function(){
       this.mapControl = new MapControl();
-      this.mapControl.InitMap(this.initLoc);
+      var param = {
+        useSatellite: this.mapOption.useSatellite,
+        initLoc: this.initLoc
+      };
+      this.mapControl.InitMap(param);
 
       this.waterUse = new WaterUseStatistic();
       this.waterUse.InitMap();
     },
     ToggleSatellite: function(){
-      this.mapControl.ToggleSatellite(this.useSatellite);
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.ToggleSatellite(this.mapOption.useSatellite);
     },
     UpdateMapType: function(){
-      switch(this.mapType){
+      this.UpdateUrl();
+      switch(this.mapOption.mapType){
         case "waterEvent":
           Vue.nextTick(function(){
             this.UpdateMap();
@@ -415,7 +589,7 @@ var g_APP = new Vue({
       selectElement.css("left",x+"px");
 
       var scrollX = parseInt(x) - $("body").width()*0.5;
-      var speed = 1000 / $("#playSpeed").val();
+      var speed = 1000 / this.mapOption.playSpeed;
       if(this.playTimer == null) speed = 500;
       $(".timebar").parent(".h-scroll").animate({scrollLeft: scrollX}, speed);
 
@@ -474,18 +648,19 @@ var g_APP = new Vue({
           if(!this.NextTime()){
             this.TogglePlay();
           }
-        }.bind(this),1000.0/this.playSpeed);
+        }.bind(this),1000.0/this.mapOption.playSpeed);
         this.playIcon = "/static/Image/icon-pause.png";
       }
     },
     UpdatePlaySpeed: function(){
+      this.UpdateUrl();
       if(this.playTimer){
         clearInterval(this.playTimer);
         this.playTimer = setInterval(function(){
           if(!this.NextTime()){
             this.TogglePlay();
           }
-        }.bind(this),1000.0/this.playSpeed);
+        }.bind(this),1000.0/this.mapOption.playSpeed);
       }
     },
     UpdateDailySum: function(){
@@ -627,6 +802,7 @@ var g_APP = new Vue({
       }
     },
     UpdateMap: function(){
+      this.UpdateUrl();
       this.UpdateMapRain();
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
@@ -658,6 +834,7 @@ var g_APP = new Vue({
       return null;
     },
     UpdateMapRain: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       //compute data hash in previous time
       var offset = this.TimeToOffset(this.curTime);
@@ -678,6 +855,7 @@ var g_APP = new Vue({
       this.mapControl.UpdateMapRain(preDataHash, rainData);
     },
     UpdateMapWaterLevel: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       //compute data hash in previous time
       var offset = this.TimeToOffset(this.curTime);
@@ -698,6 +876,7 @@ var g_APP = new Vue({
       this.mapControl.UpdateMapWaterLevel(preDataHash, waterLevelData);
     },
     UpdateMapReservoir: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       var hour = this.curTime.split(":")[0];
       var reservoirData = this.GetDataFromTime(this.reservoirData.data,hour+":00");
@@ -705,12 +884,14 @@ var g_APP = new Vue({
       this.mapControl.UpdateMapReservoir(reservoirData);
     },
     UpdateMapFlood: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       var floodData = this.GetDataFromTime(this.floodData.data,this.curTime);
       if(!floodData || this.floodOption.show == false) return this.mapControl.ClearMapFlood();
       this.mapControl.UpdateMapFlood(floodData);
     },
     UpdateMapAlert: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.ClearMapAlert();
       //console.log(this.alertData);
@@ -718,6 +899,7 @@ var g_APP = new Vue({
       this.mapControl.UpdateMapAlert(this.alertData, t);
     },
     UpdateMapTyphoon: function(){
+      this.UpdateUrl();
       if(!this.mapControl) return;
       var hour = this.curTime.split(":")[0];
       var typhoonData = this.typhoonTrajectoryData[hour+":00:00"];

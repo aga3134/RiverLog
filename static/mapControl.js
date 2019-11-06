@@ -31,12 +31,12 @@ function MapControl(){
   this.lineChartType = "";
 };
 
-MapControl.prototype.InitMap = function(initLoc){
+MapControl.prototype.InitMap = function(param){
 	var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
-  if(initLoc){
-    if(initLoc.lat) loc.lat = initLoc.lat;
-    if(initLoc.lng) loc.lng = initLoc.lng;
-    if(initLoc.zoom) loc.zoom = initLoc.zoom;
+  if(param.initLoc){
+    if(param.initLoc.lat) loc.lat = param.initLoc.lat;
+    if(param.initLoc.lng) loc.lng = param.initLoc.lng;
+    if(param.initLoc.zoom) loc.zoom = param.initLoc.zoom;
   }
   var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
@@ -45,7 +45,7 @@ MapControl.prototype.InitMap = function(initLoc){
       center: taiwan,
       zoom: loc.zoom,
       scaleControl: true,
-      mapTypeId: 'terrain',
+      mapTypeId: param.useSatellite?"hybrid":"terrain",
       styles: style,
       mapTypeControl: false
     });
@@ -61,6 +61,10 @@ MapControl.prototype.InitMap = function(initLoc){
     this.map.addListener('zoom_changed', function() {
       g_APP.UpdateMap();
     }.bind(this));
+
+    this.map.addListener('bounds_changed',function(){
+      g_APP.UpdateUrl();
+    });
 
     this.map.data.setStyle(function(feature){
       var alert = false;
