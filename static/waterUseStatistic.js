@@ -22,6 +22,58 @@ function WaterUseStatistic(){
 	this.cultivationKindMap = {"1":"吳郭魚","2":"鰻魚","3":"鱸魚","4":"虱目魚","5":"鯛類","7":"烏魚","8":"海水蝦類","9":"長腳大蝦","10":"文蛤","11":"蜆","12":"龍鬚菜","14":"其他鹹水","15":"其他淡水","16":"鱠","17":"九孔","18":"香魚"};
 	this.livestockKindMap = {"2":"水牛及黃雜牛","3":"乳牛","4":"豬","5":"綿羊及山羊","6":"乳羊","7":"雞","8":"鴨"};
 	this.industryKindMap = {"0800":"食品及飼品製造業","0900":"飲料製造業","1000":"菸草製造業","1100":"紡織業","1200":"成衣及服飾品製造業","1300":"皮革、毛皮及其製品製造業","1400":"木竹製品製造業","1500":"紙漿、紙及紙製品製造業","1600":"印刷及資料儲存媒體複製業","1700":"石油及煤製品製造業","1800":"化學原材料、肥料、氮化合物、塑橡膠原料及人造纖維製造業","1900":"其他化學製品製造業","2000":"藥品及醫用化學製品製造業","2100":"橡膠製品製造業","2200":"塑膠製品製造業","2300":"非金屬礦物製品製造業","2400":"基本金屬製造業","2500":"金屬製品製造業","2600":"電子零組件製造業","2700":"電腦、電子產品及光學製品製造業","2800":"電力設備及配備製造業","2900":"機械設備製造業","3000":"汽車及其零件製造業","3100":"其他運輸工具及其零件製造業","3200":"家具製造業","3300":"其他製造業","3400":"產業用機械設備維修及安裝業"};
+	this.opType = [
+		{name: "總用水供需", value: "overview"},
+		{name: "灌溉用水", value: "agriculture"},
+		{name: "養殖用水", value: "cultivation"},
+		{name: "畜牧用水", value: "livestock"},
+		{name: "工業用水", value: "industry"},
+		{name: "生活用水", value: "living"},
+		{name: "水庫統計", value: "reservoir"},
+	];
+	this.opAgricultureType = [
+		{name: "灌溉用水", value: "灌溉用水"},
+		{name: "灌溉面積", value: "灌溉面積"},
+		{name: "單位面積用水量", value: "單位面積用水量"},
+	];
+	this.opCultivationType = [
+		{name: "養殖用水", value: "養殖用水"},
+		{name: "養殖面積", value: "養殖面積"},
+		{name: "單位面積用水量", value: "單位面積用水量"},
+	];
+	this.opLivestockType = [
+		{name: "畜牧用水", value: "畜牧用水"},
+		{name: "畜牧數量", value: "畜牧數量"},
+		{name: "每千隻用水量", value: "每千隻用水量"},
+	];
+	this.opIndustryType = [
+		{name: "工業用水", value: "工業用水"},
+		{name: "工業面積", value: "工業面積"},
+		{name: "單位面積用水量", value: "單位面積用水量"},
+	];
+	this.opLivingType = [
+		{name: "每人每日配水量", value: "每人每日配水量"},
+		{name: "每人每日生活總用水量", value: "每人每日生活總用水量"},
+		{name: "自行取水用水人口", value: "自行取水用水人口"},
+		{name: "自行取水年用水量", value: "自行取水年用水量"},
+		{name: "自行取水每人每日生活用水量", value: "自行取水每人每日生活用水量"},
+		{name: "自來水年用水量", value: "自來水年用水量"},
+		{name: "自來水供水人口", value: "自來水供水人口"},
+		{name: "每人每日售水量", value: "每人每日售水量"},
+	];
+	this.opReservoirType = [
+		{name: "進水量", value: "進水量"},
+		{name: "各標的用水量總計", value: "各標的用水量總計"},
+		{name: "農業用水量", value: "農業用水量"},
+		{name: "工業用水量", value: "工業用水量"},
+		{name: "生活用水量", value: "生活用水量"},
+		{name: "洩洪量", value: "洩洪量"},
+		{name: "損耗水量", value: "損耗水量"},
+		{name: "其他放流量", value: "其他放流量"},
+		{name: "淤積增減量", value: "淤積增減量"},
+		{name: "發電水量回流", value: "發電水量回流"},
+		{name: "發電水量放流", value: "發電水量放流"},
+	];
 };
 
 WaterUseStatistic.prototype.InitMap = function(){
@@ -34,7 +86,7 @@ WaterUseStatistic.prototype.InitMap = function(){
 	}.bind(this));
 
 	d3.json("/static/geo/county_sim.json", function(data) {
-    	this.county = topojson.feature(data, data.objects["geo"]).features;
+   	this.county = topojson.feature(data, data.objects["geo"]).features;
 		this.UpdateGraph();
 	}.bind(this));
 };
@@ -70,6 +122,7 @@ WaterUseStatistic.prototype.ToggleYearPlay = function(){
 };
 
 WaterUseStatistic.prototype.UpdatePlaySpeed = function(){
+	g_APP.UpdateUrl();
 	if(this.yearTimer){
 		clearInterval(this.yearTimer);
 		this.yearTimer = setInterval(function(){
@@ -82,6 +135,7 @@ WaterUseStatistic.prototype.UpdatePlaySpeed = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraph = function(){
+	g_APP.UpdateUrl();
 	Vue.nextTick(function(){
 		switch(this.type){
 			case "overview":
@@ -450,7 +504,9 @@ WaterUseStatistic.prototype.UpdateGraphAgriculture = function(){
 	        	d.Year += 1911;
 	        }
 	        this.agricultureData.data = result.data;
-	        Vue.set(this.agricultureData, "type", "灌溉用水");
+	        if(!this.agricultureData.type){
+	        	Vue.set(this.agricultureData, "type", "灌溉用水");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.agricultureData.minYear = yearBound[0];
@@ -749,7 +805,9 @@ WaterUseStatistic.prototype.UpdateGraphCultivation = function(){
 	        	d.Year += 1911;
 	        }
 	        this.cultivationData.data = result.data;
-	        Vue.set(this.cultivationData, "type", "養殖用水");
+	        if(!this.cultivationData.type){
+	        	Vue.set(this.cultivationData, "type", "養殖用水");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.cultivationData.minYear = yearBound[0];
@@ -1040,7 +1098,9 @@ WaterUseStatistic.prototype.UpdateGraphLivestock = function(){
 	        	}
 	        }
 	        this.livestockData.data = result.data;
-	        Vue.set(this.livestockData, "type", "畜牧用水");
+	        if(!this.livestockData.type){
+	        	Vue.set(this.livestockData, "type", "畜牧用水");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.livestockData.minYear = yearBound[0];
@@ -1328,7 +1388,9 @@ WaterUseStatistic.prototype.UpdateGraphIndustry = function(){
 	        	d.Year += 1911;
 	        }
 	        this.industryData.data = result.data;
-	        Vue.set(this.industryData, "type", "工業用水");
+	        if(!this.industryData.type){
+	        	Vue.set(this.industryData, "type", "工業用水");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.industryData.minYear = yearBound[0];
@@ -1633,7 +1695,9 @@ WaterUseStatistic.prototype.UpdateGraphLiving = function(){
 	        	d.Year += 1911;
 	        }
 	        this.livingData.data = result.data;
-	        Vue.set(this.livingData, "type", "每人每日配水量");
+	        if(!this.livingData.type){
+	        	Vue.set(this.livingData, "type", "每人每日配水量");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.livingData.minYear = yearBound[0];
@@ -1883,7 +1947,9 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 	        	d.Year += 1911;
 	        }
 	        this.reservoirData.data = result.data;
-	        Vue.set(this.reservoirData, "type", "進水量");
+	        if(!this.reservoirData.type){
+	        	Vue.set(this.reservoirData, "type", "進水量");
+	        }
 
 	        var yearBound = d3.extent(result.data, function(d) { return d.Year; });
 	        this.reservoirData.minYear = yearBound[0];
@@ -1896,4 +1962,60 @@ WaterUseStatistic.prototype.UpdateGraphReservoir = function(){
 
 WaterUseStatistic.prototype.UpdateReservoirDetail = function(){
 
+};
+
+WaterUseStatistic.prototype.EncodeOptionString = function(){
+	function OpValueToIndex(opArr, value){
+    var index = 0;
+    for(var i=0;i<opArr.length;i++){
+      var op = opArr[i];
+      if(value == op.value){
+        index = i&15;
+      }
+    }
+    return index;
+	}
+	var waterUseType = OpValueToIndex(this.opType, this.type);
+	var agricultureType = OpValueToIndex(this.opAgricultureType, this.agricultureData.type);
+	var cultivationType = OpValueToIndex(this.opCultivationType, this.cultivationData.type);
+	var livestockType = OpValueToIndex(this.opLivestockType, this.livestockData.type);
+	var industryType = OpValueToIndex(this.opIndustryType, this.industryData.type);
+	var livingType = OpValueToIndex(this.opLivingType, this.livingData.type);
+	var reservoirType = OpValueToIndex(this.opReservoirType, this.reservoirData.type);
+	var year = (this.year-1911) & 255;
+	var playSpeed = this.playSpeed & 255;
+
+	var waterUseEncode = "";
+	waterUseEncode += g_Util.PadLeft(waterUseType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(agricultureType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(cultivationType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(livestockType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(industryType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(livingType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(reservoirType.toString(16),1);
+	waterUseEncode += g_Util.PadLeft(year.toString(16),2);
+	waterUseEncode += g_Util.PadLeft(playSpeed.toString(16),2);
+  return waterUseEncode;
+};
+
+WaterUseStatistic.prototype.DecodeOptionString = function(option){
+  var waterUseType = parseInt(option[0],16) & 15;
+  var agricultureType = parseInt(option[1],16) & 15;
+  var cultivationType = parseInt(option[2],16) & 15;
+  var livestockType = parseInt(option[3],16) & 15;
+  var industryType = parseInt(option[4],16) & 15;
+  var livingType = parseInt(option[5],16) & 15;
+  var reservoirType = parseInt(option[6],16) & 15;
+  var year = parseInt(option.substr(7,2),16) & 255;
+  var playSpeed = parseInt(option.substr(9,2),16) & 255;
+
+  this.type = this.opType[waterUseType].value;
+  this.agricultureData.type = this.opAgricultureType[agricultureType].value;
+  this.cultivationData.type = this.opCultivationType[cultivationType].value;
+  this.livestockData.type = this.opLivestockType[livestockType].value;
+  this.industryData.type = this.opIndustryType[industryType].value;
+  this.livingData.type = this.opLivingType[livingType].value;
+  this.reservoirData.type = this.opReservoirType[reservoirType].value;
+  this.year = year + 1911;
+  this.playSpeed = playSpeed;
 };

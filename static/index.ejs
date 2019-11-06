@@ -62,13 +62,7 @@
 				
 				<div class="graph-content" v-show="mapOption.mapType == 'waterUse' " v-if="waterUse">
 					<select v-model="waterUse.type" v-on:change="waterUse.UpdateGraph();">
-						<option value="overview">總用水供需</option>
-						<option value="agriculture">灌溉用水</option>
-						<option value="cultivation">養殖用水</option>
-						<option value="livestock">畜牧用水</option>
-						<option value="industry">工業用水</option>
-						<option value="living">生活用水</option>
-						<option value="reservoir">水庫統計</option>
+						<option v-for="op in waterUse.opType" v-bind:value="op.value">{{op.name}}</option>
 					</select>
 
 					<div class="graph-container" v-if="waterUse.type == 'overview' ">
@@ -442,9 +436,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.agricultureData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="灌溉用水">灌溉用水</option>
-								<option value="灌溉面積">灌溉面積</option>
-								<option value="單位面積用水量">單位面積用水量</option>
+								<option v-for="op in waterUse.opAgricultureType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
@@ -454,9 +446,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.cultivationData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="養殖用水">養殖用水</option>
-								<option value="養殖面積">養殖面積</option>
-								<option value="單位面積用水量">單位面積用水量</option>
+								<option v-for="op in waterUse.opCultivationType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
@@ -466,9 +456,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.livestockData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="畜牧用水">畜牧用水</option>
-								<option value="畜牧數量">畜牧數量</option>
-								<option value="每千隻用水量">每千隻用水量</option>
+								<option v-for="op in waterUse.opLivestockType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
@@ -478,9 +466,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.industryData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="工業用水">工業用水</option>
-								<option value="工業面積">工業面積</option>
-								<option value="單位面積用水量">單位面積用水量</option>
+								<option v-for="op in waterUse.opIndustryType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
@@ -490,14 +476,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.livingData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="每人每日配水量">每人每日配水量</option>
-								<option value="每人每日生活總用水量">每人每日生活總用水量</option>
-								<option value="自行取水用水人口">自行取水用水人口</option>
-								<option value="自行取水年用水量">自行取水年用水量</option>
-								<option value="自行取水每人每日生活用水量">自行取水每人每日生活用水量</option>
-								<option value="自來水年用水量">自來水年用水量</option>
-								<option value="自來水供水人口">自來水供水人口</option>
-								<option value="每人每日售水量">每人每日售水量</option>
+								<option v-for="op in waterUse.opLivingType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
@@ -507,17 +486,7 @@
 						<div class="option-item">
 							<div class="option-label">統計項目</div>
 							<select v-model="waterUse.reservoirData.type" v-on:change="waterUse.UpdateGraph();">
-								<option value="進水量">進水量</option>
-								<option value="各標的用水量總計">各標的用水量總計</option>
-								<option value="農業用水量">農業用水量</option>
-								<option value="工業用水量">工業用水量</option>
-								<option value="生活用水量">生活用水量</option>
-								<option value="洩洪量">洩洪量</option>
-								<option value="損耗水量">損耗水量</option>
-								<option value="其他放流量">其他放流量</option>
-								<option value="淤積增減量">淤積增減量</option>
-								<option value="發電水量回流">發電水量回流</option>
-								<option value="發電水量放流">發電水量放流</option>
+								<option v-for="op in waterUse.opReservoirType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
 					</div>
