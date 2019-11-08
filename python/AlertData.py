@@ -65,7 +65,9 @@ class AlertData:
             r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 data = json.loads(r.text)
-                
+                if not isinstance(data["entry"], list):
+                    data["entry"] = [data["entry"]]
+                    
                 for entry in data["entry"]:
                     day = entry["updated"].split("T")[0].replace("-","")
                     query = self.db["alert"+day].find_one({"_id":{"$regex":entry["id"]}})

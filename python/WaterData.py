@@ -57,6 +57,7 @@ class WaterData:
 
             self.ProcessWaterLevelDrain("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E5%8D%80%E5%9F%9F%E6%8E%92%E6%B0%B4%E6%B0%B4%E4%BD%8D%27,Thing/properties/StationType)%20&$count=true")
             self.ProcessWaterLevelAgri("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B0%B4%E5%88%A9%E6%9C%83%27,Thing/properties/authority)%20&$count=true")
+            self.ProcessWaterLevelGate("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E9%96%98%E9%96%80%27,Thing/properties/StationType)%20&$count=true")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -296,6 +297,7 @@ class WaterData:
                     w = {}
                     w["StationIdentifier"] = prop["stationID"]
                     t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
                     w["RecordTime"] = t
                     w["WaterLevel"] = d["Observations"][0]["result"]
@@ -396,6 +398,7 @@ class WaterData:
                     f = {}
                     f["stationID"] = d["Thing"]["name"]
                     t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
                     f["time"] = t
                     f["value"] = d["Observations"][0]["result"]
@@ -529,6 +532,7 @@ class WaterData:
                     f = {}
                     f["stationID"] = d["Thing"]["name"]
                     t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
                     f["time"] = t
                     f["value"] = d["Observations"][0]["result"]
@@ -570,6 +574,7 @@ class WaterData:
                     f = {}
                     f["stationID"] = d["Thing"]["name"]
                     t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
                     f["time"] = t
                     f["value"] = d["Observations"][0]["result"]
@@ -581,6 +586,48 @@ class WaterData:
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelAgri(result["@iot.nextLink"])
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWaterLevelGate(self, url):
+        print("process water level gate url: "+url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["value"]
+                #add site
+                for d in data:
+                    if len(d["Thing"]["Locations"]) == 0:
+                        continue
+                    s = {}
+                    s["_id"] = d["Thing"]["name"]
+                    s["stationName"] = d["Thing"]["properties"]["stationName"]
+                    coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                    s["lat"] = coord[1]
+                    s["lng"] = coord[0]
+                    self.db["waterLevelGateSite"].update({"_id":s["_id"]},s,upsert=True)
+                #add data
+                for d in data:
+                    if len(d["Observations"]) == 0:
+                        continue
+                    f = {}
+                    f["stationID"] = d["Thing"]["name"]
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+
+                    f["time"] = t
+                    f[d["name"]] = d["Observations"][0]["result"]
+                    key = {"stationID":f["stationID"],"time":f["time"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+
+                    self.db["waterLevelGate"+day].update(key,{"$set":f},upsert=True)
+
+                if "@iot.nextLink" in result:
+                    self.ProcessWaterLevelGate(result["@iot.nextLink"])
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -598,6 +645,7 @@ class WaterData:
                     f = {}
                     f["stationNo"] = d["stationNo"]
                     t = datetime.datetime.strptime(d["recTime"],'%Y%m%d%H%M')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=taiwan)
                     f["time"] = t
                     f["value"] = d["levelOut"]

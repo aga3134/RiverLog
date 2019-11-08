@@ -9,8 +9,8 @@ from math import sin,cos,tan,pow,pi
 
 def ToFloat(s):
     try:
-        if isinstance(s, float):
-            return s
+        if isinstance(s, float) or isinstance(s, int):
+            return float(s)
         else:
             return float(s.replace(",",""))
     except ValueError:
@@ -18,8 +18,8 @@ def ToFloat(s):
 
 def ToInt(s):
     try:
-        if isinstance(s, int):
-            return s
+        if isinstance(s, int) or isinstance(s, float):
+            return int(s)
         else:
             return int(s.replace(",",""))
     except ValueError:
