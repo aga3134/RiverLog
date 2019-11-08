@@ -50,8 +50,7 @@ class FloodOverlay extends SvgOverlay{
                 d: d
             });
 
-
-            var fillH = this.size*(1-Math.min(1,this.value/180.0));
+            var fillH = this.size-(this.size-padT)*Math.min(1,this.value/180.0);
             svg.append("rect").attr({
                 x: 0,
                 y: 0,
@@ -80,12 +79,30 @@ class FloodOverlay extends SvgOverlay{
             });
         }.bind(this);
 
-        var headR = this.size*0.15;
-        var bodyW = this.size*0.5;
-        var bodyH = this.size*0.4-4;
-        var legW = this.size*0.3;
-        var legH = this.size*0.3;
-        DrawHumanShape(headR,bodyW,bodyH,legW,legH,2);
+        if(this.value >= 50){
+            for(var i=-1;i<2;i++){
+                svg.append("text").attr({
+                    "x": this.size*(0.5+i*0.1),
+                    "y": 0,
+                    "fill": "#ff0000",
+                    "text-anchor":"middle",
+                    "alignment-baseline": "hanging"
+                }).style({
+                    "font-size": this.size*0.2,
+                    "font-weight": "bold",
+                    "transform-origin": "50% 50%",
+                    "transform": "rotate("+15*i+"deg)"
+                }).text("!");
+            }
+        }
+
+        var headR = this.size*0.12;
+        var bodyW = this.size*0.42;
+        var bodyH = this.size*0.3;
+        var legW = this.size*0.25;
+        var legH = this.size*0.25;
+        var padT = this.size*0.2;
+        DrawHumanShape(headR,bodyW,bodyH,legW,legH,padT);
         
     }
 }
