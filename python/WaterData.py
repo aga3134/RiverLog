@@ -29,6 +29,7 @@ class WaterData:
     def Init(self):
         self.AddWaterLevelSite()
         self.AddReservoirSite()
+        self.AddSewerSite()
             
     def CollectData10min(self):
         try:
@@ -49,9 +50,13 @@ class WaterData:
 
             #collect water level from fhy website for more real time data
             self.ProcessWaterLevelFromWebsite()
+            self.ProcessSewerData()
 
             self.ProcessFlood("https://sta.ci.taiwan.gov.tw/STA_WaterResource_lastest/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B7%B1%E5%BA%A6%27,Datastream/name)%20&$count=true")
             self.ProcessWaterLevel("https://sta.ci.taiwan.gov.tw/STA_WaterLevel_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)&$count=true")
+
+            self.ProcessWaterLevelDrain("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E5%8D%80%E5%9F%9F%E6%8E%92%E6%B0%B4%E6%B0%B4%E4%BD%8D%27,Thing/properties/StationType)%20&$count=true")
+            self.ProcessWaterLevelAgri("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B0%B4%E5%88%A9%E6%9C%83%27,Thing/properties/authority)%20&$count=true")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -156,6 +161,43 @@ class WaterData:
                     key = {"ReservoirName":r["ReservoirName"],"Year":r["Year"]}
                     self.db["reservoirInfo"].update(key,r,upsert=True)
                     
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def AddSewerSite(self):
+        try:
+            print("add sewer sites")
+            #water level sites
+            url = "http://ipgod.nchc.org.tw/dataset/0f140b04-e04f-4b03-8706-21c03dfa0989/resource/e4a22c5c-859c-4a5a-b3e7-3f7323524856/download/70eb2f32ed6de9adbceb2b983bcae5f4.kml"
+            r = requests.get(url,verify=False)
+            r.encoding = "utf-8-sig"
+            if r.status_code == requests.codes.all_okay:
+                soup = BeautifulSoup(r.text, "xml")
+                placeArr = soup.Folder.find_all("Placemark")
+                for place in placeArr:
+                    coord = place.find("coordinates").string.split(",")
+                    site = {}
+                    site["lat"] = coord[1]
+                    site["lng"] = coord[0]
+
+                    data = place.find_all("SimpleData")
+                    for d in data:
+                        name = d.get("name")
+                        if name == "ST_NO":
+                            site["no"] = d.string
+                        elif name == "DISTRICT":
+                            site["district"] = d.string
+                        elif name == "VILLAGE":
+                            site["village"] = d.string
+                        elif name == "REGION":
+                            site["region"] = d.string
+                        elif name == "ST_NAME":
+                            site["name"] = d.string
+                        elif name == "ST_ADDRESS":
+                            site["address"] = d.string
+                    key = {"no":site["no"]}
+                    self.db["sewerStation"].update(key,site,upsert=True)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -457,6 +499,113 @@ class WaterData:
                         if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
                             continue
                         self.db["reservoir"+day].insert_one(data)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWaterLevelDrain(self, url):
+        print("process water level drain url: "+url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["value"]
+                #add site
+                for d in data:
+                    if len(d["Thing"]["Locations"]) == 0:
+                        continue
+                    s = {}
+                    s["_id"] = d["Thing"]["name"]
+                    s["stationName"] = d["Thing"]["properties"]["stationName"]
+                    coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                    s["lat"] = coord[1]
+                    s["lng"] = coord[0]
+                    self.db["waterLevelDrainSite"].update({"_id":s["_id"]},s,upsert=True)
+                #add data
+                for d in data:
+                    if len(d["Observations"]) == 0:
+                        continue
+                    f = {}
+                    f["stationID"] = d["Thing"]["name"]
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    f["time"] = t
+                    f["value"] = d["Observations"][0]["result"]
+                    key = {"stationID":f["stationID"],"time":f["time"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["waterLevelDrain"+day].find_one(key)
+                    if query is None:
+                        self.db["waterLevelDrain"+day].insert_one(f)
+
+                if "@iot.nextLink" in result:
+                    self.ProcessWaterLevelDrain(result["@iot.nextLink"])
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWaterLevelAgri(self, url):
+        print("process water level agriculture url: "+url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["value"]
+                #add site
+                for d in data:
+                    if len(d["Thing"]["Locations"]) == 0:
+                        continue
+                    s = {}
+                    s["_id"] = d["Thing"]["name"]
+                    s["stationName"] = d["Thing"]["properties"]["stationName"]
+                    coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                    s["lat"] = coord[1]
+                    s["lng"] = coord[0]
+                    self.db["waterLevelAgriSite"].update({"_id":s["_id"]},s,upsert=True)
+                #add data
+                for d in data:
+                    if len(d["Observations"]) == 0:
+                        continue
+                    f = {}
+                    f["stationID"] = d["Thing"]["name"]
+                    t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    f["time"] = t
+                    f["value"] = d["Observations"][0]["result"]
+                    key = {"stationID":f["stationID"],"time":f["time"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["waterLevelAgri"+day].find_one(key)
+                    if query is None:
+                        self.db["waterLevelAgri"+day].insert_one(f)
+
+                if "@iot.nextLink" in result:
+                    self.ProcessWaterLevelAgri(result["@iot.nextLink"])
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessSewerData(self):
+        print("process sewer data")
+        try:
+            r = requests.get("http://117.56.59.17/OpenData/API/Sewer/Get?stationNo=&loginId=sewer01&dataKey=BD3E513A")
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["data"]
+                
+                for d in data:
+                    f = {}
+                    f["stationNo"] = d["stationNo"]
+                    t = datetime.datetime.strptime(d["recTime"],'%Y%m%d%H%M')
+                    t = t.replace(tzinfo=taiwan)
+                    f["time"] = t
+                    f["value"] = d["levelOut"]
+                    key = {"stationID":f["stationNo"],"time":f["time"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["sewer"+day].find_one(key)
+                    if query is None:
+                        self.db["sewer"+day].insert_one(f)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
