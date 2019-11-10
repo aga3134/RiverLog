@@ -17,12 +17,14 @@ import os
 import gc
 import math
 from bs4 import BeautifulSoup
+from GridData import GridData
 
 class WeatherData:
     def __init__(self, db):
         self.db = db
         config = json.loads(open("../config.json",encoding="utf8").read())
         self.key = config["weatherAPIKey"]
+        self.grid = GridData(db)
         
     def Init(self):
         pass
@@ -91,6 +93,8 @@ class WeatherData:
                     lat = util.ToFloat(location.find(ns+"lat").text)
                     lon = util.ToFloat(location.find(ns+"lon").text)
                     data["stationID"] = sID
+                    data["lat"] = lat
+                    data["lon"] = lon
                     station["stationID"] = sID
                     station["name"] = sName
                     station["lat"] = lat
@@ -138,6 +142,7 @@ class WeatherData:
                         self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                 
+                        self.grid.AddGridRain(d)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
