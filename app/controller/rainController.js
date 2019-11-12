@@ -6,6 +6,7 @@ var Util = require("../util");
 
 //一天的data存成一個collection，必免資料太大存取很慢
 var RainSchema = require("../../db/rainSchema");
+var RainGridSchema = require("../../db/rainGridSchema");
 
 var rc = {};
 
@@ -35,22 +36,36 @@ rc.GetExtremeDate = function(param){
 
 rc.GetData = function(param){
 	if(!param.date) return param.failFunc({err:"no date"});
+	
+	var condition = [];
+	if(param.minLat) condition.push({'lat': {$gte: param.minLat}});
+	if(param.maxLat) condition.push({'lat': {$lte: param.maxLat}});
+	if(param.minLng) condition.push({'lon': {$gte: param.minLng}});
+	if(param.maxLng) condition.push({'lon': {$lte: param.maxLng}});
+	var query = {};
+	if(condition.length > 0){
+		query.$and = condition;
+	}
 
-	var conditions = [];
-	conditions.push({time: {$gte: new Date(param.date+" 00:00")}});
-	conditions.push({time: {$lte: new Date(param.date+" 23:59")}});
-	var query   = {$and: conditions};
-
-	var date = new Date(param.date);
-	var t = Util.DateToDateString(date,"");
-	var Rain = mongoose.model("rain"+t, RainSchema);
-	Rain.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
+	RainStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
-
-		for(var i=0;i<data.length;i++){
-			data[i].time = Util.DateToTimeString(data[i].time);
+		
+		var idArr = [];
+		for(var i=0;i<sites.length;i++){
+			idArr.push(sites[i].stationID);
 		}
-		param.succFunc(data);
+
+		var condition = [];
+		condition.push({stationID: {$in:idArr}});
+		var query   = {$and: condition};
+
+		var date = new Date(param.date);
+		var t = Util.DateToDateString(date,"");
+		var Rain = mongoose.model("rain"+t, RainSchema);
+		Rain.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
+			if(err) return param.failFunc({err:err});
+			param.succFunc(data);
+		});
 	});
 };
 
@@ -64,9 +79,6 @@ rc.Get10minSum = function(param){
 
 	Rain10minSum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
-		for(var i=0;i<data.length;i++){
-			data[i].time = Util.DateToTimeString(data[i].time);
-		}
 		param.succFunc(data);
 	});
 };
@@ -81,10 +93,45 @@ rc.GetDailySum = function(param){
 
 	RainDailySum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
-		for(var i=0;i<data.length;i++){
-			data[i].time = Util.DateToDateString(data[i].time);
-		}
 		param.succFunc(data);
+	});
+};
+
+rc.GridData = function(param){
+	var gridPerUnit = 100;
+	var levelNum = 6;
+	var date = new Date(param.date);
+	var t = Util.DateToDateString(date,"");
+	var level = parseInt(param.level);
+	var minLat = parseFloat(param.minLat);
+	var maxLat = parseFloat(param.maxLat);
+	var minLng = parseFloat(param.minLng);
+	var maxLng = parseFloat(param.maxLng);
+	if(!date || !param.level || level < 0 || level >= levelNum) return param.failFunc({err:"invalid param"});;
+
+	var query = {"lev": level};
+	var condition = [];
+	var scale = gridPerUnit/Math.pow(2,level);
+	var interval = 1.0/scale;
+	if(minLat) condition.push({'y': {$gte: minLat*scale}});
+	if(maxLat) condition.push({'y': {$lte: maxLat*scale}});
+	if(minLng) condition.push({'x': {$gte: minLng*scale}});
+	if(maxLng) condition.push({'x': {$lte: maxLng*scale}});
+
+	if(condition.length > 0){
+		query.$and = condition;
+	}
+	var RainGrid = mongoose.model('rainGrid'+t, RainGridSchema);
+	RainGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
+		if(err){
+			console.log(err);
+			return param.failFunc({err:"load grid fail"});
+		}
+		
+		var result = {};
+		result.level = level;
+		result.data = data;
+		param.succFunc(result);
 	});
 };
 

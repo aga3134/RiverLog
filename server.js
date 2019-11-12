@@ -11,7 +11,7 @@ var AlertRoute = require("./app/route/alertRoute.js");
 var FloodRoute = require("./app/route/floodRoute.js");
 var StatisticRoute = require("./app/route/statisticRoute.js");
 
-mongoose.connect("mongodb://localhost/RiverLog", { useNewUrlParser: true });
+mongoose.connect("mongodb://localhost/RiverLog", {useNewUrlParser:true,useUnifiedTopology:true});
 mongoose.Promise = global.Promise;
 mongoose.pluralize(null);
 

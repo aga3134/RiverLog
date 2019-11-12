@@ -100,36 +100,6 @@ var g_APP = new Vue({
       }.bind(this)
     });
 
-    $.ajax({
-      url:"/rain/station",
-      async: false,
-      success:function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        var stationHash = {};
-        for(var i=0;i<result.data.length;i++){
-          stationHash[result.data[i].stationID] = result.data[i];
-        }
-        this.rainData.station = stationHash;
-
-      }.bind(this)
-    });
-
-    $.ajax({
-      url:"/waterLevel/station",
-      async: false,
-      success: function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        var stationHash = {};
-        for(var i=0;i<result.data.length;i++){
-          stationHash[result.data[i].BasinIdentifier] = result.data[i];
-        }
-        this.waterLevelData.station = stationHash;
-      }.bind(this)
-    });
 
     $.ajax({
       url:"/flood/station",
@@ -147,26 +117,12 @@ var g_APP = new Vue({
       }.bind(this)
     });
 
-    $.ajax({
-      url:"/reservoir/info",
-      async: false,
-      success: function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        var stationHash = {};
-        for(var i=0;i<result.data.length;i++){
-          stationHash[result.data[i].id] = result.data[i];
-        }
-        this.reservoirData.station = stationHash;
-      }.bind(this)
-    });
 
     this.mapControl = new MapControl();
     this.waterUse = new WaterUseStatistic();
 
     this.ParseParameter();
-    this.ChangeYear(this.curYear);
+
     google.maps.event.addDomListener(window, 'load', this.InitMap);
   },
   methods: {
@@ -195,7 +151,10 @@ var g_APP = new Vue({
       if(this.mapControl){
         var param = {
           useSatellite: this.mapOption.useSatellite,
-          initLoc: this.initLoc
+          initLoc: this.initLoc,
+          succFunc: function(){
+            this.ChangeYear(this.curYear);
+          }.bind(this)
         };
         this.mapControl.InitMap(param);
       }
@@ -230,7 +189,8 @@ var g_APP = new Vue({
         this["rainData"].dayAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this["rainData"].dayAvg[d.time] = d;
+          var t = dayjs(d.time,{timeZone:"Asia/Taipei"});
+          this["rainData"].dayAvg[t.format("YYYY-MM-DD")] = d;
         }
 
         $.get("/alert/alertStatistic?year="+year, function(result){
@@ -272,26 +232,14 @@ var g_APP = new Vue({
         this["rainData"].timeAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          this["rainData"].timeAvg[d.time] = d;
+          var t = dayjs(d.time,{timeZone:"Asia/Taipei"});
+          this["rainData"].timeAvg[t.format("HH:mm:ss")] = d;
         }
         //console.log(this["rainData"].timeAvg);
         this.UpdateTimebar();
         this.ChangeTime(this.curTime);
 
-        $.get("/rain/rainData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          this.rainData.data = d3.nest()
-            .key(function(d){return d.time;})
-            .map(result.data);
-
-          this.rainData.daily = d3.nest()
-            .key(function(d){return d.stationID})
-            .map(result.data);
-
-          this.UpdateMapRain();
-        }.bind(this));
+        this.mapControl.ChangeDate();
 
         $.get("/waterLevel/waterLevelData?date="+this.curYear+"-"+this.curDate,function(result){
           if(result.status != "ok"){
@@ -308,39 +256,6 @@ var g_APP = new Vue({
           this.UpdateMapWaterLevel();
         }.bind(this));
 
-        $.get("/reservoir/reservoirData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          this.reservoirData.data = d3.nest()
-            .key(function(d){return d.ObservationTime;})
-            .map(result.data);
-
-          //expend data to later hours
-          var prev = {};
-          for(var i=0;i<24;i++){
-            var t = g_Util.PadLeft(i,2)+":00:00";
-            if(!this.reservoirData.data[t]) continue;
-            var hasData = {};
-            for(var j=0;j<this.reservoirData.data[t].length;j++){
-              var r = this.reservoirData.data[t][j];
-              if(r){
-                prev[r.ReservoirIdentifier] = r;
-                hasData[r.ReservoirIdentifier] = true;
-              }
-            }
-            for(var key in prev){
-              if(!hasData[key]){
-                this.reservoirData.data[t].push(prev[key]);
-              }
-            }
-          }
-
-          this.reservoirData.daily = d3.nest()
-            .key(function(d){return d.ReservoirIdentifier})
-            .map(result.data);
-          this.UpdateMapReservoir();
-        }.bind(this));
 
         $.get("/flood/floodData?date="+this.curYear+"-"+this.curDate,function(result){
           if(result.status != "ok"){
@@ -655,52 +570,17 @@ var g_APP = new Vue({
     UpdateMapRain: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
-      //compute data hash in previous time
-      var offset = this.TimeToOffset(this.curTime);
-      offset -= 1;
-      if(offset < 0) offset = 0;
-      var preData = this.GetDataFromTime(this.rainData.data,this.OffsetToTime(offset));
-
-      var rainData = this.GetDataFromTime(this.rainData.data,this.curTime);
-      if(!rainData || this.rainOption.show == false) return this.mapControl.ClearMapRain();
-      
-      var preDataHash = {};
-      if(preData){
-        for(var i=0;i<preData.length;i++){
-          var s = preData[i].stationID;
-          preDataHash[s] = preData[i];
-        }
-      }
-      this.mapControl.UpdateMapRain(preDataHash, rainData);
+      this.mapControl.UpdateMapRain();
     },
     UpdateMapWaterLevel: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
-      //compute data hash in previous time
-      var offset = this.TimeToOffset(this.curTime);
-      offset -= 1;
-      if(offset < 0) offset = 0;
-      var preData = this.GetDataFromTime(this.waterLevelData.data,this.OffsetToTime(offset));
-
-      var waterLevelData = this.GetDataFromTime(this.waterLevelData.data,this.curTime);
-      if(!waterLevelData || this.waterLevelOption.show == false) return this.mapControl.ClearMapWaterLevel();
-
-      var preDataHash = {};
-      if(preData){
-        for(var i=0;i<preData.length;i++){
-          var s = preData[i].StationIdentifier;
-          preDataHash[s] = preData[i];
-        }
-      }
-      this.mapControl.UpdateMapWaterLevel(preDataHash, waterLevelData);
+      this.mapControl.UpdateMapWaterLevel();
     },
     UpdateMapReservoir: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
-      var hour = this.curTime.split(":")[0];
-      var reservoirData = this.GetDataFromTime(this.reservoirData.data,hour+":00");
-      if(!reservoirData || this.reservoirOption.show == false) return this.mapControl.ClearMapReservoir();
-      this.mapControl.UpdateMapReservoir(reservoirData);
+      this.mapControl.UpdateMapReservoir();
     },
     UpdateMapFlood: function(){
       this.UpdateUrl();

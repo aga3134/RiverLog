@@ -16,22 +16,6 @@ rc.GetInfo = function(param){
 	});
 }
 
-rc.GetExtremeDate = function(param){
-	var result = {};
-	ReservoirDailySum.findOne({}).sort({time: -1}).exec(function(err, maxDate) {
-		if(err) return param.failFunc({err:err});
-		if(!maxDate) return param.failFunc({err:"no max date"});
-
-		result.maxDate = Util.DateToDateString(maxDate.time);
-		ReservoirDailySum.findOne({}).sort({time: 1}).exec(function(err, minDate) {
-			if(err) return param.failFunc({err:err});
-			if(!minDate) return param.failFunc({err:"no min date"});
-
-			result.minDate = Util.DateToDateString(minDate.time);
-			return param.succFunc(result);
-		});
-	});
-};
 
 rc.GetData = function(param){
 	if(!param.date) return param.failFunc({err:"no date"});
@@ -46,44 +30,6 @@ rc.GetData = function(param){
 	var Reservoir = mongoose.model("reservoir"+t, ReservoirSchema);
 	Reservoir.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
-
-		for(var i=0;i<data.length;i++){
-			data[i].ObservationTime = Util.DateToTimeString(data[i].ObservationTime);
-		}
-		param.succFunc(data);
-	});
-}
-
-rc.GetHourSum = function(param){
-	if(!param.date) return param.failFunc({err:"no date"});
-
-	var conditions = [];
-	conditions.push({time: {$gte: new Date(param.date+" 00:00")}});
-	conditions.push({time: {$lte: new Date(param.date+" 23:59")}});
-	var query   = {$and: conditions};
-
-	ReservoirHourSum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
-		if(err) return param.failFunc({err:err});
-		for(var i=0;i<data.length;i++){
-			data[i].time = Util.DateToTimeString(data[i].time);
-		}
-		param.succFunc(data);
-	});
-}
-
-rc.GetDailySum = function(param){
-	if(!param.year) return param.failFunc({err:"no year"});
-
-	var conditions = [];
-	conditions.push({time: {$gte: new Date(param.year+"-1-1")}});
-	conditions.push({time: {$lte: new Date(param.year+"-12-31")}});
-	var query   = {$and: conditions};
-
-	ReservoirDailySum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
-		if(err) return param.failFunc({err:err});
-		for(var i=0;i<data.length;i++){
-			data[i].time = Util.DateToDateString(data[i].time);
-		}
 		param.succFunc(data);
 	});
 }

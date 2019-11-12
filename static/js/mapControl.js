@@ -1,23 +1,21 @@
 
 function MapControl(){
 	this.map = null;
-	this.infoRain = null;
-	this.infoReservoir = null;
-	this.infoWaterLevel = null;
-	this.infoAlert = null;
-	this.infoStorm = null;
-	this.infoTyphoon = null;
-	this.infoTyphoonTrajectory = null;
-  this.infoFlood = null;
-	this.layerRain = {};
-  this.layerReservoir = {};
-  this.layerWaterLevel = {};
+
+  this.mapRain = new MapRain({"siteUrl":"/rain/station", "dataUrl":"/rain/rainData", "gridUrl":"/rain/gridData"});
+  this.mapReservoir = new MapReservoir({"siteUrl":"/reservoir/info", "dataUrl":"/reservoir/reservoirData"});
+  this.mapWaterLevel = new MapWaterLevel({"siteUrl":"/waterLevel/station", "dataUrl":"/waterLevel/waterLevelData"});
+  
+  this.infoAlert = new google.maps.InfoWindow();
+  this.infoStorm = new google.maps.InfoWindow();
+  this.infoTyphoon = new google.maps.InfoWindow();
+  this.infoFlood = new google.maps.InfoWindow();
+  this.infoTyphoonTrajectory = new google.maps.InfoWindow();
+
   this.layerFlood = {};
   this.layerThunderstorm = {};
   this.layerTyphoonTrajectory = {};
-  this.infoRainID = "";
-  this.infoReservoirID = "";
-  this.infoWaterLevelID = "";
+
   this.infoAlertID = "";
   this.infoStormID = "";
   this.infoFloodID = "";
@@ -216,17 +214,22 @@ MapControl.prototype.InitMap = function(param){
       this.map.data.addGeoJson(geoJsonObject); 
     }.bind(this));*/
 
+
+    this.mapRain.map = this.map;
+    this.mapReservoir.map = this.map;
+    this.mapWaterLevel.map = this.map;
+    param.succFunc();
+
   }.bind(this));
   
-  this.infoRain = new google.maps.InfoWindow();
-  this.infoReservoir = new google.maps.InfoWindow();
-  this.infoWaterLevel = new google.maps.InfoWindow();
-  this.infoAlert = new google.maps.InfoWindow();
-  this.infoStorm = new google.maps.InfoWindow();
-  this.infoTyphoon = new google.maps.InfoWindow();
-  this.infoFlood = new google.maps.InfoWindow();
-  this.infoTyphoonTrajectory = new google.maps.InfoWindow();
 };
+
+MapControl.prototype.ChangeDate = function(){
+  var date = g_APP.curYear+"-"+g_APP.curDate;
+  if(this.mapRain) this.mapRain.ChangeDate(date);
+  if(this.mapReservoir) this.mapReservoir.ChangeDate(date);
+  if(this.mapWaterLevel) this.mapWaterLevel.ChangeDate(date);
+}
 
 MapControl.prototype.LoadVillage = function(county){
   $.ajax({
@@ -334,7 +337,6 @@ MapControl.prototype.GenAlertContent = function(feature){
   var typhoonArr = feature.getProperty("typhoon");
   for(var i=0;i<typhoonArr.length;i++){
     var typhoon = typhoonArr[i];
-    console.log(typhoon);
     alert = true;
     content += "<p class='info-title'>"+typhoon.headline+" - "+typhoon.description.cwb_typhoon_name+"颱風</p>";
     content += "<p>"+typhoon.description["注意事項"]+"</p>";
@@ -355,269 +357,23 @@ MapControl.prototype.ToggleSatellite = function(useSatellite){
   }
 };
 
-MapControl.prototype.UpdateMapRain = function(preDataHash,rainData){
-  this.ClearMapRain(true);
-
-	var UpdateInfoRain = function(d){
-    var s = g_APP.rainData.station[d.stationID];
-    var str = "<p>"+s.name+"</p>";
-    str += "<p>累積雨量 "+d.now+" mm</p>";
-    str += "<p>雨量變化 "+d.diff+" mm</p>";
-    str += "<p>時間 "+d.time+" </p>";
-    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"rain\");'>今日變化</div></div>";
-    var loc = new google.maps.LatLng(s.lat, s.lon);
-    this.infoRain.setOptions({content: str, position: loc});
-  }.bind(this);
-
-  var clickFn = function(data,i){ 
-    return function() {
-      UpdateInfoRain(data[i]);
-      this.infoRain.open(this.map);
-      this.infoRainID = data[i].stationID;
-    }.bind(this);
-  }.bind(this);
-
-  for(var i=0;i<rainData.length;i++){
-    var sID = rainData[i].stationID
-    var station = g_APP.rainData.station[rainData[i].stationID];
-    if(!station) continue;
-    if(rainData[i].now <= 0) continue;
-
-    rainData[i].diff = 0;
-    if(preDataHash[sID]){
-      if(preDataHash[sID].now && rainData[i].now){
-        rainData[i].diff = rainData[i].now-preDataHash[sID].now;
-      }
-    }
-    var value = 0, scale = 0;
-    switch(g_APP.rainOption.type){
-      case "daily":
-        value = rainData[i].now;
-        scale = 0.0005;
-        break;
-      case "diff":
-        value = rainData[i].diff;
-        scale =0.005;
-        break;
-    }
-
-    //info window有打開，更新資訊
-    if(this.infoRain.getMap() && this.infoRainID == station.stationID){
-      UpdateInfoRain(rainData[i]);
-    }
-
-    var rectW = 0.01*g_APP.rainOption.scale;
-    var rectH = scale*g_APP.rainOption.scale;
-    if(this.layerRain[station.stationID]){
-      var rect = this.layerRain[station.stationID];
-      rect.setOptions({
-        map: this.map,
-        fillColor: g_APP.color.rain(value),
-        fillOpacity: g_APP.rainOption.opacity,
-        bounds: {
-          north: station.lat+value*rectH,
-          south: station.lat,
-          east: station.lon+rectW,
-          west: station.lon-rectW
-        }
-      });
-      google.maps.event.clearListeners(rect,"click");
-      rect.addListener('click', clickFn(rainData,i));
-    }
-    else{
-      var rect = new google.maps.Rectangle({
-        strokeWeight: 0,
-        fillColor: g_APP.color.rain(value),
-        fillOpacity: g_APP.rainOption.opacity,
-        map: this.map,
-        zIndex: 1,
-        bounds: {
-          north: station.lat+value*rectH,
-          south: station.lat,
-          east: station.lon+rectW,
-          west: station.lon-rectW
-        }
-      });
-      rect.addListener('click', clickFn(rainData,i));
-      this.layerRain[station.stationID] = rect;
-    }
-  }
+MapControl.prototype.UpdateMapRain = function(){
+  if(!this.mapRain) return;
+  this.mapRain.Update();
 };
 
 MapControl.prototype.UpdateMapWaterLevel = function(preDataHash, waterLevelData){
-  this.ClearMapWaterLevel(true);
-
-	var UpdateInfoWaterLevel = function(d){
-    var s = g_APP.waterLevelData.station[d.StationIdentifier];
-    var str = "<p>"+s.ObservatoryName+"</p>";
-    str += "<p>溪流 "+s.RiverName+"</p>";
-    str += "<p>水位 "+d.WaterLevel+" m (";
-    if(d.levelDiff >= 0) str += "+";
-    str += d.levelDiff.toFixed(2)+" m)</p>";
-    str += "<p>警戒水位(三級/二級/一級):</p>";
-    str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
-    str += "<p>時間 "+d.RecordTime+" </p>";
-    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
-    var loc = new google.maps.LatLng(s.lat, s.lon);
-    this.infoWaterLevel.setOptions({content: str, position: loc});
-  }.bind(this);
-
-  var clickFn = function(data,i){ 
-    return function() {
-      UpdateInfoWaterLevel(data[i]);
-      this.infoWaterLevel.open(this.map);
-      this.infoWaterLevelID = data[i].StationIdentifier;
-    }.bind(this);
-  }.bind(this);
-
-  var DrawArrow = function(lat,lng,value){
-    var scale = 0.01*g_APP.waterLevelOption.scale;
-    var valueScale = 0.1*g_APP.waterLevelOption.scale;
-    var thresh = g_APP.waterLevelOption.thresh*0.01;
-    var arr = [];
-    if(Math.abs(value) < thresh){
-      arr.push({lat: lat-scale*0.5, lng: lng});
-      arr.push({lat: lat, lng: lng-scale*0.5});
-      arr.push({lat: lat+scale*0.5, lng: lng});
-      arr.push({lat: lat, lng: lng+scale*0.5});
-    }
-    else{
-      var base = value>0?scale*0.5:-scale*0.5;
-      arr.push({lat: lat, lng: lng-scale*0.5});
-      arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
-      arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
-      arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
-      arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
-      arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
-      arr.push({lat: lat, lng: lng+scale*0.5});
-    }
-    return arr;
-  }.bind(this);
-
-  for(var i=0;i<waterLevelData.length;i++){
-    var sID = waterLevelData[i].StationIdentifier
-    var station = g_APP.waterLevelData.station[sID];
-    if(!station) continue;
-
-    //compute water level difference
-    var value = 0;
-    if(preDataHash[sID]){
-      if(preDataHash[sID].WaterLevel && waterLevelData[i].WaterLevel){
-        value = waterLevelData[i].WaterLevel-preDataHash[sID].WaterLevel;
-      }
-    }
-    waterLevelData[i].levelDiff = value;
-
-    //info window有打開，更新資訊
-    if(this.infoWaterLevel.getMap() && this.infoWaterLevelID == station.BasinIdentifier){
-      UpdateInfoWaterLevel(waterLevelData[i]);
-    }
-
-    var color = "#37cc00";
-    if(waterLevelData[i].WaterLevel > station.AlertLevel3) color = "#ffcc00";
-    if(waterLevelData[i].WaterLevel > station.AlertLevel2) color = "#ff6600";
-    if(waterLevelData[i].WaterLevel > station.AlertLevel1) color = "#ff0000";
-
-    if(this.layerWaterLevel[station.BasinIdentifier]){
-      var arrow = this.layerWaterLevel[station.BasinIdentifier];
-      arrow.setOptions({
-        map: this.map,
-        fillColor: color,
-        strokeOpacity: g_APP.waterLevelOption.opacity,
-        fillOpacity: g_APP.waterLevelOption.opacity,
-        paths: DrawArrow(station.lat,station.lon,value)
-      });
-      google.maps.event.clearListeners(arrow,"click");
-      arrow.addListener('click', clickFn(waterLevelData,i));
-    }
-    else{
-      var arrow = new google.maps.Polygon({
-        strokeWeight: 1,
-        strokeColor: '#000000',
-        strokeOpacity: g_APP.waterLevelOption.opacity,
-        fillColor: color,
-        fillOpacity: g_APP.waterLevelOption.opacity,
-        map: this.map,
-        zIndex: 2,
-        paths: DrawArrow(station.lat,station.lon,value)
-      });
-      arrow.addListener('click', clickFn(waterLevelData,i));
-      this.layerWaterLevel[station.BasinIdentifier] = arrow;
-    }
-  }
+  if(!this.mapWaterLevel) return;
+  this.mapWaterLevel.Update();
 };
 
-MapControl.prototype.UpdateMapReservoir = function(reservoirData){
-  this.ClearMapReservoir(true);
-
-	var UpdateInfoReservoir = function(d){
-    var s = g_APP.reservoirData.station[d.ReservoirIdentifier];
-    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
-    var str = "<p>"+s.ReservoirName+"</p>";
-    str += "<p>蓄水百分比 "+percent+" %</p>";
-    str += "<p>水位/滿水位/死水位: </p>"
-    str += d.WaterLevel+" / "+s.FullWaterLevel+" / "+s.DeadStorageLevel+" m</p>";
-    str += "<p>有效總容量 "+s.EffectiveCapacity+" m3</p>";
-    str += "<p>時間 "+d.ObservationTime+" </p>";
-    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"reservoir\");'>今日變化</div></div>";
-    var loc = new google.maps.LatLng(s.lat, s.lng);
-    this.infoReservoir.setOptions({content: str, position: loc});
-  }.bind(this);
-
-  var clickFn = function(data,i){ 
-    return function() {
-      UpdateInfoReservoir(data[i]);
-      this.infoReservoir.open(this.map);
-      this.infoReservoirID = data[i].ReservoirIdentifier;
-    }.bind(this);
-  }.bind(this);
-
-  for(var i=0;i<reservoirData.length;i++){
-    var station = g_APP.reservoirData.station[reservoirData[i].ReservoirIdentifier];
-    if(!station || !this.map) continue;
-    //info window有打開，更新資訊
-    if(this.infoReservoir.getMap() && this.infoReservoirID == station.id){
-      UpdateInfoReservoir(reservoirData[i]);
-    }
-
-    var zoomLevel = this.map.getZoom();
-    var baseSize = 0.001*(Math.pow(1.7,zoomLevel-7))*g_APP.reservoirOption.scale;
-    var d = reservoirData[i];
-    var percent = (100*d.EffectiveWaterStorageCapacity/station.EffectiveCapacity).toFixed(2);
-    if(isNaN(percent)) continue;
-
-    if(this.layerReservoir[station.id]){
-      var overlay = this.layerReservoir[station.id];
-      var option = {
-        map: this.map,
-        size: station.EffectiveCapacity*baseSize,
-        percent: percent,
-        opacity: g_APP.reservoirOption.opacity,
-        color: g_APP.color.reservoir(percent*0.01)
-      };
-      overlay.Update(option);
-      google.maps.event.clearListeners(overlay,"click");
-      overlay.addListener('click', clickFn(reservoirData,i));
-    }
-    else{
-      var overlay = new ReservoirOverlay({
-        map: this.map,
-        lat: station.lat,
-        lng: station.lng,
-        size: station.EffectiveCapacity*baseSize,
-        svgID: "svg_"+station.id,
-        percent: percent,
-        opacity: g_APP.reservoirOption.opacity,
-        color: g_APP.color.reservoir(percent*0.01)
-      });
-      
-      overlay.addListener('click', clickFn(reservoirData,i));
-      this.layerReservoir[station.id] = overlay;
-    }
-  }
+MapControl.prototype.UpdateMapReservoir = function(){
+  if(!this.mapReservoir) return;
+  this.mapReservoir.Update();
 };
 
 MapControl.prototype.UpdateMapFlood = function(floodData){
+  if(!this.map) return;
   this.ClearMapFlood(true);
 
   var UpdateInfoFlood = function(d){
@@ -682,6 +438,7 @@ MapControl.prototype.UpdateMapFlood = function(floodData){
 };
 
 MapControl.prototype.UpdateMapAlert = function(alertData, t){
+  if(!this.map) return;
   this.ClearMapAlert(true);
 
 	AddAlert = function(type, alertData){
@@ -869,6 +626,7 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
 };
 
 MapControl.prototype.UpdateMapTyphoon = function(typhoonData){
+  if(!this.map) return;
   this.ClearMapTyphoon(true);
 
 	var UpdateInfoTyphoon = function(d){
@@ -978,34 +736,14 @@ MapControl.prototype.UpdateMapTyphoon = function(typhoonData){
 };
 
 MapControl.prototype.ClearMap = function(){
-  this.ClearMapRain();
-  this.ClearMapWaterLevel();
-  this.ClearMapReservoir();
+  this.mapRain.ClearMap();
+  this.mapReservoir.ClearMap();
+  this.mapWaterLevel.ClearMap();
   this.ClearMapAlert();
   this.ClearMapTyphoon();
   this.ClearMapFlood();
 };
 
-MapControl.prototype.ClearMapRain = function(keepLayer){
-	for(var key in this.layerRain){
-    this.layerRain[key].setMap(null);
-  }
-  if(!keepLayer) this.layerRain = {};
-};
-
-MapControl.prototype.ClearMapWaterLevel = function(keepLayer){
-	for(var key in this.layerWaterLevel){
-    this.layerWaterLevel[key].setMap(null);
-  }
-  if(!keepLayer) this.layerWaterLevel = {};
-};
-
-MapControl.prototype.ClearMapReservoir = function(keepLayer){
-	for(var key in this.layerReservoir){
-    this.layerReservoir[key].setMap(null);
-  }
-  if(!keepLayer) this.layerReservoir = {};
-};
 
 MapControl.prototype.ClearMapFlood = function(keepLayer){
   for(var key in this.layerFlood){
@@ -1065,9 +803,9 @@ MapControl.prototype.UpdateLineChart = function(){
       title = "雨量";
       unitY = "mm";
       minY = 0;
-      var s = g_APP.rainData.station[this.infoRainID];
+      var s = this.mapRain.data.site[this.mapRain.infoTarget];
       this.dailyChartTitle = s.name+" 雨量站 今日變化";
-      var arr = g_APP.rainData.daily[this.infoRainID];
+      var arr = this.mapRain.data.daily[this.mapRain.infoTarget];
       for(var i=0;i<arr.length;i++){
         if(arr[i].now > maxY) maxY = arr[i].now;
         data.push({
@@ -1079,9 +817,9 @@ MapControl.prototype.UpdateLineChart = function(){
     case "waterLevel":
       title = "水位";
       unitY = "m";
-      var s = g_APP.waterLevelData.station[this.infoWaterLevelID];
+      var s = this.mapWaterLevel.data.site[this.mapWaterLevel.infoTarget];
       this.dailyChartTitle = s.ObservatoryName+" 河川水位站 今日變化";
-      var arr = g_APP.waterLevelData.daily[this.infoWaterLevelID];
+      var arr = this.mapWaterLevel.data.daily[this.mapWaterLevel.infoTarget];
       for(var i=0;i<arr.length;i++){
         if(arr[i].WaterLevel < minY) minY = arr[i].WaterLevel;
         if(arr[i].WaterLevel > maxY) maxY = arr[i].WaterLevel;
@@ -1096,9 +834,9 @@ MapControl.prototype.UpdateLineChart = function(){
       unitY = "%";
       //minY = 0;
       //maxY = 100;
-      var s = g_APP.reservoirData.station[this.infoReservoirID];
+      var s = this.mapReservoir.data.site[this.mapReservoir.infoTarget];
       this.dailyChartTitle = s.ReservoirName+" 蓄水百分比 今日變化";
-      var arr = g_APP.reservoirData.daily[this.infoReservoirID];
+      var arr = this.mapReservoir.data.daily[this.mapReservoir.infoTarget];
       for(var i=0;i<arr.length;i++){
         var percent = (100*arr[i].EffectiveWaterStorageCapacity/s.EffectiveCapacity);
         if(percent < minY) minY = percent;

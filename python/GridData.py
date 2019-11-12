@@ -16,49 +16,13 @@ class GridData:
 
     def AddGridRain(self, d):
         timeKey = "time"
-        valueKey = ["now","hour12","hour24"]
+        valueKey = ["now"]
         dayStr = d[timeKey].strftime('%Y%m%d')
         table = "rainGrid"+dayStr
         latKey = "lat"
         lngKey = "lon"
         self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
 
-    def AddGridWaterLevel(self, d):
-        timeKey = "RecordTime"
-        valueKey = ["WaterLevel"]
-        dayStr = d[timeKey].strftime('%Y%m%d')
-        table = "waterLevelGrid"+dayStr
-        latKey = "lat"
-        lngKey = "lon"
-        self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
-
-    def AddGridWaterLevelDrain(self, d):
-        timeKey = "time"
-        valueKey = ["value"]
-        dayStr = d[timeKey].strftime('%Y%m%d')
-        table = "waterLevelDrainGrid"+dayStr
-        latKey = "lat"
-        lngKey = "lng"
-        self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
-
-    def AddGridWaterLevelAgri(self, d):
-        timeKey = "time"
-        valueKey = ["value"]
-        dayStr = d[timeKey].strftime('%Y%m%d')
-        table = "waterLevelAgriGrid"+dayStr
-        latKey = "lat"
-        lngKey = "lng"
-        self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
-
-    def AddGridSewer(self, d):
-        timeKey = "time"
-        valueKey = ["value"]
-        dayStr = d[timeKey].strftime('%Y%m%d')
-        table = "sewerGrid"+dayStr
-        latKey = "lat"
-        lngKey = "lng"
-        self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
-        
     def AddGridData(self, table, d, timeKey, valueKey, latKey, lngKey):
         for level in range(self.levelNum):
             scale = self.gridPerUnit/math.pow(2,level)
