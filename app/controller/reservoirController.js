@@ -1,7 +1,5 @@
 var mongoose = require('mongoose');
 var ReservoirInfo = require('../../db/reservoirInfo');
-var ReservoirDailySum = require('../../db/reservoirDailySum');
-var ReservoirHourSum = require('../../db/reservoirHourSum');
 var Util = require("../util");
 
 //一天的data存成一個collection，必免資料太大存取很慢
