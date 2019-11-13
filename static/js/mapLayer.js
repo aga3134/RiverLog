@@ -4,7 +4,6 @@ class MapLayer{
       this.siteUrl = option.siteUrl;
       this.dataUrl = option.dataUrl;
       this.gridUrl = option.gridUrl;
-      this.useGrid = option.useGrid;
       this.divideLatLng = option.divide;
 
       this.map = option.map;
@@ -14,7 +13,7 @@ class MapLayer{
       this.date = "";
       this.data = {site:{},data:{},daily:{}};
 
-      if(this.useGrid){
+      if(this.gridUrl){
         this.levelNum = option.levelNum || 6;
         this.gridPerUnit = option.gridPerUnit || 6;
         this.level = this.GetLevel();
@@ -38,7 +37,7 @@ class MapLayer{
     }
 
     GetLevel(){
-      if(!this.useGrid) return -1;
+      if(!this.gridUrl) return -1;
       if(!this.map) return this.levelNum-1;
       var zoom = this.map.getZoom();
       var level = 5+this.levelNum-zoom;
@@ -120,7 +119,7 @@ class MapLayer{
     }
 
     UpdateGrid(minLat,minLng,maxLat,maxLng){
-      if(!this.useGrid) return;
+      if(!this.gridUrl) return;
 
       var param = {};
       param.date = this.date;
@@ -163,6 +162,7 @@ class MapLayer{
     }
 
     LoadSite(){
+      if(!this.siteUrl) return;
       $.get(this.siteUrl, function(result){
         if(result.status != "ok"){
           return console.log(result.err);
@@ -177,6 +177,7 @@ class MapLayer{
     }
 
     LoadLayer(param){
+      if(!this.dataUrl) return;
       var url = this.dataUrl;
       url += "?date="+this.date;
       if(this.divideLatLng){
@@ -185,6 +186,7 @@ class MapLayer{
         url += "&maxLat="+param.maxLat;
         url += "&maxLng="+param.maxLng;
       }
+      //console.log(url);
 
       var data = this.data.data;
       var daily = this.data.daily;
@@ -211,7 +213,7 @@ class MapLayer{
     }
 
     LoadGrid(param){
-      if(!this.useGrid) return;
+      if(!this.gridUrl) return;
 
       var url = this.gridUrl;
       url += "?date="+this.date;
@@ -247,7 +249,6 @@ class MapLayer{
       for(var key in this.layer){
         this.layer[key].setMap(null);
       }
-      this.layer = {};
     }
 
     ClearData(){
@@ -255,7 +256,7 @@ class MapLayer{
       this.infoTarget = {};
       this.data.data = {};
       this.data.daily = {};
-      if(this.useGrid){
+      if(this.gridUrl){
         for(var i=0;i<this.levelNum;i++){
           this.grid[i] = {};
         }

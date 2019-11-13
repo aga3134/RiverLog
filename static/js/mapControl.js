@@ -5,21 +5,16 @@ function MapControl(){
   this.mapRain = new MapRain({"siteUrl":"/rain/station", "dataUrl":"/rain/rainData", "gridUrl":"/rain/gridData"});
   this.mapReservoir = new MapReservoir({"siteUrl":"/reservoir/info", "dataUrl":"/reservoir/reservoirData"});
   this.mapWaterLevel = new MapWaterLevel({"siteUrl":"/waterLevel/station", "dataUrl":"/waterLevel/waterLevelData"});
+  this.mapFlood = new MapFlood({"siteUrl":"/flood/station", "dataUrl":"/flood/floodData"});
+  this.mapTyphoon = new MapTyphoon({"dataUrl":"/alert/typhoonData"});
   
   this.infoAlert = new google.maps.InfoWindow();
   this.infoStorm = new google.maps.InfoWindow();
-  this.infoTyphoon = new google.maps.InfoWindow();
-  this.infoFlood = new google.maps.InfoWindow();
-  this.infoTyphoonTrajectory = new google.maps.InfoWindow();
 
-  this.layerFlood = {};
   this.layerThunderstorm = {};
-  this.layerTyphoonTrajectory = {};
-
+  
   this.infoAlertID = "";
   this.infoStormID = "";
-  this.infoFloodID = "";
-  this.infoTyphoonTrajectoryID = "";
   this.geoDebris = {};
   this.geoCounty = {};
   this.geoTown = {};
@@ -218,6 +213,8 @@ MapControl.prototype.InitMap = function(param){
     this.mapRain.map = this.map;
     this.mapReservoir.map = this.map;
     this.mapWaterLevel.map = this.map;
+    this.mapFlood.map = this.map;
+    this.mapTyphoon.map = this.map;
     param.succFunc();
 
   }.bind(this));
@@ -229,6 +226,8 @@ MapControl.prototype.ChangeDate = function(){
   if(this.mapRain) this.mapRain.ChangeDate(date);
   if(this.mapReservoir) this.mapReservoir.ChangeDate(date);
   if(this.mapWaterLevel) this.mapWaterLevel.ChangeDate(date);
+  if(this.mapFlood) this.mapFlood.ChangeDate(date);
+  if(this.mapTyphoon) this.mapTyphoon.ChangeDate(date);
 }
 
 MapControl.prototype.LoadVillage = function(county){
@@ -373,68 +372,8 @@ MapControl.prototype.UpdateMapReservoir = function(){
 };
 
 MapControl.prototype.UpdateMapFlood = function(floodData){
-  if(!this.map) return;
-  this.ClearMapFlood(true);
-
-  var UpdateInfoFlood = function(d){
-    var s = g_APP.floodData.station[d.stationID];
-    var str = "<p>"+s.stationName+"</p>";
-    str += "<p>淹水 "+d.value+" 公分</p>";
-    str += "<p>時間 "+d.time+" </p>";
-    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"flood\");'>今日變化</div></div>";
-    var loc = new google.maps.LatLng(s.lat, s.lng);
-    this.infoFlood.setOptions({content: str, position: loc});
-  }.bind(this);
-
-  var clickFn = function(data,i){ 
-    return function() {
-      UpdateInfoFlood(data[i]);
-      this.infoFlood.open(this.map);
-      this.infoFloodID = data[i].stationID;
-    }.bind(this);
-  }.bind(this);
-
-  for(var i=0;i<floodData.length;i++){
-    var station = g_APP.floodData.station[floodData[i].stationID];
-
-    if(!station || !this.map) continue;
-    //info window有打開，更新資訊
-    if(this.infoFlood.getMap() && this.infoFloodID == station._id){
-      UpdateInfoFlood(floodData[i]);
-    }
-
-    var zoomLevel = this.map.getZoom();
-    var size = 10*(Math.pow(1.5,zoomLevel-7))*g_APP.floodOption.scale;
-    var d = floodData[i];
-    
-    if(this.layerFlood[station._id]){
-      var overlay = this.layerFlood[station._id];
-      var option = {
-        map: this.map,
-        size: size,
-        value: d.value,
-        opacity: g_APP.floodOption.opacity
-      };
-      overlay.Update(option);
-      google.maps.event.clearListeners(overlay,"click");
-      overlay.addListener('click', clickFn(floodData,i));
-    }
-    else{
-      var overlay = new FloodOverlay({
-        map: this.map,
-        lat: station.lat,
-        lng: station.lng,
-        size: size,
-        svgID: "svg_"+station._id,
-        value: d.value,
-        opacity: g_APP.floodOption.opacity,
-        color: g_APP.color.flood
-      });
-      
-      overlay.addListener('click', clickFn(floodData,i));
-      this.layerFlood[station._id] = overlay;
-    }
-  }
+  if(!this.mapFlood) return;
+  this.mapFlood.Update();
 };
 
 MapControl.prototype.UpdateMapAlert = function(alertData, t){
@@ -626,131 +565,19 @@ MapControl.prototype.UpdateMapAlert = function(alertData, t){
 };
 
 MapControl.prototype.UpdateMapTyphoon = function(typhoonData){
-  if(!this.map) return;
-  this.ClearMapTyphoon(true);
-
-	var UpdateInfoTyphoon = function(d){
-    var str = "<p class='info-title'>"+d.cwb_typhoon_name+"颱風</p>";
-    str += "<p>近中心最大風速: "+d.max_wind_speed+" m/s</p>";
-    str += "<p>近中心最大陣風: "+d.max_gust_speed+" m/s</p>";
-    str += "<p>中心氣壓: "+d.pressure+" 百帕</p>";
-    str += "<p>七級風暴風半徑: "+d.circle_of_15ms+" km</p>";
-    str += "<p>十級風暴風半徑: "+d.circle_of_25ms+" km</p>";
-    str += "<p>時間 "+d.time+" </p>";
-    var loc = new google.maps.LatLng(d.lat, d.lng);
-    this.infoTyphoonTrajectory.setOptions({content: str, position: loc});
-  }.bind(this);
-
-  var clickFn = function(data,i){ 
-    return function() {
-      UpdateInfoTyphoon(data[i]);
-      this.infoTyphoonTrajectory.open(this.map);
-      this.infoTyphoonTrajectoryID = data[i].typhoon_name;
-    }.bind(this);
-  }.bind(this);
-
-  for(var i=0;i<typhoonData.length;i++){
-    var typhoon = typhoonData[i];
-
-    //info window有打開，更新資訊
-    if(this.infoTyphoonTrajectory.getMap() && this.infoTyphoonTrajectoryID == typhoon.typhoon_name){
-      UpdateInfoTyphoon(typhoon);
-    }
-
-    var scale = 1000; //google map circle unit is m
-
-    if(this.layerTyphoonTrajectory[typhoon.typhoon_name]){
-      var graph = this.layerTyphoonTrajectory[typhoon.typhoon_name];
-
-      graph.level7.setOptions({
-        map: this.map,
-        fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: typhoon.circle_of_15ms*scale
-      });
-
-      graph.level10.setOptions({
-        map: this.map,
-        fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: typhoon.circle_of_25ms*scale
-      });
-
-      graph.center.setOptions({
-        map: this.map,
-        fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: 1*scale
-      });
-
-      google.maps.event.clearListeners(graph.level7,"click");
-      graph.level7.addListener('click', clickFn(typhoonData,i));
-      google.maps.event.clearListeners(graph.level10,"click");
-      graph.level10.addListener('click', clickFn(typhoonData,i));
-      google.maps.event.clearListeners(graph.center,"click");
-      graph.center.addListener('click', clickFn(typhoonData,i));
-    }
-    else{
-      var graph = {level7: null, level10: null, center: null};
-
-      graph.level7 = new google.maps.Circle({
-        strokeColor: '#FFFFFF',
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillColor: '#FFFF00',
-        fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
-        map: this.map,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: typhoon.circle_of_15ms*scale
-      });
-      
-      graph.level10 = new google.maps.Circle({
-        strokeColor: '#FFFFFF',
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillColor: '#FF0000',
-        fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
-        map: this.map,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: typhoon.circle_of_25ms*scale
-      });
-
-      graph.center = new google.maps.Circle({
-        strokeColor: '#FFFFFF',
-        strokeOpacity: 1,
-        strokeWeight: 1,
-        fillColor: '#FFFFFF',
-        fillOpacity: 0,
-        map: this.map,
-        center: {lat:typhoon.lat, lng:typhoon.lng},
-        radius: 1*scale
-      });
-      
-      graph.level7.addListener('click', clickFn(typhoonData,i));
-      graph.center.addListener('click', clickFn(typhoonData,i));
-      graph.level10.addListener('click', clickFn(typhoonData,i));
-
-      this.layerTyphoonTrajectory[typhoon.typhoon_name] = graph;
-    }
-  }
+  if(!this.mapTyphoon) return;
+  this.mapTyphoon.Update();
 };
 
 MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
   this.mapWaterLevel.ClearMap();
+  this.mapFlood.ClearMap();
+  this.mapTyphoon.ClearMap();
   this.ClearMapAlert();
-  this.ClearMapTyphoon();
-  this.ClearMapFlood();
 };
 
-
-MapControl.prototype.ClearMapFlood = function(keepLayer){
-  for(var key in this.layerFlood){
-    this.layerFlood[key].setMap(null);
-  }
-  if(!keepLayer) this.layerFlood = {};
-};
 
 MapControl.prototype.ClearMapAlert = function(keepLayer){
   if(!this.map) return;
@@ -775,15 +602,6 @@ MapControl.prototype.ClearMapAlert = function(keepLayer){
   if(!keepLayer) this.layerTyphoon = {};
 };
 
-MapControl.prototype.ClearMapTyphoon = function(keepLayer){
-	for(var key in this.layerTyphoonTrajectory){
-    var graph = this.layerTyphoonTrajectory[key];
-    graph.level7.setMap(null);
-    graph.level10.setMap(null);
-    graph.center.setMap(null);
-  }
-  if(!keepLayer) this.layerTyphoonTrajectory = {};
-};
 
 MapControl.prototype.OpenLineChart = function(type){
   this.openDailyChart = true;
@@ -851,9 +669,9 @@ MapControl.prototype.UpdateLineChart = function(){
       title = "淹水深度";
       unitY = "cm";
       minY = 0;
-      var s = g_APP.floodData.station[this.infoFloodID];
+      var s = this.mapFlood.data.site[this.mapFlood.infoTarget];
       this.dailyChartTitle = s.stationName+" 淹水測站 今日變化";
-      var arr = g_APP.floodData.daily[this.infoFloodID];
+      var arr = this.mapFlood.data.daily[this.mapFlood.infoTarget];
       for(var i=0;i<arr.length;i++){
         if(arr[i].value > maxY) maxY = arr[i].value;
         data.push({

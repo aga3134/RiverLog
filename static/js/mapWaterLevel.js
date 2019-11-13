@@ -1,16 +1,15 @@
 
 class MapWaterLevel extends MapLayer{
     constructor(option){
-			option.siteKey = "BasinIdentifier";
-			option.dataSiteKey = "StationIdentifier";
-			option.timeKey = "RecordTime";
-			option.useGrid = false;
-			option.divideLatLng = false;
-			super(option);
+		option.siteKey = "BasinIdentifier";
+		option.dataSiteKey = "StationIdentifier";
+		option.timeKey = "RecordTime";
+		option.divideLatLng = false;
+		super(option);
     }
 
     UpdateInfoWindow(d){
-			var s = this.data.site[d.StationIdentifier];
+		var s = this.data.site[d.StationIdentifier];
 	    var str = "<p>"+s.ObservatoryName+"</p>";
 	    str += "<p>溪流 "+s.RiverName+"</p>";
 	    str += "<p>水位 "+d.WaterLevel+" m (";
@@ -21,7 +20,7 @@ class MapWaterLevel extends MapLayer{
 	    str += "<p>時間 "+d.RecordTime+" </p>";
 	    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
 	    var loc = new google.maps.LatLng(s.lat, s.lon); 
-			this.infoWindow.setOptions({content: str, position: loc});
+		this.infoWindow.setOptions({content: str, position: loc});
     }
 
     GetBaseScale(){
@@ -37,20 +36,20 @@ class MapWaterLevel extends MapLayer{
 	    var thresh = g_APP.waterLevelOption.thresh*0.01;
 	    var arr = [];
 	    if(Math.abs(value) < thresh){
-				arr.push({lat: lat-scale*0.5, lng: lng});
-				arr.push({lat: lat, lng: lng-scale*0.5});
-				arr.push({lat: lat+scale*0.5, lng: lng});
-				arr.push({lat: lat, lng: lng+scale*0.5});
+			arr.push({lat: lat-scale*0.5, lng: lng});
+			arr.push({lat: lat, lng: lng-scale*0.5});
+			arr.push({lat: lat+scale*0.5, lng: lng});
+			arr.push({lat: lat, lng: lng+scale*0.5});
 	    }
 	    else{
-				var base = value>0?scale*0.5:-scale*0.5;
-				arr.push({lat: lat, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
-				arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
-				arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
-				arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
-				arr.push({lat: lat, lng: lng+scale*0.5});
+			var base = value>0?scale*0.5:-scale*0.5;
+			arr.push({lat: lat, lng: lng-scale*0.5});
+			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
+			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
+			arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
+			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
+			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
+			arr.push({lat: lat, lng: lng+scale*0.5});
 	    }
 	    return arr;
 	}
@@ -96,7 +95,7 @@ class MapWaterLevel extends MapLayer{
 			waterLevelData[i].diff = value;
 
 			//info window有打開，更新資訊
-			if(this.map && this.infoTarget == sID){
+			if(this.infoWindow.getMap() && this.infoTarget == sID){
 				this.UpdateInfoWindow(waterLevelData[i]);
 			}
 

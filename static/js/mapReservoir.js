@@ -4,7 +4,6 @@ class MapReservoir extends MapLayer{
     	option.siteKey = "id";
     	option.dataSiteKey = "ReservoirIdentifier";
     	option.timeKey = "ObservationTime";
-    	option.useGrid = false;
     	option.divideLatLng = false;
       super(option);
     }
@@ -55,7 +54,7 @@ class MapReservoir extends MapLayer{
 		    var size = Math.min(200,s.EffectiveCapacity*baseSize);
 
 		    //info window有打開，更新資訊
-		    if(this.map && this.infoTarget == sID){
+		    if(this.infoWindow.getMap() && this.infoTarget == sID){
 		      this.UpdateInfoWindow(reservoirData[i]);
 		    }
 
