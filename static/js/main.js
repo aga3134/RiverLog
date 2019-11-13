@@ -14,13 +14,8 @@ var g_APP = new Vue({
     dailySum: [],
     weekLabel: [],
     monthLabel: [],
-    rainData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
-    reservoirData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
-    waterLevelData: {station:{},dayAvg:{},timeAvg:{},data:{}, daily:{}},
-    floodData: {station:{},data:{}, daily:{}},
-    alertData: {},
+    avgData: {dayAvg:{},timeAvg:{}},
     alertStatistic: {},
-    typhoonTrajectoryData: {},
     color: {},
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
@@ -100,24 +95,6 @@ var g_APP = new Vue({
       }.bind(this)
     });
 
-
-    $.ajax({
-      url:"/flood/station",
-      async: false,
-      success: function(result){
-        if(result.status != "ok"){
-          return console.log(result.err);
-        }
-        var stationHash = {};
-        for(var i=0;i<result.data.length;i++){
-          stationHash[result.data[i]._id] = result.data[i];
-        }
-
-        this.floodData.station = stationHash;
-      }.bind(this)
-    });
-
-
     this.mapControl = new MapControl();
     this.waterUse = new WaterUseStatistic();
 
@@ -186,11 +163,11 @@ var g_APP = new Vue({
       this.curYear = year;
       $.get("/rain/dailySum?year="+year,function(result){
         if(result.status != "ok") return;
-        this["rainData"].dayAvg = {};
+        this.avgData.dayAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
           var t = dayjs(d.time,{timeZone:"Asia/Taipei"});
-          this["rainData"].dayAvg[t.format("YYYY-MM-DD")] = d;
+          this.avgData.dayAvg[t.format("YYYY-MM-DD")] = d;
         }
 
         $.get("/alert/alertStatistic?year="+year, function(result){
@@ -229,89 +206,17 @@ var g_APP = new Vue({
         if(result.status != "ok"){
           return console.log(result.err);
         }
-        this["rainData"].timeAvg = {};
+        this.avgData.timeAvg = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
           var t = dayjs(d.time,{timeZone:"Asia/Taipei"});
-          this["rainData"].timeAvg[t.format("HH:mm:ss")] = d;
+          this.avgData.timeAvg[t.format("HH:mm:ss")] = d;
         }
         //console.log(this["rainData"].timeAvg);
         this.UpdateTimebar();
         this.ChangeTime(this.curTime);
-
         this.mapControl.ChangeDate();
 
-        $.get("/waterLevel/waterLevelData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          this.waterLevelData.data = d3.nest()
-            .key(function(d){return d.RecordTime;})
-            .map(result.data);
-
-          this.waterLevelData.daily = d3.nest()
-            .key(function(d){return d.StationIdentifier})
-            .map(result.data);
-
-          this.UpdateMapWaterLevel();
-        }.bind(this));
-
-
-        $.get("/flood/floodData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          var date = this.curYear+"-"+this.curDate;
-          this.floodData.data = d3.nest()
-            .key(function(d){
-              var t = dayjs(date+" "+d.time);
-              var m = t.minute();
-              m = m - m%10;
-              t = t.set('minute', m);
-              return t.format("HH:mm:00");
-            })
-            .map(result.data);
-
-          this.floodData.daily = d3.nest()
-            .key(function(d){return d.stationID})
-            .map(result.data);
-            
-          this.UpdateMapFlood();
-        }.bind(this));
-
-        $.get("/alert/alertData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          for(var i=0;i<result.data.length;i++){
-            var alertInfo = result.data[i];
-            alertInfo.effective = dayjs(alertInfo.effective);
-            alertInfo.expires = dayjs(alertInfo.expires);
-          }
-          this.alertData = d3.nest()
-            .key(function(d){return d.eventcode;})
-            .map(result.data);
-
-          this.UpdateMapAlert();
-        }.bind(this));
-
-        $.get("/alert/typhoonData?date="+this.curYear+"-"+this.curDate,function(result){
-          if(result.status != "ok"){
-            return console.log(result.err);
-          }
-          for(var i=0;i<result.data.length;i++){
-            var typhoon = result.data[i];
-            var t = dayjs(typhoon.time);
-            typhoon.time = t.format("HH:00:00");
-            typhoon.circle_of_15ms = Math.max(0,typhoon.circle_of_15ms);
-            typhoon.circle_of_25ms = Math.max(0,typhoon.circle_of_25ms);
-          }
-          this.typhoonTrajectoryData = d3.nest()
-            .key(function(d){return d.time;})
-            .map(result.data);
-
-          this.UpdateMapTyphoon();
-        }.bind(this));
 
       }.bind(this));
     },
@@ -426,7 +331,7 @@ var g_APP = new Vue({
         var weekDay = d.getDay();
         var t = g_Util.DateToDateString(d);
 
-        var avg = this.rainData.dayAvg[t];
+        var avg = this.avgData.dayAvg[t];
         var color = this.color.rain;
 
         var bt = {};
@@ -507,7 +412,7 @@ var g_APP = new Vue({
         var m = 10*(i%numPerHour);
         var t = g_Util.PadLeft(h,2)+":"+g_Util.PadLeft(m,2);
 
-        var avg = this.rainData.timeAvg[t+":00"];
+        var avg = this.avgData.timeAvg[t+":00"];
         var color = this.color.rain;
 
         var bt = {};
@@ -590,10 +495,7 @@ var g_APP = new Vue({
     UpdateMapAlert: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
-      this.mapControl.ClearMapAlert();
-      //console.log(this.alertData);
-      var t = dayjs(this.curYear+"-"+this.curDate+" "+this.curTime);
-      this.mapControl.UpdateMapAlert(this.alertData, t);
+      this.mapControl.UpdateMapAlert();
     },
     UpdateMapTyphoon: function(){
       this.UpdateUrl();
