@@ -29,7 +29,7 @@ wlc.GetData = function(param){
 		query.$and = condition;
 	}
 
-	WaterLevelDrainStation.find(query, { __v:0}).exec(function(err, sites){
+	WaterLevelDrainSite.find(query, { __v:0}).exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		
 		var idArr = [];
