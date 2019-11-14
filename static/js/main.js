@@ -21,7 +21,15 @@ var g_APP = new Vue({
     playIcon: "/static/Image/icon-play.png",
     mapControl: null,
     rainOption: {opacity:0.8, scale:1, show:true, type:"daily"},
-    waterLevelOption: {opacity:0.5, scale:1, show:true, thresh: 10},
+    waterLevelOption: {
+      opacity:0.5,
+      scale:1,
+      showRiver:true,
+      showDrain:true,
+      showAgri:true,
+      showSewer:true,
+      thresh: 10
+    },
     reservoirOption: {opacity:0.5, scale:1, show:true},
     floodOption: {opacity:0.5, scale:1, show:true},
     typhoonTrajectoryOption:{opacity:0.3, show:true},
@@ -584,9 +592,15 @@ var g_APP = new Vue({
 
       var waterLevelOpacity = Math.round(this.waterLevelOption.opacity/0.1) & 255;
       var waterLevelScale = Math.round(this.waterLevelOption.scale/0.1) & 255;
-      var waterLevelShow = (this.waterLevelOption.show?1:0) & 1;
+      var waterLevelShowRiver = (this.waterLevelOption.showRiver?1:0) & 1;
+      var waterLevelShowDrain = (this.waterLevelOption.showDrain?1:0) & 1;
+      var waterLevelShowAgri = (this.waterLevelOption.showAgri?1:0) & 1;
+      var waterLevelShowSewer = (this.waterLevelOption.showSewer?1:0) & 1;
       var waterLevelThresh = this.waterLevelOption.thresh & 255;
-      var waterLevelEncode = waterLevelThresh + (waterLevelShow<<8) + (waterLevelScale<<9) + (waterLevelOpacity<<17);
+      var waterLevelEncode = waterLevelThresh + (waterLevelShowRiver<<8) + 
+        (waterLevelShowDrain<<9) + (waterLevelShowAgri<<10) + 
+        (waterLevelShowSewer<<11) + (waterLevelScale<<12) + 
+        (waterLevelOpacity<<20);
       waterLevelEncode = g_Util.PadLeft(waterLevelEncode.toString(16),8);
 
       var reservoirOpacity = Math.round(this.reservoirOption.opacity/0.1) & 255;
@@ -650,11 +664,17 @@ var g_APP = new Vue({
       var waterLevelEncode = option.substr(8,8);
       waterLevelEncode = parseInt(waterLevelEncode,16);
       var waterLevelThresh = waterLevelEncode & 255;
-      var waterLevelShow = (waterLevelEncode>>8) & 1;
-      var waterLevelScale = (waterLevelEncode>>9) & 255;
-      var waterLevelOpacity = (waterLevelEncode>>17) & 255;
+      var waterLevelShowRiver = (waterLevelEncode>>8) & 1;
+      var waterLevelShowDrain = (waterLevelEncode>>9) & 1;
+      var waterLevelShowAgri = (waterLevelEncode>>10) & 1;
+      var waterLevelShowSewer = (waterLevelEncode>>11) & 1;
+      var waterLevelScale = (waterLevelEncode>>12) & 255;
+      var waterLevelOpacity = (waterLevelEncode>>20) & 255;
       this.waterLevelOption.thresh = waterLevelThresh;
-      this.waterLevelOption.show = waterLevelShow==1?true:false;
+      this.waterLevelOption.showRiver = waterLevelShowRiver==1?true:false;
+      this.waterLevelOption.showDrain = waterLevelShowDrain==1?true:false;
+      this.waterLevelOption.showAgri = waterLevelShowAgri==1?true:false;
+      this.waterLevelOption.showSewer = waterLevelShowSewer==1?true:false;
       this.waterLevelOption.scale = waterLevelScale*0.1;
       this.waterLevelOption.opacity = waterLevelOpacity*0.1;
 

@@ -5,6 +5,9 @@ function MapControl(){
   this.mapRain = new MapRain({"siteUrl":"/rain/station", "dataUrl":"/rain/rainData", "gridUrl":"/rain/gridData"});
   this.mapReservoir = new MapReservoir({"siteUrl":"/reservoir/info", "dataUrl":"/reservoir/reservoirData"});
   this.mapWaterLevel = new MapWaterLevel({"siteUrl":"/waterLevel/station", "dataUrl":"/waterLevel/waterLevelData"});
+  this.mapWaterLevelDrain = new MapWaterLevelDrain({"siteUrl":"/waterLevelDrain/station", "dataUrl":"/waterLevelDrain/waterLevelDrainData"});
+  this.mapWaterLevelAgri = new MapWaterLevelAgri({"siteUrl":"/waterLevelAgri/station", "dataUrl":"/waterLevelAgri/waterLevelAgriData"});
+  this.mapSewer = new MapSewer({"siteUrl":"/sewer/station", "dataUrl":"/sewer/sewerData"});
   this.mapFlood = new MapFlood({"siteUrl":"/flood/station", "dataUrl":"/flood/floodData"});
   this.mapTyphoon = new MapTyphoon({"dataUrl":"/alert/typhoonData"});
   this.mapAlert = new MapAlert({"dataUrl":"/alert/alertData"});
@@ -53,6 +56,9 @@ MapControl.prototype.InitMap = function(param){
     this.mapRain.map = this.map;
     this.mapReservoir.map = this.map;
     this.mapWaterLevel.map = this.map;
+    this.mapWaterLevelDrain.map = this.map;
+    this.mapWaterLevelAgri.map = this.map;
+    this.mapSewer.map = this.map;
     this.mapFlood.map = this.map;
     this.mapTyphoon.map = this.map;
     this.mapAlert.map = this.map;
@@ -65,12 +71,15 @@ MapControl.prototype.InitMap = function(param){
 
 MapControl.prototype.ChangeDate = function(){
   var date = g_APP.curYear+"-"+g_APP.curDate;
-  if(this.mapRain) this.mapRain.ChangeDate(date);
-  if(this.mapReservoir) this.mapReservoir.ChangeDate(date);
-  if(this.mapWaterLevel) this.mapWaterLevel.ChangeDate(date);
-  if(this.mapFlood) this.mapFlood.ChangeDate(date);
-  if(this.mapTyphoon) this.mapTyphoon.ChangeDate(date);
-  if(this.mapAlert) this.mapAlert.ChangeDate(date);
+  this.mapRain.ChangeDate(date);
+  this.mapReservoir.ChangeDate(date);
+  this.mapWaterLevel.ChangeDate(date);
+  this.mapWaterLevelDrain.ChangeDate(date);
+  this.mapWaterLevelAgri.ChangeDate(date);
+  this.mapSewer.ChangeDate(date);
+  this.mapFlood.ChangeDate(date);
+  this.mapTyphoon.ChangeDate(date);
+  this.mapAlert.ChangeDate(date);
 }
 
 MapControl.prototype.ToggleSatellite = function(useSatellite){
@@ -88,8 +97,10 @@ MapControl.prototype.UpdateMapRain = function(){
 };
 
 MapControl.prototype.UpdateMapWaterLevel = function(){
-  if(!this.mapWaterLevel) return;
-  this.mapWaterLevel.Update();
+  if(this.mapWaterLevel) this.mapWaterLevel.Update();
+  if(this.mapWaterLevelDrain) this.mapWaterLevelDrain.Update();
+  if(this.mapWaterLevelAgri) this.mapWaterLevelAgri.Update();
+  if(this.mapSewer) this.mapSewer.Update();
 };
 
 MapControl.prototype.UpdateMapReservoir = function(){
@@ -116,6 +127,9 @@ MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
   this.mapWaterLevel.ClearMap();
+  this.mapWaterLevelDrain.ClearMap();
+  this.mapWaterLevelAgri.ClearMap();
+  this.mapSewer.ClearMap();
   this.mapFlood.ClearMap();
   this.mapTyphoon.ClearMap();
   this.mapAlert.ClearMap();

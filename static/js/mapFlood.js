@@ -19,7 +19,8 @@ class MapFlood extends MapLayer{
 
 	GetBaseScale(){
 		var zoom = this.map.getZoom();
-		return 10*(Math.pow(1.5,zoom-7));
+		if(zoom <= 10) return 10*(Math.pow(1.7,zoom-7));
+		else return 100;
 	}
 
 	DrawLayer(data){

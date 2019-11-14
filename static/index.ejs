@@ -312,10 +312,22 @@
 						<div class="option-label">縮放</div>
 					</div>
 
-					<div class="option-category">河川水位</div>
+					<div class="option-category">各類水位</div>
 					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="waterLevelOption.show" v-on:change="UpdateMapWaterLevel();">
+						<div class="option-label">河川水位</div>
+						<input type="checkbox" v-model="waterLevelOption.showRiver" v-on:change="UpdateMapWaterLevel();">
+					</div>
+					<div class="option-item">
+						<div class="option-label">區域排水水位</div>
+						<input type="checkbox" v-model="waterLevelOption.showDrain" v-on:change="UpdateMapWaterLevel();">
+					</div>
+					<div class="option-item">
+						<div class="option-label">水利會水位</div>
+						<input type="checkbox" v-model="waterLevelOption.showAgri" v-on:change="UpdateMapWaterLevel();">
+					</div>
+					<div class="option-item">
+						<div class="option-label">下水道水位</div>
+						<input type="checkbox" v-model="waterLevelOption.showSewer" v-on:change="UpdateMapWaterLevel();">
 					</div>
 					<div class="option-item">
 						<input type="range" min="0" max="1" step="0.1" v-model="waterLevelOption.opacity" v-on:change="UpdateMapWaterLevel();">
@@ -683,6 +695,9 @@
 		<script src="/static/js/mapRain.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapReservoir.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapWaterLevel.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/mapWaterLevelDrain.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/mapWaterLevelAgri.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/mapSewer.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapFlood.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapTyphoon.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapAlert.js?v=<%=meta.version%>"></script>

@@ -1,25 +1,21 @@
 
-class MapWaterLevel extends MapLayer{
+class MapSewer extends MapLayer{
     constructor(option){
-		option.siteKey = "BasinIdentifier";
-		option.dataSiteKey = "StationIdentifier";
-		option.timeKey = "RecordTime";
+		option.siteKey = "no";
+		option.dataSiteKey = "stationNo";
 		option.divideLatLng = false;
 		super(option);
     }
 
     UpdateInfoWindow(d){
-		var s = this.data.site[d.StationIdentifier];
-	    var str = "<p>"+s.ObservatoryName+"</p>";
-	    str += "<p>溪流 "+s.RiverName+"</p>";
-	    str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
+		var s = this.data.site[d.stationNo];
+	    var str = "<p>"+s.name+"</p>";
+	    str += "<p>水位 "+d.value.toFixed(2)+" m (";
 	    if(d.diff >= 0) str += "+";
 	    str += d.diff.toFixed(2)+" m)</p>";
-	    str += "<p>警戒水位(三級/二級/一級):</p>";
-	    str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
-	    str += "<p>時間 "+d.RecordTime+" </p>";
-	    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
-	    var loc = new google.maps.LatLng(s.lat, s.lon); 
+	    str += "<p>時間 "+d.time+" </p>";
+	    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevelDrain\");'>今日變化</div></div>";
+	    var loc = new google.maps.LatLng(s.lat, s.lng); 
 		this.infoWindow.setOptions({content: str, position: loc});
     }
 
@@ -56,7 +52,7 @@ class MapWaterLevel extends MapLayer{
 
     DrawLayer(data){
 		if(!this.map) return;
-		if(!data || !g_APP.waterLevelOption.showRiver) return;
+		if(!data || !g_APP.waterLevelOption.showSewer) return;
 
 		var offset = g_APP.TimeToOffset(g_APP.curTime);
 		offset -= 1;
@@ -68,7 +64,7 @@ class MapWaterLevel extends MapLayer{
 		var preDataHash = {};
 		if(preData){
 			for(var i=0;i<preData.length;i++){
-				var s = preData[i].StationIdentifier;
+				var s = preData[i].stationNo;
 				preDataHash[s] = preData[i];
 			}
 		}
@@ -77,12 +73,12 @@ class MapWaterLevel extends MapLayer{
 			return function() {
 				this.UpdateInfoWindow(data[i]);
 				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].StationIdentifier;
+				this.infoTarget = data[i].stationNo;
 			}.bind(this);
 		}.bind(this);
 
 		for(var i=0;i<waterLevelData.length;i++){
-			var sID = waterLevelData[i].StationIdentifier;
+			var sID = waterLevelData[i].stationNo;
 			var s = this.data.site[sID];
 			if(!s) continue;
 
@@ -99,11 +95,7 @@ class MapWaterLevel extends MapLayer{
 				this.UpdateInfoWindow(waterLevelData[i]);
 			}
 
-			var color = "#37cc00";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel3) color = "#ffcc00";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel2) color = "#ff6600";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel1) color = "#ff0000";
-
+			var color = "#333333";
 			if(this.layer[sID]){
 				var icon = this.layer[sID];
 				icon.setOptions({
@@ -111,7 +103,7 @@ class MapWaterLevel extends MapLayer{
 					fillColor: color,
 					strokeOpacity: g_APP.waterLevelOption.opacity,
 					fillOpacity: g_APP.waterLevelOption.opacity,
-					paths: this.DrawIcon(s.lat,s.lon,value)
+					paths: this.DrawIcon(s.lat,s.lng,value)
 				});
 				google.maps.event.clearListeners(icon,"click");
 				icon.addListener('click', clickFn(waterLevelData,i));
@@ -125,7 +117,7 @@ class MapWaterLevel extends MapLayer{
 					fillOpacity: g_APP.waterLevelOption.opacity,
 					map: this.map,
 					zIndex: 2,
-					paths: this.DrawIcon(s.lat,s.lon,value)
+					paths: this.DrawIcon(s.lat,s.lng,value)
 				});
 				icon.addListener('click', clickFn(waterLevelData,i));
 				this.layer[sID] = icon;

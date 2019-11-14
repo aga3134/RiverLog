@@ -8,7 +8,7 @@ var WaterLevelDrainSchema = require('../../db/waterLevelDrainSchema');
 var wlc = {};
 
 wlc.GetStation = function(param){
-	WaterLevelDrainSite.find({}, {_id: 0, __v:0}).exec(function(err, sites){
+	WaterLevelDrainSite.find({}, {__v:0}).exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
