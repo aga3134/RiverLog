@@ -1,126 +1,76 @@
 
-class MapWaterLevelAgri extends MapLayer{
+class MapWaterLevelAgri extends MapWaterLevel{
     constructor(option){
-		option.siteKey = "_id";
-		option.dataSiteKey = "stationID";
-		option.divideLatLng = false;
+		if(!option.siteKey) option.siteKey = "_id";
+		if(!option.dataSiteKey) option.dataSiteKey = "stationID";
+		if(!option.timeKey) option.timeKey = "time";
+		if(!option.divideLatLng) option.divideLatLng = false;
 		super(option);
     }
 
     UpdateInfoWindow(d){
-		var s = this.data.site[d.stationID];
-	    var str = "<p>"+s.stationName+"</p>";
-	    str += "<p>水位 "+d.value.toFixed(2)+" m (";
-	    if(d.diff >= 0) str += "+";
-	    str += d.diff.toFixed(2)+" m)</p>";
-	    str += "<p>時間 "+d.time+" </p>";
-	    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevelDrain\");'>今日變化</div></div>";
-	    var loc = new google.maps.LatLng(s.lat, s.lng); 
+    	var str = "";
+		var loc = null;
+		if(d.num){	//cluster
+			var lat = d.latSum/d.num;
+			var lng = d.lngSum/d.num;
+			var value = d.valueSum/d.num;
+			var diff = d.diffSum/d.num;
+			str = "<p>水利會水位</p>";
+			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			str += "<p>測站數 "+d.num+"</p>";
+			str += "<p>時間 "+d.t+" </p>";
+			loc = new google.maps.LatLng(lat,lng);
+		}
+		else{
+			var s = this.data.site[d.stationID];
+		    str = "<p>"+s.stationName+"</p>";
+		    str += "<p>水位 "+d.value.toFixed(2)+" m (";
+		    if(d.diff >= 0) str += "+";
+		    str += d.diff.toFixed(2)+" m)</p>";
+		    str += "<p>時間 "+d.time+" </p>";
+		    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevelDrain\");'>今日變化</div></div>";
+		    loc = new google.maps.LatLng(s.lat, s.lng); 
+		}
 		this.infoWindow.setOptions({content: str, position: loc});
     }
-
-    GetBaseScale(){
-      var zoom = this.map.getZoom();
-      if(zoom > 9) return 1*Math.pow(1.7,9-zoom);
-      else return 1;
-    }
-
-    DrawIcon(lat,lng,value){
-    	var baseScale = this.GetBaseScale();
-	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
-	    var valueScale = 0.3*baseScale*g_APP.waterLevelOption.scale;
-	    var thresh = g_APP.waterLevelOption.thresh*0.01;
-	    var arr = [];
-	    if(Math.abs(value) < thresh){
-			arr.push({lat: lat-scale*0.5, lng: lng});
-			arr.push({lat: lat, lng: lng-scale*0.5});
-			arr.push({lat: lat+scale*0.5, lng: lng});
-			arr.push({lat: lat, lng: lng+scale*0.5});
-	    }
-	    else{
-			var base = value>0?scale*0.5:-scale*0.5;
-			arr.push({lat: lat, lng: lng-scale*0.5});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
-			arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
-			arr.push({lat: lat, lng: lng+scale*0.5});
-	    }
-	    return arr;
-	}
 
     DrawLayer(data){
 		if(!this.map) return;
 		if(!data || !g_APP.waterLevelOption.showAgri) return;
 
-		var offset = g_APP.TimeToOffset(g_APP.curTime);
-		offset -= 1;
-		if(offset < 0) offset = 0;
-		var preData = g_APP.GetDataFromTime(data,g_APP.OffsetToTime(offset));
-		var waterLevelData = g_APP.GetDataFromTime(data,g_APP.curTime);
-		if(!waterLevelData) return;
+		var cluster = this.GetDisplayData(data,"stationID","value","time","lat","lng");
+		var color = "#0073FF";
+		
+		if(cluster.isCluster){
+			for(var i=0;i<cluster.data.length;i++){
+				var d = cluster.data[i];
+				var sID = d.key;
+				//info window有打開，更新資訊
+				if(this.infoWindow.getMap() && this.infoTarget == sID){
+					this.UpdateInfoWindow(d);
+				}
 
-		var preDataHash = {};
-		if(preData){
-			for(var i=0;i<preData.length;i++){
-				var s = preData[i].stationID;
-				preDataHash[s] = preData[i];
+				var lat = d.latSum/d.num;
+				var lng = d.lngSum/d.num;
+				var diff = d.diffSum/d.num;
+				var clickFn = this.GenClickFn(cluster.data,i,"key");
+				this.DrawWaterLevel(sID,diff,color,lat,lng,clickFn);
 			}
 		}
-
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].stationID;
-			}.bind(this);
-		}.bind(this);
-
-		for(var i=0;i<waterLevelData.length;i++){
-			var sID = waterLevelData[i].stationID;
-			var s = this.data.site[sID];
-			if(!s) continue;
-
-			var value = 0;
-			if(preDataHash[sID]){
-				if(preDataHash[sID].WaterLevel && waterLevelData[i].WaterLevel){
-					value = waterLevelData[i].WaterLevel-preDataHash[sID].WaterLevel;
+		else{
+			for(var i=0;i<cluster.data.length;i++){
+				var d = cluster.data[i];
+				var sID = d.stationID;
+				var s = this.data.site[sID];
+				if(!s) continue;
+				//info window有打開，更新資訊
+				if(this.infoWindow.getMap() && this.infoTarget == sID){
+					this.UpdateInfoWindow(d);
 				}
-			}
-			waterLevelData[i].diff = value;
-
-			//info window有打開，更新資訊
-			if(this.infoWindow.getMap() && this.infoTarget == sID){
-				this.UpdateInfoWindow(waterLevelData[i]);
-			}
-
-			var color = "#0073FF";
-			if(this.layer[sID]){
-				var icon = this.layer[sID];
-				icon.setOptions({
-					map: this.map,
-					fillColor: color,
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					paths: this.DrawIcon(s.lat,s.lng,value)
-				});
-				google.maps.event.clearListeners(icon,"click");
-				icon.addListener('click', clickFn(waterLevelData,i));
-			}
-			else{
-				var icon = new google.maps.Polygon({
-					strokeWeight: 1,
-					strokeColor: '#000000',
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillColor: color,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					map: this.map,
-					zIndex: 2,
-					paths: this.DrawIcon(s.lat,s.lng,value)
-				});
-				icon.addListener('click', clickFn(waterLevelData,i));
-				this.layer[sID] = icon;
+				var clickFn = this.GenClickFn(cluster.data,i,"stationID");
+				this.DrawWaterLevel(sID,d.diff,color,s.lat,s.lng,clickFn);
 			}
 		}
 	}

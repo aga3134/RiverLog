@@ -1,7 +1,7 @@
 
 class MapTyphoon extends MapLayer{
 	constructor(option){
-		option.divideLatLng = false;
+		if(!option.divideLatLng) option.divideLatLng = false;
 		super(option);
 	}
 
@@ -30,14 +30,6 @@ class MapTyphoon extends MapLayer{
 		}
 		if(!typhoonData) return;
 
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].typhoon_name;
-			}.bind(this);
-		}.bind(this);
-
 		for(var i=0;i<typhoonData.length;i++){
 			var typhoon = typhoonData[i];
 			var sID = typhoon.typhoon_name;
@@ -48,6 +40,7 @@ class MapTyphoon extends MapLayer{
 			}
 
 			var scale = 1000; //google map circle unit is m
+			var clickFn = this.GenClickFn(typhoonData,i,"typhoon_name");
 
 			if(this.layer[sID]){
 				var graph = this.layer[sID];
@@ -74,11 +67,11 @@ class MapTyphoon extends MapLayer{
 				});
 
 				google.maps.event.clearListeners(graph.level7,"click");
-				graph.level7.addListener('click', clickFn(typhoonData,i));
+				graph.level7.addListener('click', clickFn);
 				google.maps.event.clearListeners(graph.level10,"click");
-				graph.level10.addListener('click', clickFn(typhoonData,i));
+				graph.level10.addListener('click', clickFn);
 				google.maps.event.clearListeners(graph.center,"click");
-				graph.center.addListener('click', clickFn(typhoonData,i));
+				graph.center.addListener('click', clickFn);
 			}
 			else{
 				var graph = {level7: null, level10: null, center: null};
@@ -116,9 +109,9 @@ class MapTyphoon extends MapLayer{
 					radius: 1*scale
 				});
 
-				graph.level7.addListener('click', clickFn(typhoonData,i));
-				graph.center.addListener('click', clickFn(typhoonData,i));
-				graph.level10.addListener('click', clickFn(typhoonData,i));
+				graph.level7.addListener('click', clickFn);
+				graph.center.addListener('click', clickFn);
+				graph.level10.addListener('click', clickFn);
 
 				this.layer[sID] = graph;
 			}

@@ -1,10 +1,10 @@
 
 class MapReservoir extends MapLayer{
     constructor(option){
-    	option.siteKey = "id";
-    	option.dataSiteKey = "ReservoirIdentifier";
-    	option.timeKey = "ObservationTime";
-    	option.divideLatLng = false;
+    	if(!option.siteKey) option.siteKey = "id";
+    	if(!option.dataSiteKey) option.dataSiteKey = "ReservoirIdentifier";
+    	if(!option.timeKey) option.timeKey = "ObservationTime";
+    	if(!option.divideLatLng) option.divideLatLng = false;
       super(option);
     }
 
@@ -34,14 +34,6 @@ class MapReservoir extends MapLayer{
       var reservoirData = g_APP.GetDataFromTime(data,hour+":00");
       if(!reservoirData || !g_APP.reservoirOption.show) return;
 
-		  var clickFn = function(data,i){ 
-		    return function() {
-		      this.UpdateInfoWindow(data[i]);
-		      this.infoWindow.open(this.map);
-		      this.infoTarget = data[i].ReservoirIdentifier;
-		    }.bind(this);
-		  }.bind(this);
-
 		  var baseSize = this.GetBaseScale()*g_APP.reservoirOption.scale;
 		  for(var i=0;i<reservoirData.length;i++){
 		    var sID = reservoirData[i].ReservoirIdentifier;
@@ -52,6 +44,7 @@ class MapReservoir extends MapLayer{
 		    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
 		    if(isNaN(percent)) continue;
 		    var size = Math.min(200,s.EffectiveCapacity*baseSize);
+        var clickFn = this.GenClickFn(reservoirData,i,"ReservoirIdentifier");
 
 		    //info window有打開，更新資訊
 		    if(this.infoWindow.getMap() && this.infoTarget == sID){
@@ -69,7 +62,7 @@ class MapReservoir extends MapLayer{
 		      };
 		      overlay.Update(option);
 		      google.maps.event.clearListeners(overlay,"click");
-		      overlay.addListener('click', clickFn(reservoirData,i));
+		      overlay.addListener('click', clickFn);
 		    }
 		    else{
 		      var overlay = new ReservoirOverlay({
@@ -83,7 +76,7 @@ class MapReservoir extends MapLayer{
 		        color: g_APP.color.reservoir(percent*0.01)
 		      });
 		      
-		      overlay.addListener('click', clickFn(reservoirData,i));
+		      overlay.addListener('click', clickFn);
 		      this.layer[sID] = overlay;
 		    }
 		  }

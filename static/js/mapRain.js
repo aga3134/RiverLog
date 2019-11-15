@@ -1,9 +1,9 @@
 
 class MapRain extends MapLayer{
 	constructor(option){
-		option.siteKey = "stationID";
-		option.dataSiteKey = "stationID";
-		option.divideLatLng = true;
+		if(!option.siteKey) option.siteKey = "stationID";
+		if(!option.dataSiteKey) option.dataSiteKey = "stationID";
+		if(!option.divideLatLng) option.divideLatLng = true;
 		super(option);
 	}
 
@@ -14,18 +14,18 @@ class MapRain extends MapLayer{
 		switch(this.level){
 			case -1:
 				var s = this.data.site[d.stationID];
-				var str = "<p>"+s.name+"</p>";
+				str = "<p>"+s.name+"</p>";
 				str += "<p>累積雨量 "+d.now+" mm</p>";
 				str += "<p>雨量變化 "+d.diff+" mm</p>";
 				str += "<p>時間 "+d.time+" </p>";
 				str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"rain\");'>今日變化</div></div>";
-				var loc = new google.maps.LatLng(s.lat, s.lon);
+				loc = new google.maps.LatLng(s.lat, s.lon);
 			break;
 			default:
 				var lat = d.latSum/d.num;
 				var lng = d.lngSum/d.num;
 				var now = d.nowSum/d.num;
-				var str = "<p>位置"+lng.toFixed(5)+" "+lat.toFixed(5)+"</p>";
+				str = "<p>位置"+lng.toFixed(5)+" "+lat.toFixed(5)+"</p>";
 				str += "<p>平均累積雨量 "+now+" mm</p>";
 				str += "<p>平均雨量變化 "+d.diff+" mm</p>";
 				str += "<p>時間 "+d.t+" </p>";
@@ -54,14 +54,6 @@ class MapRain extends MapLayer{
 			}
 		}
 
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].stationID;
-			}.bind(this);
-		}.bind(this);
-
 		for(var i=0;i<rainData.length;i++){
 			var sID = rainData[i].stationID;
 			var s = this.data.site[sID];
@@ -74,7 +66,8 @@ class MapRain extends MapLayer{
 					rainData[i].diff = rainData[i].now-preDataHash[sID].now;
 				}
 			}
-
+			
+			var clickFn = this.GenClickFn(rainData,i,"stationID");
 			var baseScale = this.GetBaseScale();
 			var value = 0, scaleH = 0, scaleW = 0.01*baseScale;
 			switch(g_APP.rainOption.type){
@@ -109,7 +102,7 @@ class MapRain extends MapLayer{
 					}
 				});
 				google.maps.event.clearListeners(rect,"click");
-				rect.addListener('click', clickFn(rainData,i));
+				rect.addListener('click', clickFn);
 			}
 			else{
 				var rect = new google.maps.Rectangle({
@@ -125,7 +118,7 @@ class MapRain extends MapLayer{
 						west: s.lon-rectW
 					}
 				});
-				rect.addListener('click', clickFn(rainData,i));
+				rect.addListener('click', clickFn);
 				this.layer[sID] = rect;
 			}
 		}
@@ -150,15 +143,6 @@ class MapRain extends MapLayer{
 				preDataHash[key] = preData[i];
 			}
 		}
-
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				var key = data[i].x+"-"+data[i].y;
-				this.infoTarget = key;
-			}.bind(this);
-		}.bind(this);
 
 		for(var i=0;i<rainData.length;i++){
 			if(rainData[i].nowSum <= 0) continue;
@@ -195,6 +179,7 @@ class MapRain extends MapLayer{
 			var lng = rainData[i].lngSum/rainData[i].num;
 			var rectW = scaleW*g_APP.rainOption.scale;
 			var rectH = scaleH*g_APP.rainOption.scale;
+			var clickFn = this.GenClickFn(rainData,i,rainData[i].x+"-"+rainData[i].y);
 			if(this.layer[key]){
 				var rect = this.layer[key];
 				rect.setOptions({
@@ -209,7 +194,7 @@ class MapRain extends MapLayer{
 					}
 				});
 				google.maps.event.clearListeners(rect,"click");
-				rect.addListener('click', clickFn(rainData,i));
+				rect.addListener('click', clickFn);
 			}
 			else{
 				var rect = new google.maps.Rectangle({
@@ -225,7 +210,7 @@ class MapRain extends MapLayer{
 						west: lng-rectW
 					}
 				});
-				rect.addListener('click', clickFn(rainData,i));
+				rect.addListener('click', clickFn);
 				this.layer[key] = rect;
 			}
 		}

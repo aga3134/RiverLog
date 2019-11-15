@@ -1,9 +1,9 @@
 
 class MapFlood extends MapLayer{
 	constructor(option){
-		option.siteKey = "_id";
-		option.dataSiteKey = "stationID";
-		option.divideLatLng = false;
+		if(!option.siteKey) option.siteKey = "_id";
+		if(!option.dataSiteKey) option.dataSiteKey = "stationID";
+		if(!option.divideLatLng) option.divideLatLng = false;
 		super(option);
 	}
 
@@ -30,14 +30,6 @@ class MapFlood extends MapLayer{
 		var floodData = g_APP.GetDataFromTime(data,g_APP.curTime);
 		if(!floodData) return;
 
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].stationID;
-			}.bind(this);
-		}.bind(this);
-
 		for(var i=0;i<floodData.length;i++){
 			var sID = floodData[i].stationID;
 			var s = this.data.site[sID];
@@ -50,6 +42,7 @@ class MapFlood extends MapLayer{
 
 			var size = this.GetBaseScale()*g_APP.floodOption.scale;
 			var d = floodData[i];
+			var clickFn = this.GenClickFn(floodData,i,"stationID");
 
 			if(this.layer[sID]){
 				var overlay = this.layer[sID];
@@ -61,7 +54,8 @@ class MapFlood extends MapLayer{
 				};
 				overlay.Update(option);
 				google.maps.event.clearListeners(overlay,"click");
-				overlay.addListener('click', clickFn(floodData,i));
+				
+				overlay.addListener('click', clickFn);
 			}
 			else{
 				var overlay = new FloodOverlay({
@@ -74,8 +68,7 @@ class MapFlood extends MapLayer{
 					opacity: g_APP.floodOption.opacity,
 					color: g_APP.color.flood
 				});
-
-				overlay.addListener('click', clickFn(floodData,i));
+				overlay.addListener('click', clickFn);
 				this.layer[sID] = overlay;
 			}
 		}

@@ -149,6 +149,14 @@ class MapLayer{
       
     }
 
+    GenClickFn(data,i,key){
+      return function() {
+        this.UpdateInfoWindow(data[i]);
+        this.infoWindow.open(this.map);
+        this.infoTarget = data[i][key];
+      }.bind(this);
+    }
+
     UpdateInfoWindow(d){
       
     }
@@ -198,7 +206,9 @@ class MapLayer{
         else pos = "0-0";
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          var t = dayjs(d[this.timeKey]).format("HH:mm:ss");
+          var t = dayjs(d[this.timeKey]);
+          var m = t.minute()-t.minute()%10;
+          t = t.minute(m).second(0).format("HH:mm:ss");
           d[this.timeKey] = t;
           if(!data[pos]) data[pos] = {};
           if(!data[pos][t]) data[pos][t] = [];
@@ -235,7 +245,9 @@ class MapLayer{
         if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
         else pos = "0-0";
         for(var i=0;i<data.length;i++){
-          var t = dayjs(data[i][this.gridTimeKey]).format("HH:mm:ss");
+          var t = dayjs(data[i][this.gridTimeKey]);
+          var m = t.minute()-t.minute()%10;
+          t = t.minute(m).second(0).format("HH:mm:ss");
           data[i][this.gridTimeKey] = t;
           if(!grid[pos]) grid[pos] = {};
           if(!grid[pos][t]) grid[pos][t] = [];

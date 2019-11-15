@@ -1,52 +1,53 @@
 
 class MapWaterLevel extends MapLayer{
     constructor(option){
-		option.siteKey = "BasinIdentifier";
-		option.dataSiteKey = "StationIdentifier";
-		option.timeKey = "RecordTime";
-		option.divideLatLng = false;
+		if(!option.siteKey) option.siteKey = "BasinIdentifier";
+		if(!option.dataSiteKey) option.dataSiteKey = "StationIdentifier";
+		if(!option.timeKey) option.timeKey = "RecordTime";
+		if(!option.divideLatLng) option.divideLatLng = false;
 		super(option);
     }
 
     UpdateInfoWindow(d){
     	var str = "";
 		var loc = null;
-		this.level = this.GetLevel();
-		switch(this.level){
-			case -1:
-				var s = this.data.site[d.StationIdentifier];
-			    var str = "<p>"+s.ObservatoryName+"</p>";
-			    str += "<p>溪流 "+s.RiverName+"</p>";
-			    str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
-			    if(d.diff >= 0) str += "+";
-			    str += d.diff.toFixed(2)+" m)</p>";
-			    str += "<p>警戒水位(三級/二級/一級):</p>";
-			    str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
-			    str += "<p>時間 "+d.RecordTime+" </p>";
-			    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
-			    var loc = new google.maps.LatLng(s.lat, s.lon);
-		    break;
-			default:
-				var lat = d.latSum/d.num;
-				var lng = d.lngSum/d.num;
-				var value = d.WaterLevelSum/d.num;
-				var str = "<p>位置"+lng.toFixed(5)+" "+lat.toFixed(5)+"</p>";
-				str += "<p>平均水位 "+value+" m</p>";
-				str += "<p>平均水位變化 "+d.diff+" m</p>";
-				str += "<p>時間 "+d.t+" </p>";
-				loc = new google.maps.LatLng(lat,lng);
-			break;
+		if(d.num){	//cluster
+			var lat = d.latSum/d.num;
+			var lng = d.lngSum/d.num;
+			var value = d.valueSum/d.num;
+			var diff = d.diffSum/d.num;
+			str = "<p>河川水位</p>";
+			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			str += "<p>三級警戒數 "+d.alertL3+"</p>";
+			str += "<p>二級警戒數 "+d.alertL2+"</p>";
+			str += "<p>一級警戒數 "+d.alertL1+"</p>";
+			str += "<p>測站數 "+d.num+"</p>";
+			str += "<p>時間 "+d.t+" </p>";
+			loc = new google.maps.LatLng(lat,lng);
+		}
+		else{
+			var s = this.data.site[d.StationIdentifier];
+		    str = "<p>"+s.ObservatoryName+"</p>";
+		    str += "<p>溪流 "+s.RiverName+"</p>";
+		    str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
+		    if(d.diff >= 0) str += "+";
+		    str += d.diff.toFixed(2)+" m)</p>";
+		    str += "<p>警戒水位(三級/二級/一級):</p>";
+		    str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
+		    str += "<p>時間 "+d.RecordTime+" </p>";
+		    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
+		    loc = new google.maps.LatLng(s.lat, s.lon);
 		}
 		this.infoWindow.setOptions({content: str, position: loc});
     }
 
     GetBaseScale(){
       var zoom = this.map.getZoom();
-      if(zoom > 9) return 1*Math.pow(1.7,9-zoom);
-      else return 1;
+      return 1*Math.pow(2,9-zoom);
     }
 
-    DrawIcon(lat,lng,value){
+    GenIcon(lat,lng,value){
     	var baseScale = this.GetBaseScale();
 	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
 	    var valueScale = 0.3*baseScale*g_APP.waterLevelOption.scale;
@@ -71,163 +72,162 @@ class MapWaterLevel extends MapLayer{
 	    return arr;
 	}
 
-    DrawLayer(data){
-		if(!this.map) return;
-		if(!data || !g_APP.waterLevelOption.showRiver) return;
-
+	GetDisplayData(data,siteKey,valueKey,timeKey,latKey,lngKey){
 		var offset = g_APP.TimeToOffset(g_APP.curTime);
 		offset -= 1;
 		if(offset < 0) offset = 0;
 		var preData = g_APP.GetDataFromTime(data,g_APP.OffsetToTime(offset));
 		var waterLevelData = g_APP.GetDataFromTime(data,g_APP.curTime);
-		if(!waterLevelData) return;
+		if(!waterLevelData) return {isCluster:false, data:[]};
 
 		var preDataHash = {};
 		if(preData){
 			for(var i=0;i<preData.length;i++){
-				var s = preData[i].StationIdentifier;
+				var s = preData[i][siteKey];
 				preDataHash[s] = preData[i];
 			}
 		}
 
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				this.infoTarget = data[i].StationIdentifier;
-			}.bind(this);
-		}.bind(this);
-
 		for(var i=0;i<waterLevelData.length;i++){
-			var sID = waterLevelData[i].StationIdentifier;
+			var sID = waterLevelData[i][siteKey];
+			var s = this.data.site[sID];
+			if(!s) continue;
+			var value = 0;
+			if(preDataHash[sID]){
+				if(preDataHash[sID][valueKey] && waterLevelData[i][valueKey]){
+					value = waterLevelData[i][valueKey]-preDataHash[sID][valueKey];
+				}
+			}
+			waterLevelData[i].diff = value;
+		}
+
+		var zoom = this.map.getZoom();
+		if(zoom >= 10) return {isCluster:false, data:waterLevelData};
+
+		var step = 0.1*Math.pow(2,10-zoom);
+		var clusterHash = {};
+		for(var i=0;i<waterLevelData.length;i++){
+			var sID = waterLevelData[i][siteKey];
 			var s = this.data.site[sID];
 			if(!s) continue;
 
-			var value = 0;
-			if(preDataHash[sID]){
-				if(preDataHash[sID].WaterLevel && waterLevelData[i].WaterLevel){
-					value = waterLevelData[i].WaterLevel-preDataHash[sID].WaterLevel;
-				}
-			}
-			waterLevelData[i].diff = value;
-
-			//info window有打開，更新資訊
-			if(this.infoWindow.getMap() && this.infoTarget == sID){
-				this.UpdateInfoWindow(waterLevelData[i]);
-			}
-
-			var color = "#37cc00";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel3) color = "#ffcc00";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel2) color = "#ff6600";
-			if(waterLevelData[i].WaterLevel > s.AlertLevel1) color = "#ff0000";
-
-			if(this.layer[sID]){
-				var icon = this.layer[sID];
-				icon.setOptions({
-					map: this.map,
-					fillColor: color,
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					paths: this.DrawIcon(s.lat,s.lon,value)
-				});
-				google.maps.event.clearListeners(icon,"click");
-				icon.addListener('click', clickFn(waterLevelData,i));
+			var x = Math.round(s[latKey]/step);
+			var y = Math.round(s[lngKey]/step);
+			var key = x+"-"+y;
+			if(key in clusterHash){
+				var d = clusterHash[key];
+				d.valueSum += waterLevelData[i][valueKey];
+				d.diffSum += waterLevelData[i].diff;
+				d.num += 1;
+				d.latSum += s[latKey];
+				d.lngSum += s[lngKey];
+				if(waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
+				else if(waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
+				else if(waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
 			}
 			else{
-				var icon = new google.maps.Polygon({
-					strokeWeight: 1,
-					strokeColor: '#000000',
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillColor: color,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					map: this.map,
-					zIndex: 2,
-					paths: this.DrawIcon(s.lat,s.lon,value)
-				});
-				icon.addListener('click', clickFn(waterLevelData,i));
-				this.layer[sID] = icon;
+				var d = {};
+				d.key = key;
+				d.t = waterLevelData[i][timeKey];
+				d.valueSum = waterLevelData[i][valueKey];
+				d.diffSum = waterLevelData[i].diff;
+				d.num = 1;
+				d.latSum = s[latKey];
+				d.lngSum = s[lngKey];
+				d.alertL3 = 0;
+				d.alertL2 = 0;
+				d.alertL1 = 0;
+				if(waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
+				else if(waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
+				else if(waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
+				clusterHash[key] = d;
 			}
+		}
+		var cluster = [];
+		for(var key in clusterHash){
+			cluster.push(clusterHash[key]);
+		}
+		return {isCluster:true, data:cluster};
+	}
+
+	DrawWaterLevel(id,value,color,lat,lng,clickFn){
+		if(this.layer[id]){
+			var icon = this.layer[id];
+			icon.setOptions({
+				map: this.map,
+				fillColor: color,
+				strokeOpacity: g_APP.waterLevelOption.opacity,
+				fillOpacity: g_APP.waterLevelOption.opacity,
+				paths: this.GenIcon(lat,lng,value)
+			});
+			google.maps.event.clearListeners(icon,"click");
+			icon.addListener('click', clickFn);
+		}
+		else{
+			var icon = new google.maps.Polygon({
+				strokeWeight: 1,
+				strokeColor: '#000000',
+				strokeOpacity: g_APP.waterLevelOption.opacity,
+				fillColor: color,
+				fillOpacity: g_APP.waterLevelOption.opacity,
+				map: this.map,
+				zIndex: 2,
+				paths: this.GenIcon(lat,lng,value)
+			});
+			icon.addListener('click', clickFn);
+			this.layer[id] = icon;
 		}
 	}
 
-	DrawGrid(data){
+    DrawLayer(data){
 		if(!this.map) return;
-		if(!data) return;
+		if(!data || !g_APP.waterLevelOption.showRiver) return;
 
-		var offset = g_APP.TimeToOffset(g_APP.curTime);
-		offset -= 1;
-		if(offset < 0) offset = 0;
-		var preData = g_APP.GetDataFromTime(data,g_APP.OffsetToTime(offset));
-		var waterLevelData = g_APP.GetDataFromTime(data,g_APP.curTime);
-		if(!waterLevelData) return;
+		var cluster = this.GetDisplayData(data,"StationIdentifier","WaterLevel","RecordTime","lat","lon");
+		
+		if(cluster.isCluster){
+			for(var i=0;i<cluster.data.length;i++){
+				var d = cluster.data[i];
+				var sID = d.key;
 
-
-		var preDataHash = {};
-		if(preData){
-			for(var i=0;i<preData.length;i++){
-				var key = preData[i].x+"-"+preData[i].y;
-				preDataHash[key] = preData[i];
-			}
-		}
-
-		var clickFn = function(data,i){ 
-			return function() {
-				this.UpdateInfoWindow(data[i]);
-				this.infoWindow.open(this.map);
-				var key = data[i].x+"-"+data[i].y;
-				this.infoTarget = key;
-			}.bind(this);
-		}.bind(this);
-
-		for(var i=0;i<waterLevelData.length;i++){
-			if(waterLevelData[i].WaterLevelSum <= 0) continue;
-			var key = waterLevelData[i].x+"-"+waterLevelData[i].y;
-			
-			var value = 0;
-			if(preDataHash[key]){
-				if(preDataHash[key].WaterLevelSum && waterLevelData[i].WaterLevelSum){
-					var now = waterLevelData[i].WaterLevelSum/waterLevelData[i].num;
-					var preNow = preDataHash[key].WaterLevelSum/preDataHash[key].num;
-					value = now-preNow;
+				//info window有打開，更新資訊
+				if(this.infoWindow.getMap() && this.infoTarget == sID){
+					this.UpdateInfoWindow(d);
 				}
-			}
-			waterLevelData[i].diff = value;
 
-			//info window有打開，更新資訊
-			if(this.map && this.infoTarget == key){
-				this.UpdateInfoWindow(waterLevelData[i]);
-			}
+				var color = "#37cc00";
+				if(d.alertL3 > 0) color = "#ffcc00";
+				if(d.alertL2 > 0) color = "#ff6600";
+				if(d.alertL1 > 0) color = "#ff0000";
+				var lat = d.latSum/d.num;
+				var lng = d.lngSum/d.num;
+				var diff = d.diffSum/d.num;
 
-			var color = "#37cc00";
-			var lat = waterLevelData[i].latSum/waterLevelData[i].num;
-			var lng = waterLevelData[i].lngSum/waterLevelData[i].num;
-			if(this.layer[key]){
-				var icon = this.layer[key];
-				icon.setOptions({
-					map: this.map,
-					fillColor: color,
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					paths: this.DrawIcon(lat,lng,value)
-				});
-				google.maps.event.clearListeners(icon,"click");
-				icon.addListener('click', clickFn(waterLevelData,i));
-			}
-			else{
-				var icon = new google.maps.Polygon({
-					strokeWeight: 1,
-					strokeColor: '#000000',
-					strokeOpacity: g_APP.waterLevelOption.opacity,
-					fillColor: color,
-					fillOpacity: g_APP.waterLevelOption.opacity,
-					map: this.map,
-					zIndex: 2,
-					paths: this.DrawIcon(lat,lng,value)
-				});
-				icon.addListener('click', clickFn(waterLevelData,i));
-				this.layer[key] = icon;
+				var clickFn = this.GenClickFn(cluster.data,i,"key");
+				this.DrawWaterLevel(sID,diff,color,lat,lng,clickFn);
 			}
 		}
-    }
+		else{
+			for(var i=0;i<cluster.data.length;i++){
+				var d = cluster.data[i];
+				var sID = d.StationIdentifier;
+				var s = this.data.site[sID];
+				if(!s) continue;
+				//info window有打開，更新資訊
+				if(this.infoWindow.getMap() && this.infoTarget == sID){
+					this.UpdateInfoWindow(d);
+				}
+
+				var color = "#37cc00";
+				if(d.WaterLevel > s.AlertLevel3) color = "#ffcc00";
+				if(d.WaterLevel > s.AlertLevel2) color = "#ff6600";
+				if(d.WaterLevel > s.AlertLevel1) color = "#ff0000";
+
+				var clickFn = this.GenClickFn(cluster.data,i,"StationIdentifier");
+				this.DrawWaterLevel(sID,d.diff,color,s.lat,s.lon,clickFn);
+			}
+		}
+		
+	}
 
 }
