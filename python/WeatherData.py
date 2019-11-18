@@ -18,6 +18,10 @@ import gc
 import math
 from bs4 import BeautifulSoup
 from GridData import GridData
+import pytz
+#using Asia/Taipei will cause offset to be +0806
+#taiwan = pytz.timezone('Asia/Taipei')
+taiwan = datetime.timezone(offset = datetime.timedelta(hours = 8))
 
 class WeatherData:
     def __init__(self, db):
@@ -199,3 +203,45 @@ class WeatherData:
             if i % batchNum == 0:
                 print("garbage collection")
                 gc.collect()
+
+    def GenGridFromDB(self,startDate,endDate):
+        try:
+            start = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+            end = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+            day = start
+
+            siteHash = {}
+            siteArr = self.db["rainStation"].find({})
+            for s in siteArr:
+                siteHash[s["stationID"]] = s
+
+            while(day <= end):
+                dayStr = datetime.datetime.strftime(day,"%Y%m%d")
+                print("generate grid for "+dayStr)
+                query = self.db["rain"+dayStr].find({})
+                arr = []
+                for row in query:
+                    s = siteHash[row["stationID"]]
+                    d = {}
+                    t = row["time"].replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    d["time"] = t
+                    d["now"] = row["now"]
+                    if d["now"] < 0:
+                        d["now"] = 0
+                    d["lat"] = s["lat"]
+                    d["lon"] = s["lon"]
+                    arr.append(d)
+
+                print("data num: "+str(len(arr)))
+                timeKey = "time"
+                valueKey = ["now"]
+                table = "rainGrid"+dayStr
+                latKey = "lat"
+                lngKey = "lon"
+                self.grid.AddGridBatch(table,arr,timeKey,valueKey,latKey,lngKey)
+
+                day = day + datetime.timedelta(days=1) 
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+        

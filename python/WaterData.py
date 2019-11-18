@@ -311,10 +311,10 @@ class WaterData:
                     if query is None:
                         self.db["waterLevel"+day].insert_one(w)
 
-                        loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        w["lat"] = loc[1]
-                        w["lon"] = loc[0]
-                        self.grid.AddGridWaterLevel(w)
+                        #loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                        #w["lat"] = loc[1]
+                        #w["lon"] = loc[0]
+                        #self.grid.AddGridWaterLevel(w)
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevel(result["@iot.nextLink"])
@@ -361,10 +361,10 @@ class WaterData:
                     if query is None:
                         self.db["waterLevel"+day].insert_one(w)
 
-                        loc = siteHash[name]
-                        w["lat"] = loc["lat"]
-                        w["lon"] = loc["lon"]
-                        self.grid.AddGridWaterLevel(w)
+                        #loc = siteHash[name]
+                        #w["lat"] = loc["lat"]
+                        #w["lon"] = loc["lon"]
+                        #self.grid.AddGridWaterLevel(w)
                     
                         #計算北中南平均警戒程度
                         """inc = {}
@@ -556,10 +556,10 @@ class WaterData:
                     if query is None:
                         self.db["waterLevelDrain"+day].insert_one(f)
 
-                        loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        f["lat"] = loc[1]
-                        f["lng"] = loc[0]
-                        self.grid.AddGridWaterLevelDrain(f)
+                        #loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                        #f["lat"] = loc[1]
+                        #f["lng"] = loc[0]
+                        #self.grid.AddGridWaterLevelDrain(f)
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelDrain(result["@iot.nextLink"])
@@ -603,10 +603,10 @@ class WaterData:
                     if query is None:
                         self.db["waterLevelAgri"+day].insert_one(f)
 
-                        coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        f["lat"] = coord[1]
-                        f["lng"] = coord[0]
-                        self.grid.AddGridWaterLevelAgri(f)
+                        #coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
+                        #f["lat"] = coord[1]
+                        #f["lng"] = coord[0]
+                        #self.grid.AddGridWaterLevelAgri(f)
 
 
                 if "@iot.nextLink" in result:
@@ -685,11 +685,11 @@ class WaterData:
                     if query is None:
                         self.db["sewer"+day].insert_one(f)
 
-                        if f["stationNo"] in siteHash:
-                            s = siteHash[f["stationNo"]]
-                            f["lat"] = s["lat"]
-                            f["lng"] = s["lng"]
-                            self.grid.AddGridSewer(f)
+                        #if f["stationNo"] in siteHash:
+                        #    s = siteHash[f["stationNo"]]
+                        #    f["lat"] = s["lat"]
+                        #    f["lng"] = s["lng"]
+                        #    self.grid.AddGridSewer(f)
 
         except:
             print(sys.exc_info()[0])

@@ -54,3 +54,8 @@ if __name__ == "__main__":
 
     if "statistic" in args:
         statistic.CollectData()
+
+    if args[1] == "genGrid":
+        startDate = args[2]
+        endDate = args[3]
+        weather.GenGridFromDB(startDate,endDate)

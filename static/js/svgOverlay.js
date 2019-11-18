@@ -29,7 +29,8 @@ class SvgOverlay extends google.maps.OverlayView {
         var panes = this.getPanes();
         panes.overlayMouseTarget.appendChild(div);
 
-        google.maps.event.addDomListener(div, 'click', function() {
+        google.maps.event.addDomListener(div, 'click', function(event) {
+            event.stopPropagation();
             google.maps.event.trigger(this, 'click');
         }.bind(this));
     }

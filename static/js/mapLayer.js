@@ -14,8 +14,8 @@ class MapLayer{
       this.data = {site:{},data:{},daily:{}};
 
       if(this.gridUrl){
-        this.levelNum = option.levelNum || 6;
-        this.gridPerUnit = option.gridPerUnit || 6;
+        this.levelNum = option.levelNum || 3;
+        this.gridPerUnit = option.gridPerUnit || 10;
         this.level = this.GetLevel();
         this.grid = [];
         for(var i=0;i<this.levelNum;i++){
@@ -40,7 +40,7 @@ class MapLayer{
       if(!this.gridUrl) return -1;
       if(!this.map) return this.levelNum-1;
       var zoom = this.map.getZoom();
-      var level = 5+this.levelNum-zoom;
+      var level = 6+this.levelNum-zoom;
       if(level >= this.levelNum) level = this.levelNum-1;
       if(level < 0) level = -1;
       return level;
@@ -48,13 +48,13 @@ class MapLayer{
 
     GetBaseScale(){
       var zoom = this.map.getZoom();
-      return 1*Math.pow(2,10-zoom);
+      return 1*Math.pow(1.7,10-zoom);
     }
 
     Update(){
       if(!this.map) return;
       this.ClearMap();
-      var level = this.GetLevel();
+      this.level = this.GetLevel();
 
       if(this.divideLatLng){
         var bound = this.map.getBounds();
@@ -72,7 +72,7 @@ class MapLayer{
 
         for(var lat=minLat; lat<=maxLat; lat+=step){
           for(var lng=minLng; lng<=maxLng; lng+=step){
-            if(level == -1){
+            if(this.level == -1){
               this.UpdateLayer(lat,lng,lat+step,lng+step);
             }
             else{
@@ -82,7 +82,7 @@ class MapLayer{
         }
       }
       else{
-        if(level == -1){
+        if(this.level == -1){
           this.UpdateLayer();
         }
         else{

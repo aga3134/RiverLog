@@ -84,7 +84,8 @@ class MapTyphoon extends MapLayer{
 					fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
 					map: this.map,
 					center: {lat:typhoon.lat, lng:typhoon.lng},
-					radius: Math.max(0,typhoon.circle_of_15ms*scale)
+					radius: Math.max(0,typhoon.circle_of_15ms*scale),
+					zIndex: 1
 				});
 
 				graph.level10 = new google.maps.Circle({
@@ -95,7 +96,8 @@ class MapTyphoon extends MapLayer{
 					fillOpacity: g_APP.typhoonTrajectoryOption.opacity,
 					map: this.map,
 					center: {lat:typhoon.lat, lng:typhoon.lng},
-					radius: Math.max(0,typhoon.circle_of_25ms*scale)
+					radius: Math.max(0,typhoon.circle_of_25ms*scale),
+					zIndex: 1
 				});
 
 				graph.center = new google.maps.Circle({
@@ -106,7 +108,8 @@ class MapTyphoon extends MapLayer{
 					fillOpacity: 0,
 					map: this.map,
 					center: {lat:typhoon.lat, lng:typhoon.lng},
-					radius: 1*scale
+					radius: 1*scale,
+					zIndex: 1
 				});
 
 				graph.level7.addListener('click', clickFn);

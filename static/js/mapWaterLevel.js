@@ -17,8 +17,10 @@ class MapWaterLevel extends MapLayer{
 			var value = d.valueSum/d.num;
 			var diff = d.diffSum/d.num;
 			str = "<p>河川水位</p>";
-			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
-			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
+			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
+			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
 			str += "<p>三級警戒數 "+d.alertL3+"</p>";
 			str += "<p>二級警戒數 "+d.alertL2+"</p>";
 			str += "<p>一級警戒數 "+d.alertL1+"</p>";
@@ -44,30 +46,47 @@ class MapWaterLevel extends MapLayer{
 
     GetBaseScale(){
       var zoom = this.map.getZoom();
-      return 1*Math.pow(2,9-zoom);
+      return 1*Math.pow(1.7,9-zoom);
     }
 
-    GenIcon(lat,lng,value){
-    	var baseScale = this.GetBaseScale();
+    GenIcon(lat,lng,value1,value2){
+    	if(!value2) value2 = 0;
+    	var minValue = Math.min(value1,value2);
+    	var maxValue = Math.max(value1,value2);
+
+    	var baseScale = Math.min(4,this.GetBaseScale());
 	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
-	    var valueScale = 0.3*baseScale*g_APP.waterLevelOption.scale;
+	    var valueScale = 0.03*baseScale*g_APP.waterLevelOption.scale;
 	    var thresh = g_APP.waterLevelOption.thresh*0.01;
 	    var arr = [];
-	    if(Math.abs(value) < thresh){
+	    if(Math.abs(minValue) < thresh && Math.abs(maxValue) < thresh){
 			arr.push({lat: lat-scale*0.5, lng: lng});
 			arr.push({lat: lat, lng: lng-scale*0.5});
 			arr.push({lat: lat+scale*0.5, lng: lng});
 			arr.push({lat: lat, lng: lng+scale*0.5});
 	    }
 	    else{
-			var base = value>0?scale*0.5:-scale*0.5;
-			arr.push({lat: lat, lng: lng-scale*0.5});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.5});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng-scale*0.7});
-			arr.push({lat: lat+base+(value-thresh)*valueScale*1.5, lng: lng});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.7});
-			arr.push({lat: lat+base+(value-thresh)*valueScale, lng: lng+scale*0.5});
-			arr.push({lat: lat, lng: lng+scale*0.5});
+			if(maxValue > thresh){
+				var base = scale*0.5;
+				arr.push({lat: lat, lng: lng-scale*0.5});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.5});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.7});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale*1.5, lng: lng});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.7});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.5});
+				arr.push({lat: lat, lng: lng+scale*0.5});
+			}
+			if(minValue < -thresh){
+				var base = -scale*0.5;
+				arr.push({lat: lat, lng: lng-scale*0.5});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.5});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.7});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale*1.5, lng: lng});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.7});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.5});
+				arr.push({lat: lat, lng: lng+scale*0.5});
+			}
+			
 	    }
 	    return arr;
 	}
@@ -104,7 +123,7 @@ class MapWaterLevel extends MapLayer{
 		var zoom = this.map.getZoom();
 		if(zoom >= 10) return {isCluster:false, data:waterLevelData};
 
-		var step = 0.1*Math.pow(2,10-zoom);
+		var step = 0.04*Math.min(4,Math.pow(2,11-zoom));
 		var clusterHash = {};
 		for(var i=0;i<waterLevelData.length;i++){
 			var sID = waterLevelData[i][siteKey];
@@ -116,8 +135,10 @@ class MapWaterLevel extends MapLayer{
 			var key = x+"-"+y;
 			if(key in clusterHash){
 				var d = clusterHash[key];
-				d.valueSum += waterLevelData[i][valueKey];
+				d[valueKey+"Sum"] += waterLevelData[i][valueKey];
 				d.diffSum += waterLevelData[i].diff;
+				if(waterLevelData[i].diff < d.minDiff) d.minDiff = waterLevelData[i].diff;
+				if(waterLevelData[i].diff > d.maxDiff) d.maxDiff = waterLevelData[i].diff;
 				d.num += 1;
 				d.latSum += s[latKey];
 				d.lngSum += s[lngKey];
@@ -129,8 +150,10 @@ class MapWaterLevel extends MapLayer{
 				var d = {};
 				d.key = key;
 				d.t = waterLevelData[i][timeKey];
-				d.valueSum = waterLevelData[i][valueKey];
+				d[valueKey+"Sum"] = waterLevelData[i][valueKey];
 				d.diffSum = waterLevelData[i].diff;
+				d.minDiff = waterLevelData[i].diff;
+				d.maxDiff = waterLevelData[i].diff;
 				d.num = 1;
 				d.latSum = s[latKey];
 				d.lngSum = s[lngKey];
@@ -158,7 +181,7 @@ class MapWaterLevel extends MapLayer{
 				fillColor: color,
 				strokeOpacity: g_APP.waterLevelOption.opacity,
 				fillOpacity: g_APP.waterLevelOption.opacity,
-				paths: this.GenIcon(lat,lng,value)
+				paths: this.GenIcon(lat,lng,value[0],value[1])
 			});
 			google.maps.event.clearListeners(icon,"click");
 			icon.addListener('click', clickFn);
@@ -172,7 +195,7 @@ class MapWaterLevel extends MapLayer{
 				fillOpacity: g_APP.waterLevelOption.opacity,
 				map: this.map,
 				zIndex: 2,
-				paths: this.GenIcon(lat,lng,value)
+				paths: this.GenIcon(lat,lng,value[0],value[1])
 			});
 			icon.addListener('click', clickFn);
 			this.layer[id] = icon;
@@ -204,7 +227,7 @@ class MapWaterLevel extends MapLayer{
 				var diff = d.diffSum/d.num;
 
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
-				this.DrawWaterLevel(sID,diff,color,lat,lng,clickFn);
+				this.DrawWaterLevel(sID,[d.minDiff,d.maxDiff],color,lat,lng,clickFn);
 			}
 		}
 		else{
@@ -224,7 +247,7 @@ class MapWaterLevel extends MapLayer{
 				if(d.WaterLevel > s.AlertLevel1) color = "#ff0000";
 
 				var clickFn = this.GenClickFn(cluster.data,i,"StationIdentifier");
-				this.DrawWaterLevel(sID,d.diff,color,s.lat,s.lon,clickFn);
+				this.DrawWaterLevel(sID,[d.diff],color,s.lat,s.lon,clickFn);
 			}
 		}
 		

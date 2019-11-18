@@ -73,7 +73,7 @@ class MapReservoir extends MapLayer{
 		        svgID: "svg_"+sID,
 		        percent: percent,
 		        opacity: g_APP.reservoirOption.opacity,
-		        color: g_APP.color.reservoir(percent*0.01)
+		        color: g_APP.color.reservoir(percent*0.01),
 		      });
 		      
 		      overlay.addListener('click', clickFn);
