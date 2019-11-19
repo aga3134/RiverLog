@@ -64,9 +64,9 @@ class MapRain extends MapLayer{
 		}
 
 		var zoom = this.map.getZoom();
-		if(zoom >= 11) return {isCluster:false, data:rainData};
+		if(zoom > 10) return {isCluster:false, data:rainData};
 
-		var step = 0.04*Math.min(4,Math.pow(2,11-zoom));
+		var step = 0.04*Math.min(4,Math.pow(2,10-zoom));
 		var clusterHash = {};
 		for(var i=0;i<rainData.length;i++){
 			var sID = rainData[i][siteKey];

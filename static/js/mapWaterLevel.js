@@ -121,9 +121,9 @@ class MapWaterLevel extends MapLayer{
 		}
 
 		var zoom = this.map.getZoom();
-		if(zoom >= 10) return {isCluster:false, data:waterLevelData};
+		if(zoom > 10) return {isCluster:false, data:waterLevelData};
 
-		var step = 0.04*Math.min(4,Math.pow(2,11-zoom));
+		var step = 0.04*Math.min(4,Math.pow(2,10-zoom));
 		var clusterHash = {};
 		for(var i=0;i<waterLevelData.length;i++){
 			var sID = waterLevelData[i][siteKey];
@@ -245,7 +245,7 @@ class MapWaterLevel extends MapLayer{
 				if(d.WaterLevel > s.AlertLevel3) color = "#ffcc00";
 				if(d.WaterLevel > s.AlertLevel2) color = "#ff6600";
 				if(d.WaterLevel > s.AlertLevel1) color = "#ff0000";
-
+				
 				var clickFn = this.GenClickFn(cluster.data,i,"StationIdentifier");
 				this.DrawWaterLevel(sID,[d.diff],color,s.lat,s.lon,clickFn);
 			}

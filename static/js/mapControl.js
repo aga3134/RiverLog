@@ -166,10 +166,10 @@ MapControl.prototype.UpdateLineChart = function(){
       }
       break;
     case "waterLevel":
-      title = "水位";
+      title = "河川水位";
       unitY = "m";
       var s = this.mapWaterLevel.data.site[this.mapWaterLevel.infoTarget];
-      this.dailyChartTitle = s.ObservatoryName+" 河川水位站 今日變化";
+      this.dailyChartTitle = s.ObservatoryName+" 河川水位 今日變化";
       var arr = this.mapWaterLevel.data.daily[this.mapWaterLevel.infoTarget];
       for(var i=0;i<arr.length;i++){
         if(arr[i].WaterLevel < minY) minY = arr[i].WaterLevel;
@@ -177,6 +177,51 @@ MapControl.prototype.UpdateLineChart = function(){
         data.push({
           x: new Date(day+" "+arr[i].RecordTime),
           y: arr[i].WaterLevel
+        });
+      }
+      break;
+    case "waterLevelDrain":
+      title = "區域排水水位";
+      unitY = "m";
+      var s = this.mapWaterLevelDrain.data.site[this.mapWaterLevelDrain.infoTarget];
+      this.dailyChartTitle = s.stationName+" 區域排水水位 今日變化";
+      var arr = this.mapWaterLevelDrain.data.daily[this.mapWaterLevelDrain.infoTarget];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].value < minY) minY = arr[i].value;
+        if(arr[i].value > maxY) maxY = arr[i].value;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: arr[i].value
+        });
+      }
+      break;
+    case "waterLevelAgri":
+      title = "水利會水位";
+      unitY = "m";
+      var s = this.mapWaterLevelAgri.data.site[this.mapWaterLevelAgri.infoTarget];
+      this.dailyChartTitle = s.stationName+" 水利會水位 今日變化";
+      var arr = this.mapWaterLevelAgri.data.daily[this.mapWaterLevelAgri.infoTarget];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].value < minY) minY = arr[i].value;
+        if(arr[i].value > maxY) maxY = arr[i].value;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: arr[i].value
+        });
+      }
+      break;
+    case "sewer":
+      title = "下水道水位";
+      unitY = "m";
+      var s = this.mapSewer.data.site[this.mapSewer.infoTarget];
+      this.dailyChartTitle = s.name+" 下水道水位 今日變化";
+      var arr = this.mapSewer.data.daily[this.mapSewer.infoTarget];
+      for(var i=0;i<arr.length;i++){
+        if(arr[i].value < minY) minY = arr[i].value;
+        if(arr[i].value > maxY) maxY = arr[i].value;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: arr[i].value
         });
       }
       break;
