@@ -329,7 +329,12 @@ class WaterData:
             cursor = self.db["waterLevelStation"].find({},attr)
             siteHash = {}
             for site in cursor:
-                siteHash[site["ObservatoryName"]] = site
+                name = site["ObservatoryName"]
+                arr = name.split("-")
+                if len(arr) == 3:
+                    siteHash[arr[1]] = site
+                else:
+                    siteHash[name] = site
 
             now = datetime.datetime.now()
             utcnow = datetime.datetime.utcnow()

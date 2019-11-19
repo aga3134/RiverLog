@@ -18,6 +18,7 @@ class MapRain extends MapLayer{
 			str = "<p>日雨量</p>";
 			str += "<p>平均累積雨量 "+now.toFixed(2)+" mm</p>";
 			str += "<p>平均雨量變化 "+diff.toFixed(2)+" mm</p>";
+			str += "<p>測站數 "+d.num+"</p>";
 			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}

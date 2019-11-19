@@ -56,7 +56,7 @@ class MapSewer extends MapWaterLevel{
 				var lng = d.lngSum/d.num;
 				var diff = d.diffSum/d.num;
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
-				this.DrawWaterLevel(sID,diff,color,lat,lng,clickFn);
+				this.DrawWaterLevel(sID,[d.minDiff,d.maxDiff],color,lat,lng,clickFn);
 			}
 		}
 		else{
@@ -70,7 +70,7 @@ class MapSewer extends MapWaterLevel{
 					this.UpdateInfoWindow(d);
 				}
 				var clickFn = this.GenClickFn(cluster.data,i,"stationNo");
-				this.DrawWaterLevel(sID,d.diff,color,s.lat,s.lng,clickFn);
+				this.DrawWaterLevel(sID,[d.diff],color,s.lat,s.lng,clickFn);
 			}
 		}
 
