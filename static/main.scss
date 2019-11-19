@@ -384,6 +384,10 @@ a{
 		transition: left $trans-time ease;
 		border-radius: 5px;
 
+		&.full-h{
+			height: 100%;
+		}
+
 		.panel-switch{
 			position: fixed;
 			left: -50px;
@@ -428,6 +432,10 @@ a{
 			justify-content: flex-start;
 			align-items: center;
 			flex-wrap: wrap;
+			input[type="text"]{
+				margin: 5px;
+				padding: 5px;
+			}
 			input[type="range"]{
 				width: 100px;
 			}
@@ -442,7 +450,7 @@ a{
 				border-radius: 3px;
 			}
 			.action-bt{
-				margin: 10px 0px;
+				margin: 10px 5px;
 				padding: 5px 10px;
 				background-color: #716242;
 				border-radius: 3px;

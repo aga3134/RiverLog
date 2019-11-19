@@ -17,8 +17,10 @@ class MapWaterLevelAgri extends MapWaterLevel{
 			var value = d.valueSum/d.num;
 			var diff = d.diffSum/d.num;
 			str = "<p>水利會水位</p>";
-			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
-			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
+			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
+			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
 			str += "<p>測站數 "+d.num+"</p>";
 			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);

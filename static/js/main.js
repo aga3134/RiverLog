@@ -6,6 +6,7 @@ var g_APP = new Vue({
     openDateSelect: false,
     openOption: false,
     openAbout: false,
+    openLocation: false,
     yearArr: [],
     curYear: 2019,
     curDate: "1-1",
@@ -76,7 +77,8 @@ var g_APP = new Vue({
       {name: "可能有威脅", value:"Moderate"},
       {name: "不太有威脅", value:"Minor"},
       {name: "未知", value:"Unknown"},
-    ]
+    ],
+    searchBox: null
   },
   created: function () {
     this.InitColor();
@@ -139,12 +141,37 @@ var g_APP = new Vue({
           initLoc: this.initLoc,
           succFunc: function(){
             this.ChangeYear(this.curYear);
+            this.searchBox = new google.maps.places.SearchBox(document.getElementById("placeSearch"));
+            google.maps.event.addListener(this.searchBox, 'places_changed', this.SearchPlace);
           }.bind(this)
         };
         this.mapControl.InitMap(param);
       }
       if(this.waterUse){
         this.waterUse.InitMap();
+      }
+    },
+    SearchPlace: function() {
+      var places = this.searchBox.getPlaces();
+      if(places.length) {
+        var loc = places[0].geometry.location;
+        this.mapControl.map.setZoom(12);
+        this.mapControl.map.panTo({lat: loc.lat(), lng:loc.lng()});
+      }
+    },
+    GoToMyLocation: function(){
+      //取得gps權限
+      if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position){
+          var coord = position.coords;
+          this.mapControl.map.setZoom(12);
+          this.mapControl.map.panTo({lat: coord.latitude, lng:coord.longitude});
+        }.bind(this), function(err){
+          alert("讀取GPS失敗");
+        }.bind(this));
+      }
+      else {
+        alert("瀏覽器不支援GPS");
       }
     },
     ToggleSatellite: function(){
@@ -272,6 +299,7 @@ var g_APP = new Vue({
       this.openDateSelect = false;
       this.openOption = false;
       this.openAbout = false;
+      this.openLocation = false;
       switch(type){ 
         case "date":
           this.openDateSelect = true;
@@ -281,6 +309,9 @@ var g_APP = new Vue({
           break;
         case "about":
           this.openAbout = true;
+          break;
+        case "location":
+          this.openLocation = true;
           break;
       }
     },
