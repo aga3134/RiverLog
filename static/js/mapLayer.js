@@ -206,6 +206,9 @@ class MapLayer{
         else pos = "0-0";
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
+          if(!d[this.timeKey]){
+            d[this.timeKey] = "2019-1-1 00:00:00";
+          }
           var t = dayjs(d[this.timeKey]);
           var m = t.minute()-t.minute()%10;
           t = t.minute(m).second(0).format("HH:mm:ss");
@@ -245,13 +248,17 @@ class MapLayer{
         if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
         else pos = "0-0";
         for(var i=0;i<data.length;i++){
-          var t = dayjs(data[i][this.gridTimeKey]);
+          var d = data[i];
+          if(!d[this.gridTimeKey]){
+            d[this.gridTimeKey] = "2019-1-1 00:00:00";
+          }
+          var t = dayjs(d[this.gridTimeKey]);
           var m = t.minute()-t.minute()%10;
           t = t.minute(m).second(0).format("HH:mm:ss");
-          data[i][this.gridTimeKey] = t;
+          d[this.gridTimeKey] = t;
           if(!grid[pos]) grid[pos] = {};
           if(!grid[pos][t]) grid[pos][t] = [];
-          grid[pos][t].push(data[i]);
+          grid[pos][t].push(d);
         }
         this.DrawGrid(grid[pos]);
       }.bind(this));

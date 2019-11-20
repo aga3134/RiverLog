@@ -327,6 +327,9 @@ a {
       .riverlog .side-panel .option-item input[type="text"] {
         margin: 5px;
         padding: 5px; }
+      .riverlog .side-panel .option-item input[type="number"] {
+        padding: 0px 5px;
+        width: 60px; }
       .riverlog .side-panel .option-item input[type="range"] {
         width: 100px; }
       .riverlog .side-panel .option-item input[type="checkbox"] {

@@ -9,6 +9,7 @@ from AlertData import AlertData
 from WeatherData import WeatherData
 from WaterData import WaterData
 from StatisticData import StatisticData
+from ElevationData import ElevationData
 from pymongo import MongoClient
 import json
 import requests
@@ -20,6 +21,7 @@ if __name__ == "__main__":
     water = WaterData(db)
     weather = WeatherData(db)
     statistic = StatisticData(db)
+    elevation = ElevationData(db)
         
     #weather.ProcessRain("data/rain.xml")
     #water.Init()
@@ -59,3 +61,7 @@ if __name__ == "__main__":
         startDate = args[2]
         endDate = args[3]
         weather.GenGridFromDB(startDate,endDate)
+
+    if args[1] == "elevation":
+        folder = args[2]
+        elevation.CollectDataFromFolder(folder)

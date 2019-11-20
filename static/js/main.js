@@ -32,7 +32,7 @@ var g_APP = new Vue({
       thresh: 10
     },
     reservoirOption: {opacity:0.5, scale:1, show:true},
-    floodOption: {opacity:0.5, scale:1, show:true},
+    floodOption: {opacity:0.5, scale:1, show:true, thresh:10},
     typhoonTrajectoryOption:{opacity:0.3, show:true},
     alertOption: {
       certainty: "All",
@@ -47,6 +47,7 @@ var g_APP = new Vue({
       showThunderstorm:false,
       showTyphoon:false
     },
+    elevOption:{opacity:0.5, show:true, minElev:0, maxElev:4000},
     mapOption: {
       mapType: "waterEvent",
       useSatellite: false,
@@ -133,6 +134,12 @@ var g_APP = new Vue({
       this.color.flood = d3.scale.linear()
         .domain(this.color.floodDomain)
         .range(this.color.floodRange);
+
+      this.color.elevDomain = [0,1];
+      this.color.elevRange = ["#8FD2FF","#0099FF"];
+      this.color.elev = d3.scale.linear()
+        .domain(this.color.elevDomain)
+        .range(this.color.elevRange);
     },
     InitMap: function(){
       if(this.mapControl){
@@ -157,6 +164,7 @@ var g_APP = new Vue({
         var loc = places[0].geometry.location;
         this.mapControl.map.setZoom(12);
         this.mapControl.map.panTo({lat: loc.lat(), lng:loc.lng()});
+        this.UpdateMap();
       }
     },
     GoToMyLocation: function(){
@@ -166,6 +174,7 @@ var g_APP = new Vue({
           var coord = position.coords;
           this.mapControl.map.setZoom(12);
           this.mapControl.map.panTo({lat: coord.latitude, lng:coord.longitude});
+          this.UpdateMap();
         }.bind(this), function(err){
           alert("讀取GPS失敗");
         }.bind(this));
@@ -487,6 +496,7 @@ var g_APP = new Vue({
       this.UpdateMapFlood();
       this.UpdateMapAlert();
       this.UpdateMapTyphoon();
+      this.UpdateMapElev();
       this.mapControl.UpdateLineChart();
     },
     GetDataFromTime: function(data,time){
@@ -540,6 +550,11 @@ var g_APP = new Vue({
       this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.UpdateMapTyphoon();
+    },
+    UpdateMapElev: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.UpdateMapElev();
     },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;

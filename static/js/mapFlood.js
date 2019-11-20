@@ -34,14 +34,14 @@ class MapFlood extends MapLayer{
 			var sID = floodData[i].stationID;
 			var s = this.data.site[sID];
 			if(!s) continue;
+			var d = floodData[i];
+			if(d.value < g_APP.floodOption.thresh) continue;
 
 			//info window有打開，更新資訊
 			if(this.infoWindow.getMap() && this.infoTarget == sID){
-				this.UpdateInfoWindow(floodData[i]);
+				this.UpdateInfoWindow(d);
 			}
-
 			var size = this.GetBaseScale()*g_APP.floodOption.scale;
-			var d = floodData[i];
 			var clickFn = this.GenClickFn(floodData,i,"stationID");
 
 			if(this.layer[sID]){
