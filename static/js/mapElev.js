@@ -36,10 +36,11 @@ class MapElev extends MapLayer{
 		var elevData = data["00:00:00"];
 		for(var i=0;i<elevData.length;i++){
 			var d = elevData[i];
-			if(d.elevSum <= 0) continue;
+			var map = this.map;
+			if(!d.num) continue;
 			var value = d.elevSum/d.num;
 	        value = (value-g_APP.elevOption.minElev)/(g_APP.elevOption.maxElev-g_APP.elevOption.minElev);
-	        if(value> 1) continue;
+	        if(value <= 0 || value > 1) map = null;
 
 			var key = d.x+"-"+d.y;
 			//info window有打開，更新資訊
@@ -54,7 +55,7 @@ class MapElev extends MapLayer{
 			if(this.layer[key]){
 				var rect = this.layer[key];
 				rect.setOptions({
-					map: this.map,
+					map: map,
 					fillColor: g_APP.color.elev(value),
 					fillOpacity: g_APP.elevOption.opacity,
 				});
@@ -64,7 +65,7 @@ class MapElev extends MapLayer{
 					strokeWeight: 0,
 					fillColor: g_APP.color.elev(value),
 					fillOpacity: g_APP.elevOption.opacity,
-					map: this.map,
+					map: map,
 					zIndex: 1,
 					bounds: {
 						north: lat+scale,
