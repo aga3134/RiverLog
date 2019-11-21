@@ -21,8 +21,9 @@ var g_APP = new Vue({
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
     mapControl: null,
-    rainOption: {opacity:0.8, scale:1, show:true, type:"daily"},
+    rainOption: {collapse:false,opacity:0.8, scale:1, show:true, type:"daily"},
     waterLevelOption: {
+      collapse:false,
       opacity:0.5,
       scale:1,
       showRiver:true,
@@ -31,10 +32,11 @@ var g_APP = new Vue({
       showSewer:true,
       thresh: 10
     },
-    reservoirOption: {opacity:0.5, scale:1, show:true},
-    floodOption: {opacity:0.5, scale:1, show:true, thresh:10},
-    typhoonTrajectoryOption:{opacity:0.3, show:true},
+    reservoirOption: {collapse:false,opacity:0.5, scale:1, show:true},
+    floodOption: {collapse:false,opacity:0.5, scale:1, show:true, thresh:10},
+    typhoonTrajectoryOption:{collapse:false,opacity:0.3, show:true},
     alertOption: {
+      collapse:false,
       certainty: "All",
       severity: "All",
       opacity:0.5,
@@ -47,8 +49,9 @@ var g_APP = new Vue({
       showThunderstorm:false,
       showTyphoon:false
     },
-    elevOption:{opacity:0.5, show:true, minElev:0, maxElev:4000},
+    elevOption:{collapse:false,opacity:0.5, show:false, minElev:0, maxElev:4000},
     mapOption: {
+      collapse:false,
       mapType: "waterEvent",
       useSatellite: false,
       playSpeed: 5,
@@ -136,7 +139,7 @@ var g_APP = new Vue({
         .range(this.color.floodRange);
 
       this.color.elevDomain = [0,1];
-      this.color.elevRange = ["#8FD2FF","#0099FF"];
+      this.color.elevRange = ["#0099FF","#8FD2FF"];
       this.color.elev = d3.scale.linear()
         .domain(this.color.elevDomain)
         .range(this.color.elevRange);

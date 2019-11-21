@@ -42,7 +42,7 @@
 				<div class="icon-container">
 					<img class="icon" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="openDateSelect=true;" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="icon" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="openOption=true;">
-					<img class="icon" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="openLocation=true;">
+					<img class="icon" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="openLocation=true;" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
 				</div>
 
@@ -256,7 +256,7 @@
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openDateSelect=false;">
 					<img class="bt" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="SwitchPanel('option');">
-					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');">
+					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');" >
 					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
 				
@@ -286,187 +286,234 @@
 				
 			</div>
 
-			<div class="side-panel" v-bind:class="{open: openOption}">
+			<div class="side-panel" v-bind:class="{open: openOption, 'full-h': (mapOption.mapType == 'waterEvent')}">
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
 					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');">
+					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
 				
 				<div class="option-container" v-if="mapOption.mapType == 'waterEvent' ">
-					<div class="option-category">雨量</div>
-					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="rainOption.show" v-on:change="UpdateMapRain();">
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!rainOption.collapse" v-on:click="rainOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="rainOption.collapse" v-on:click="rainOption.collapse = false;">
+						<div class="title">雨量</div>
 					</div>
-					<div class="option-item">
-						<div class="option-label">類型</div>
-						<select v-model="rainOption.type" v-on:change="UpdateMapRain();">
-							<option v-for="op in opRainType" v-bind:value="op.value">{{op.name}}</option>
-						</select>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="rainOption.opacity" v-on:change="UpdateMapRain();">
-						<div class="option-label">透明度</div>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0.1" max="2" step="0.1" v-model="rainOption.scale" v-on:change="UpdateMapRain();">
-						<div class="option-label">縮放</div>
-					</div>
-
-					<div class="option-category">各類水位</div>
-					<div class="option-item">
-						<div class="option-label">河川水位</div>
-						<input type="checkbox" v-model="waterLevelOption.showRiver" v-on:change="UpdateMapWaterLevel();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">區域排水水位</div>
-						<input type="checkbox" v-model="waterLevelOption.showDrain" v-on:change="UpdateMapWaterLevel();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">水利會水位</div>
-						<input type="checkbox" v-model="waterLevelOption.showAgri" v-on:change="UpdateMapWaterLevel();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">下水道水位</div>
-						<input type="checkbox" v-model="waterLevelOption.showSewer" v-on:change="UpdateMapWaterLevel();">
-					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="waterLevelOption.opacity" v-on:change="UpdateMapWaterLevel();">
-						<div class="option-label">透明度</div>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0.1" max="2" step="0.1" v-model="waterLevelOption.scale" v-on:change="UpdateMapWaterLevel();">
-						<div class="option-label">縮放</div>
-					</div>
-					<div class="option-item">
-						<div class="option-label full-w-label">箭頭閥值</div>
-						<input type="range" min="1" max="30" step="1" v-model="waterLevelOption.thresh" v-on:change="UpdateMapWaterLevel();">
-						<div class="option-label">{{waterLevelOption.thresh}}cm</div>
+					<div v-show="rainOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">顯示</div>
+							<input type="checkbox" v-model="rainOption.show" v-on:change="UpdateMapRain();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">類型</div>
+							<select v-model="rainOption.type" v-on:change="UpdateMapRain();">
+								<option v-for="op in opRainType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="rainOption.opacity" v-on:change="UpdateMapRain();">
+							<div class="option-label">透明度</div>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0.1" max="2" step="0.1" v-model="rainOption.scale" v-on:change="UpdateMapRain();">
+							<div class="option-label">縮放</div>
+						</div>
 					</div>
 
-					<div class="option-category">水庫水位</div>
-					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="reservoirOption.show" v-on:change="UpdateMapReservoir();">
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!waterLevelOption.collapse" v-on:click="waterLevelOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="waterLevelOption.collapse" v-on:click="waterLevelOption.collapse = false;">
+						<div class="title">各類水位</div>
 					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="reservoirOption.opacity" v-on:change="UpdateMapReservoir();">
-						<div class="option-label">透明度</div>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0.1" max="2" step="0.1" v-model="reservoirOption.scale" v-on:change="UpdateMapReservoir();">
-						<div class="option-label">縮放</div>
-					</div>
-
-					<div class="option-category">淹水深度</div>
-					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="floodOption.show" v-on:change="UpdateMapFlood();">
-					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="floodOption.opacity" v-on:change="UpdateMapFlood();">
-						<div class="option-label">透明度</div>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0.1" max="2" step="0.1" v-model="floodOption.scale" v-on:change="UpdateMapFlood();">
-						<div class="option-label">縮放</div>
-					</div>
-					<div class="option-item">
-						<div class="option-label full-w-label">顯示閥值</div>
-						<input type="range" min="0" max="100" step="1" v-model="floodOption.thresh" v-on:change="UpdateMapFlood();">
-						<div class="option-label">{{floodOption.thresh}}cm</div>
-					</div>
-
-					<div class="option-category">颱風路徑</div>
-					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="typhoonTrajectoryOption.show" v-on:change="UpdateMapTyphoon();">
-					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="typhoonTrajectoryOption.opacity" v-on:change="UpdateMapTyphoon();">
-						<div class="option-label">透明度</div>
+					<div v-show="waterLevelOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">河川水位</div>
+							<input type="checkbox" v-model="waterLevelOption.showRiver" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">區域排水水位</div>
+							<input type="checkbox" v-model="waterLevelOption.showDrain" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">水利會水位</div>
+							<input type="checkbox" v-model="waterLevelOption.showAgri" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">下水道水位</div>
+							<input type="checkbox" v-model="waterLevelOption.showSewer" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="waterLevelOption.opacity" v-on:change="UpdateMapWaterLevel();">
+							<div class="option-label">透明度</div>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0.1" max="2" step="0.1" v-model="waterLevelOption.scale" v-on:change="UpdateMapWaterLevel();">
+							<div class="option-label">縮放</div>
+						</div>
+						<div class="option-item">
+							<div class="option-label full-w-label">箭頭閥值</div>
+							<input type="range" min="1" max="30" step="1" v-model="waterLevelOption.thresh" v-on:change="UpdateMapWaterLevel();">
+							<div class="option-label">{{waterLevelOption.thresh}}cm</div>
+						</div>
 					</div>
 
-					<div class="option-category">災害警示</div>
-					<div class="option-item">
-						<div class="option-label">大雨</div>
-						<input type="checkbox" v-model="alertOption.showRainFall" v-on:change="UpdateMapAlert();">
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!reservoirOption.collapse" v-on:click="reservoirOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="reservoirOption.collapse" v-on:click="reservoirOption.collapse = false;">
+						<div class="title">水庫水位</div>
 					</div>
-					<div class="option-item">
-						<div class="option-label">淹水</div>
-						<input type="checkbox" v-model="alertOption.showFlow" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">水庫放流</div>
-						<input type="checkbox" v-model="alertOption.showReservoirDis" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">河川高水位</div>
-						<input type="checkbox" v-model="alertOption.showHighWater" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">停水</div>
-						<input type="checkbox" v-model="alertOption.showWater" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">土石流</div>
-						<input type="checkbox" v-model="alertOption.showDebrisFlow" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">雷雨</div>
-						<input type="checkbox" v-model="alertOption.showThunderstorm" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">颱風</div>
-						<input type="checkbox" v-model="alertOption.showTyphoon" v-on:change="UpdateMapAlert();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">發生機率</div>
-						<select v-model="alertOption.certainty" v-on:change="UpdateMapAlert();">
-							<option v-for="op in opAlertCertainty" v-bind:value="op.value">{{op.name}}</option>
-						</select>
-					</div>
-					<div class="option-item">
-						<div class="option-label">嚴重程度</div>
-						<select v-model="alertOption.severity" v-on:change="UpdateMapAlert();">
-							<option v-for="op in opAlertSeverity" v-bind:value="op.value">{{op.name}}</option>
-						</select>
-					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="alertOption.opacity" v-on:change="UpdateMapAlert();">
-						<div class="option-label">透明度</div>
+					<div v-show="reservoirOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">顯示</div>
+							<input type="checkbox" v-model="reservoirOption.show" v-on:change="UpdateMapReservoir();">
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="reservoirOption.opacity" v-on:change="UpdateMapReservoir();">
+							<div class="option-label">透明度</div>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0.1" max="2" step="0.1" v-model="reservoirOption.scale" v-on:change="UpdateMapReservoir();">
+							<div class="option-label">縮放</div>
+						</div>
 					</div>
 
-					<div class="option-category">高程資料</div>
-					<div class="option-item">
-						<div class="option-label">顯示</div>
-						<input type="checkbox" v-model="elevOption.show" v-on:change="UpdateMapElev()">
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!floodOption.collapse" v-on:click="floodOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="floodOption.collapse" v-on:click="floodOption.collapse = false;">
+						<div class="title">淹水深度</div>
 					</div>
-					<div class="option-item">
-						<input type="range" min="0" max="1" step="0.1" v-model="elevOption.opacity" v-on:change="UpdateMapElev();">
-						<div class="option-label">透明度</div>
-					</div>
-					<div class="option-item">
-						<div class="option-label">最低顯示高度</div>
-						<input type="number" min="0" step="1" v-model="elevOption.minElev" v-on:change="UpdateMapElev();">
-					</div>
-					<div class="option-item">
-						<div class="option-label">最高顯示高度</div>
-						<input type="number" min="0" step="1" v-model="elevOption.maxElev" v-on:change="UpdateMapElev();">
+					<div v-show="floodOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">顯示</div>
+							<input type="checkbox" v-model="floodOption.show" v-on:change="UpdateMapFlood();">
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="floodOption.opacity" v-on:change="UpdateMapFlood();">
+							<div class="option-label">透明度</div>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0.1" max="2" step="0.1" v-model="floodOption.scale" v-on:change="UpdateMapFlood();">
+							<div class="option-label">縮放</div>
+						</div>
+						<div class="option-item">
+							<div class="option-label full-w-label">顯示閥值</div>
+							<input type="range" min="0" max="100" step="1" v-model="floodOption.thresh" v-on:change="UpdateMapFlood();">
+							<div class="option-label">{{floodOption.thresh}}cm</div>
+						</div>
 					</div>
 
-					<div class="option-category">地圖</div>
-					<div class="option-item">
-						<div class="option-label">衛星檢視</div>
-						<input type="checkbox" v-model="mapOption.useSatellite" v-on:change="ToggleSatellite()">
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!typhoonTrajectoryOption.collapse" v-on:click="typhoonTrajectoryOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="typhoonTrajectoryOption.collapse" v-on:click="typhoonTrajectoryOption.collapse = false;">
+						<div class="title">颱風路徑</div>
 					</div>
-					<div class="option-item">
-						<input type="range" min="1" max="10" step="1" v-model="mapOption.playSpeed" v-on:change="UpdatePlaySpeed();">
-						<div class="option-label">播放速度</div>
+					<div v-show="typhoonTrajectoryOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">顯示</div>
+							<input type="checkbox" v-model="typhoonTrajectoryOption.show" v-on:change="UpdateMapTyphoon();">
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="typhoonTrajectoryOption.opacity" v-on:change="UpdateMapTyphoon();">
+							<div class="option-label">透明度</div>
+						</div>
 					</div>
-					
+
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!alertOption.collapse" v-on:click="alertOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="alertOption.collapse" v-on:click="alertOption.collapse = false;">
+						<div class="title">災害警示</div>
+					</div>
+					<div v-show="alertOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">大雨</div>
+							<input type="checkbox" v-model="alertOption.showRainFall" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">淹水</div>
+							<input type="checkbox" v-model="alertOption.showFlow" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">水庫放流</div>
+							<input type="checkbox" v-model="alertOption.showReservoirDis" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">河川高水位</div>
+							<input type="checkbox" v-model="alertOption.showHighWater" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">停水</div>
+							<input type="checkbox" v-model="alertOption.showWater" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">土石流</div>
+							<input type="checkbox" v-model="alertOption.showDebrisFlow" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">雷雨</div>
+							<input type="checkbox" v-model="alertOption.showThunderstorm" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">颱風</div>
+							<input type="checkbox" v-model="alertOption.showTyphoon" v-on:change="UpdateMapAlert();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">發生機率</div>
+							<select v-model="alertOption.certainty" v-on:change="UpdateMapAlert();">
+								<option v-for="op in opAlertCertainty" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+						<div class="option-item">
+							<div class="option-label">嚴重程度</div>
+							<select v-model="alertOption.severity" v-on:change="UpdateMapAlert();">
+								<option v-for="op in opAlertSeverity" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="alertOption.opacity" v-on:change="UpdateMapAlert();">
+							<div class="option-label">透明度</div>
+						</div>
+					</div>
+
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!elevOption.collapse" v-on:click="elevOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="elevOption.collapse" v-on:click="elevOption.collapse = false;">
+						<div class="title">高程資料</div>
+					</div>
+					<div v-show="elevOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">顯示</div>
+							<input type="checkbox" v-model="elevOption.show" v-on:change="UpdateMapElev()">
+						</div>
+						<div class="option-item">
+							<input type="range" min="0" max="1" step="0.1" v-model="elevOption.opacity" v-on:change="UpdateMapElev();">
+							<div class="option-label">透明度</div>
+						</div>
+						<div class="option-item">
+							<div class="option-label">最低顯示高度</div>
+							<input type="number" min="0" step="1" v-model="elevOption.minElev" v-on:change="UpdateMapElev();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">最高顯示高度</div>
+							<input type="number" min="0" step="1" v-model="elevOption.maxElev" v-on:change="UpdateMapElev();">
+						</div>
+					</div>
+
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!mapOption.collapse" v-on:click="mapOption.collapse = true;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="mapOption.collapse" v-on:click="mapOption.collapse = false;">
+						<div class="title">地圖</div>
+					</div>
+					<div v-show="mapOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">衛星檢視</div>
+							<input type="checkbox" v-model="mapOption.useSatellite" v-on:change="ToggleSatellite()">
+						</div>
+						<div class="option-item">
+							<input type="range" min="1" max="10" step="1" v-model="mapOption.playSpeed" v-on:change="UpdatePlaySpeed();">
+							<div class="option-label">播放速度</div>
+						</div>
+					</div>
 				</div>
 
 				<div class="option-container" v-if="mapOption.mapType == 'waterUse' && waterUse">

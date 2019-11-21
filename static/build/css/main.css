@@ -316,9 +316,18 @@ a {
     .riverlog .side-panel .option-category {
       width: 100%;
       padding: 5px;
-      font-size: 1.2em;
       border-bottom: 1px solid #9e8669;
-      margin-top: 10px; }
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center; }
+      .riverlog .side-panel .option-category .title {
+        font-size: 1.2em; }
+      .riverlog .side-panel .option-category .collapse-bt {
+        width: 20px;
+        height: 20px;
+        margin: 0px 10px 0px 0px;
+        cursor: pointer; }
     .riverlog .side-panel .option-item {
       display: flex;
       justify-content: flex-start;
