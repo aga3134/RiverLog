@@ -296,8 +296,8 @@
 				
 				<div class="option-container" v-if="mapOption.mapType == 'waterEvent' ">
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!rainOption.collapse" v-on:click="rainOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="rainOption.collapse" v-on:click="rainOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!rainOption.collapse" v-on:click="ToggleCollapse('rain');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="rainOption.collapse" v-on:click="ToggleCollapse('rain');">
 						<div class="title">雨量</div>
 					</div>
 					<div v-show="rainOption.collapse == false">
@@ -322,8 +322,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!waterLevelOption.collapse" v-on:click="waterLevelOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="waterLevelOption.collapse" v-on:click="waterLevelOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!waterLevelOption.collapse" v-on:click="ToggleCollapse('waterLevel');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="waterLevelOption.collapse" v-on:click="ToggleCollapse('waterLevel');">
 						<div class="title">各類水位</div>
 					</div>
 					<div v-show="waterLevelOption.collapse == false">
@@ -359,8 +359,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!reservoirOption.collapse" v-on:click="reservoirOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="reservoirOption.collapse" v-on:click="reservoirOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!reservoirOption.collapse" v-on:click="ToggleCollapse('reservoir');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="reservoirOption.collapse" v-on:click="ToggleCollapse('reservoir');">
 						<div class="title">水庫水位</div>
 					</div>
 					<div v-show="reservoirOption.collapse == false">
@@ -379,8 +379,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!floodOption.collapse" v-on:click="floodOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="floodOption.collapse" v-on:click="floodOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!floodOption.collapse" v-on:click="ToggleCollapse('flood');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="floodOption.collapse" v-on:click="ToggleCollapse('flood');">
 						<div class="title">淹水深度</div>
 					</div>
 					<div v-show="floodOption.collapse == false">
@@ -404,8 +404,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!typhoonTrajectoryOption.collapse" v-on:click="typhoonTrajectoryOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="typhoonTrajectoryOption.collapse" v-on:click="typhoonTrajectoryOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!typhoonTrajectoryOption.collapse" v-on:click="ToggleCollapse('typhoon');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="typhoonTrajectoryOption.collapse" v-on:click="ToggleCollapse('typhoon');">
 						<div class="title">颱風路徑</div>
 					</div>
 					<div v-show="typhoonTrajectoryOption.collapse == false">
@@ -420,8 +420,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!alertOption.collapse" v-on:click="alertOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="alertOption.collapse" v-on:click="alertOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!alertOption.collapse" v-on:click="ToggleCollapse('alert');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="alertOption.collapse" v-on:click="ToggleCollapse('alert');">
 						<div class="title">災害警示</div>
 					</div>
 					<div v-show="alertOption.collapse == false">
@@ -476,8 +476,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!elevOption.collapse" v-on:click="elevOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="elevOption.collapse" v-on:click="elevOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!elevOption.collapse" v-on:click="ToggleCollapse('elev');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="elevOption.collapse" v-on:click="ToggleCollapse('elev');">
 						<div class="title">高程資料</div>
 					</div>
 					<div v-show="elevOption.collapse == false">
@@ -500,8 +500,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!mapOption.collapse" v-on:click="mapOption.collapse = true;">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="mapOption.collapse" v-on:click="mapOption.collapse = false;">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!mapOption.collapse" v-on:click="ToggleCollapse('map');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="mapOption.collapse" v-on:click="ToggleCollapse('map');">
 						<div class="title">地圖</div>
 					</div>
 					<div v-show="mapOption.collapse == false">

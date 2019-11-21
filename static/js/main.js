@@ -191,6 +191,35 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       this.mapControl.ToggleSatellite(this.mapOption.useSatellite);
     },
+    ToggleCollapse: function(type){
+      switch(type){
+        case "rain":
+          this.rainOption.collapse = !this.rainOption.collapse;
+          break;
+        case "waterLevel":
+          this.waterLevelOption.collapse = !this.waterLevelOption.collapse;
+          break;
+        case "reservoir":
+          this.reservoirOption.collapse = !this.reservoirOption.collapse;
+          break;
+        case "flood":
+          this.floodOption.collapse = !this.floodOption.collapse;
+          break;
+        case "typhoon":
+          this.typhoonTrajectoryOption.collapse = !this.typhoonTrajectoryOption.collapse;
+          break;
+        case "alert":
+          this.alertOption.collapse = !this.alertOption.collapse;
+          break;
+        case "elev":
+          this.elevOption.collapse = !this.elevOption.collapse;
+          break;
+        case "map":
+          this.mapOption.collapse = !this.mapOption.collapse;
+          break;
+      }
+      this.UpdateUrl();
+    },
     UpdateMapType: function(){
       this.UpdateUrl();
       switch(this.mapOption.mapType){
@@ -621,173 +650,322 @@ var g_APP = new Vue({
       hash += "&option="+this.EncodeOptionString();
       location.hash = hash;
     },
+    OpValueToIndex: function(opArr, value){
+      for(var i=0;i<opArr.length;i++){
+        var op = opArr[i];
+        if(value == op.value){
+          return i;
+        }
+      }
+      return 0;
+    },
     EncodeOptionString: function(){
-      function OpValueToIndex(opArr, value){
-        var index = 0;
-        for(var i=0;i<opArr.length;i++){
-          var op = opArr[i];
-          if(value == op.value){
-            index = i&15;
+
+      function NumberToChar(number){  //5bit number only
+        var chArr = [];
+        for(var i=0;i<10;i++){  //0~10
+          var ch = String.fromCharCode(48+i);
+          chArr.push(ch);
+        }
+        for(var i=10;i<32;i++){  //a~z
+          var ch = String.fromCharCode(97+i-10);
+          chArr.push(ch);
+        }
+        if(number < 0 || number >= chArr.length) return "";
+        else return chArr[number];
+      }
+
+      function ValueArrToString(arr){
+        var str = "";
+        var encodeBit = 5;
+        var bitValue = 0, bitPos = 0;
+        //console.log("======================");
+        for(var i=0;i<arr.length;i++){
+          var value = arr[i].value;
+          var bitNum = arr[i].bitNum;
+          //console.log("value:"+value+" bitNum:"+bitNum);
+          var bitMask = (1<<bitNum)-1;
+          value = value & bitMask;
+          while(bitNum > 0){
+            //console.log("init bit:"+bitNum);
+            if(bitPos + bitNum >= encodeBit){ //bit數已滿，輸出新字元後buffer歸零
+              var useBit = encodeBit-bitPos;
+              //console.log("use bit: "+useBit);
+              var useMask = (1<<useBit)-1;
+              var useValue = (value & useMask)<<bitPos;
+              var encodeValue = bitValue + useValue;
+              str = NumberToChar(encodeValue)+str;
+              value = value >> useBit;
+              bitNum -= useBit;
+              //console.log("str: "+str);
+              //console.log("remain bit:"+bitNum);
+              //console.log("remain value:"+value);
+              bitValue = 0;
+              bitPos = 0;
+            }
+            else{ //bit數未滿，更新buffer
+              //console.log("residual bit:"+bitNum);
+              var useMask = (1<<bitNum)-1;
+              var useValue = (value & useMask)<<bitPos;
+              bitValue += useValue;
+              bitPos += bitNum;
+              bitNum = 0;
+              //console.log("residual value:"+bitValue);
+              //console.log("residual pos:"+bitPos);
+            }
+            
           }
         }
-        return index;
+        if(bitPos > 0){
+          str = NumberToChar(bitValue)+str;
+        }
+        return str;
       }
-      var rainOpacity = Math.round(this.rainOption.opacity/0.1) & 255;
-      var rainScale = Math.round(this.rainOption.scale/0.1) & 255;
-      var rainShow = (this.rainOption.show?1:0) & 1;
-      var rainType = OpValueToIndex(this.opRainType,this.rainOption.type);
-      var rainEncode = rainType + (rainShow<<4) + (rainScale<<5) + (rainOpacity<<13);
-      rainEncode = g_Util.PadLeft(rainEncode.toString(16),8);
 
-      var waterLevelOpacity = Math.round(this.waterLevelOption.opacity/0.1) & 255;
-      var waterLevelScale = Math.round(this.waterLevelOption.scale/0.1) & 255;
-      var waterLevelShowRiver = (this.waterLevelOption.showRiver?1:0) & 1;
-      var waterLevelShowDrain = (this.waterLevelOption.showDrain?1:0) & 1;
-      var waterLevelShowAgri = (this.waterLevelOption.showAgri?1:0) & 1;
-      var waterLevelShowSewer = (this.waterLevelOption.showSewer?1:0) & 1;
-      var waterLevelThresh = this.waterLevelOption.thresh & 255;
-      var waterLevelEncode = waterLevelThresh + (waterLevelShowRiver<<8) + 
-        (waterLevelShowDrain<<9) + (waterLevelShowAgri<<10) + 
-        (waterLevelShowSewer<<11) + (waterLevelScale<<12) + 
-        (waterLevelOpacity<<20);
-      waterLevelEncode = g_Util.PadLeft(waterLevelEncode.toString(16),8);
+      /*
+      //test: should be 1og
+      var arr = [
+        {value: 16, bitNum:8},
+        {value: 1, bitNum:1},
+        {value: 3, bitNum:4},
+      ];
+      console.log(ValueArrToString(arr));*/
 
-      var reservoirOpacity = Math.round(this.reservoirOption.opacity/0.1) & 255;
-      var reservoirScale = Math.round(this.reservoirOption.scale/0.1) & 255;
-      var reservoirShow = (this.reservoirOption.show?1:0) & 1;
-      var reservoirEncode = reservoirShow + (reservoirScale<<1) + (reservoirOpacity<<9);
-      reservoirEncode = g_Util.PadLeft(reservoirEncode.toString(16),8);
-
-      var floodOpacity = Math.round(this.floodOption.opacity/0.1) & 255;
-      var floodScale = Math.round(this.floodOption.scale/0.1) & 255;
-      var floodShow = (this.floodOption.show?1:0) & 1;
-      var floodEncode = floodShow + (floodScale<<1) + (floodOpacity<<9);
-      floodEncode = g_Util.PadLeft(floodEncode.toString(16),8);
-
-      var typhoonOpacity = Math.round(this.typhoonTrajectoryOption.opacity/0.1) & 255;
-      var typhoonShow = (this.typhoonTrajectoryOption.show?1:0) & 1;
-      var typhoonEncode = typhoonShow + (typhoonOpacity<<1);
-      typhoonEncode = g_Util.PadLeft(typhoonEncode.toString(16),8);
-
-      var alertCertainty = OpValueToIndex(this.opAlertCertainty,this.alertOption.certainty);
-      var alertSeverity = OpValueToIndex(this.opAlertSeverity,this.alertOption.severity);
-      var alertOpacity = Math.round(this.alertOption.opacity/0.1) & 255;
-      var alertShowRainFall = (this.alertOption.showRainFall?1:0) & 1;
-      var alertShowFlow = (this.alertOption.showFlow?1:0) & 1;
-      var alertShowReservoirDis = (this.alertOption.showReservoirDis?1:0) & 1;
-      var alertShowHighWater = (this.alertOption.showHighWater?1:0) & 1;
-      var alertShowWater = (this.alertOption.showWater?1:0) & 1;
-      var alertShowDebrisFlow = (this.alertOption.showDebrisFlow?1:0) & 1;
-      var alertShowThunderstorm = (this.alertOption.showThunderstorm?1:0) & 1;
-      var alertShowTyphoon = (this.alertOption.showTyphoon?1:0) & 1;
-      var alertEncode = alertShowTyphoon+(alertShowThunderstorm<<1)+(alertShowDebrisFlow<<2)
-          +(alertShowWater<<3)+(alertShowHighWater<<4)+(alertShowReservoirDis<<5)
-          +(alertShowFlow<<6)+(alertShowRainFall<<7)+(alertOpacity<<8)
-          +(alertSeverity<<16)+(alertCertainty<<20);
-      alertEncode = g_Util.PadLeft(alertEncode.toString(16),8);
-
-      var mapType = OpValueToIndex(this.opMapType,this.mapOption.mapType);
-      var mapPlaySpeed = this.mapOption.playSpeed & 255;
-      var mapUseSatellite = (this.mapOption.useSatellite?1:0) & 1;
-      var mapEncode = mapUseSatellite+(mapPlaySpeed<<1)+(mapType<<9);
-      mapEncode = g_Util.PadLeft(mapEncode.toString(16),8);
-
-      var waterUseEncode = this.waterUse.EncodeOptionString();
-
-      return rainEncode+waterLevelEncode+reservoirEncode+floodEncode
-          +typhoonEncode+alertEncode+mapEncode+waterUseEncode;
+      var arr = [];
+      //rain option
+      arr.push({value: (this.rainOption.collapse?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.rainOption.opacity*10),bitNum: 8});
+      arr.push({value: Math.round(this.rainOption.scale*10),bitNum: 8});
+      arr.push({value: (this.rainOption.show?1:0),bitNum: 1});
+      arr.push({value: this.OpValueToIndex(this.opRainType,this.rainOption.type),bitNum: 4});
       
+      //water level option
+      arr.push({value: (this.waterLevelOption.collapse?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.waterLevelOption.opacity*10),bitNum: 8});
+      arr.push({value: Math.round(this.waterLevelOption.scale*10),bitNum: 8});
+      arr.push({value: (this.waterLevelOption.showRiver?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showDrain?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showAgri?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showSewer?1:0),bitNum: 1});
+      arr.push({value: this.waterLevelOption.thresh,bitNum: 8});
+
+      //reservoir option
+      arr.push({value: (this.reservoirOption.collapse?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.reservoirOption.opacity*10),bitNum: 8});
+      arr.push({value: Math.round(this.reservoirOption.scale*10),bitNum: 8});
+      arr.push({value: (this.reservoirOption.show?1:0),bitNum: 1});
+
+      //flood option
+      arr.push({value: (this.floodOption.collapse?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.floodOption.opacity*10),bitNum: 8});
+      arr.push({value: Math.round(this.floodOption.scale*10),bitNum: 8});
+      arr.push({value: (this.floodOption.show?1:0),bitNum: 1});
+      arr.push({value: this.floodOption.thresh,bitNum: 8});
+
+      //typhoon option
+      arr.push({value: (this.typhoonTrajectoryOption.collapse?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.typhoonTrajectoryOption.opacity*10),bitNum: 8});
+      arr.push({value: (this.typhoonTrajectoryOption.show?1:0),bitNum: 1});
+
+      //alert option
+      arr.push({value: (this.alertOption.collapse?1:0),bitNum: 1});
+      arr.push({value: this.OpValueToIndex(this.opAlertCertainty,this.alertOption.certainty),bitNum: 4});
+      arr.push({value: this.OpValueToIndex(this.opAlertSeverity,this.alertOption.severity),bitNum: 4});
+      arr.push({value: Math.round(this.alertOption.opacity*10),bitNum: 8});
+      arr.push({value: (this.alertOption.showRainFall?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showFlow?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showReservoirDis?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showHighWater?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showWater?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showDebrisFlow?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showThunderstorm?1:0),bitNum: 1});
+      arr.push({value: (this.alertOption.showTyphoon?1:0),bitNum: 1});
+
+      //elevation option
+      arr.push({value: (this.elevOption.collapse?1:0),bitNum: 1});
+      arr.push({value: (this.elevOption.show?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.elevOption.opacity*10),bitNum: 8});
+      arr.push({value: this.elevOption.minElev,bitNum: 12});
+      arr.push({value: this.elevOption.maxElev,bitNum: 12});
+
+      //map option
+      arr.push({value: (this.mapOption.collapse?1:0),bitNum: 1});
+      arr.push({value: this.OpValueToIndex(this.opMapType,this.mapOption.mapType),bitNum: 4});
+      arr.push({value: this.mapOption.playSpeed,bitNum: 8});
+      arr.push({value: (this.mapOption.useSatellite?1:0),bitNum: 1});
+      
+      var waterUseArr = this.waterUse.GetEncodeOptionArr();
+
+      arr = arr.concat(waterUseArr);
+      return ValueArrToString(arr);
     },
     DecodeOptionString: function(option){
-      var rainEncode = option.substr(0,8);
-      rainEncode = parseInt(rainEncode,16);
-      var rainType = rainEncode & 15;
-      var rainShow = (rainEncode>>4) & 1;
-      var rainScale = (rainEncode>>5) & 255;
-      var rainOpacity = (rainEncode>>13) & 255;
-      this.rainOption.type = this.opRainType[rainType].value;
-      this.rainOption.show = rainShow==1?true:false;
-      this.rainOption.scale = rainScale*0.1;
-      this.rainOption.opacity = rainOpacity*0.1;
+      function CharToBit(ch,encodeBit){
+        var code = ch.charCodeAt(0);
+        var value = 0;
+        if(code >= 48 && code < 58) value = code-48;
+        else if(code >= 97 && code < 97+26) value = code+10-97;
+        return g_Util.PadLeft(value.toString(2),encodeBit);
+      }
 
-      var waterLevelEncode = option.substr(8,8);
-      waterLevelEncode = parseInt(waterLevelEncode,16);
-      var waterLevelThresh = waterLevelEncode & 255;
-      var waterLevelShowRiver = (waterLevelEncode>>8) & 1;
-      var waterLevelShowDrain = (waterLevelEncode>>9) & 1;
-      var waterLevelShowAgri = (waterLevelEncode>>10) & 1;
-      var waterLevelShowSewer = (waterLevelEncode>>11) & 1;
-      var waterLevelScale = (waterLevelEncode>>12) & 255;
-      var waterLevelOpacity = (waterLevelEncode>>20) & 255;
-      this.waterLevelOption.thresh = waterLevelThresh;
-      this.waterLevelOption.showRiver = waterLevelShowRiver==1?true:false;
-      this.waterLevelOption.showDrain = waterLevelShowDrain==1?true:false;
-      this.waterLevelOption.showAgri = waterLevelShowAgri==1?true:false;
-      this.waterLevelOption.showSewer = waterLevelShowSewer==1?true:false;
-      this.waterLevelOption.scale = waterLevelScale*0.1;
-      this.waterLevelOption.opacity = waterLevelOpacity*0.1;
+      function StringToValueArr(str,bitNumArr){
+        var encodeBit = 5;
+        //console.log("str: "+str);
+        var valueHash = {};
+        var bitArr = "";
+        for(var i=str.length-1;i>=0;i--){
+          var ch = str[i];
+          bitArr = CharToBit(ch,encodeBit)+bitArr;
+        }
+        //console.log("bitArr: "+bitArr);
+        var index = bitArr.length-1;
+        for(var i=0;i<bitNumArr.length;i++){
+          var bitNum = bitNumArr[i].bitNum;
+          var valueName = bitNumArr[i].name;
+          var binaryValue = bitArr.substr(index-bitNum+1,index);
+          //console.log("binary value:"+binaryValue);
+          var value = 0;
+          for(var j=0;j<bitNum;j++){
+            value = (value<<1)+parseInt(binaryValue[j]);
+          }
+          valueHash[valueName] = value;
+          index-=bitNum;
+        }
+        return valueHash;
+      }
+      /*//test, should be {test1:16,test2:1,test3:3}
+      var str = "1og";
+      var bitNumArr = [
+        {name:"test1",bitNum:8},
+        {name:"test2",bitNum:1},
+        {name:"test3",bitNum:4}
+      ];
+      console.log(StringToValueArr(str,bitNumArr));*/
 
-      var reservoirEncode = option.substr(16,8);
-      reservoirEncode = parseInt(reservoirEncode,16);
-      var reservoirShow = reservoirEncode & 1;
-      var reservoirScale = (reservoirEncode>>1) & 255;
-      var reservoirOpacity = (reservoirEncode>>9) & 255;
-      this.reservoirOption.show = reservoirShow==1?true:false;
-      this.reservoirOption.scale = reservoirScale*0.1;
-      this.reservoirOption.opacity = reservoirOpacity*0.1;
+      var bitNumArr = [];
+      //rain option
+      bitNumArr.push({name:"rainCollapse",bitNum:1});
+      bitNumArr.push({name:"rainOpacity",bitNum:8});
+      bitNumArr.push({name:"rainScale",bitNum:8});
+      bitNumArr.push({name:"rainShow",bitNum:1});
+      bitNumArr.push({"name":"rainType",bitNum:4});
 
-      var floodEncode = option.substr(24,8);
-      floodEncode = parseInt(floodEncode,16);
-      var floodShow = floodEncode & 1;
-      var floodScale = (floodEncode>>1) & 255;
-      var floodOpacity = (floodEncode>>9) & 255;
-      this.floodOption.show = floodShow==1?true:false;
-      this.floodOption.scale = floodScale*0.1;
-      this.floodOption.opacity = floodOpacity*0.1;
+      //water level option
+      bitNumArr.push({name:"waterLevelCollapse",bitNum:1});
+      bitNumArr.push({name:"waterLevelOpacity",bitNum:8});
+      bitNumArr.push({name:"waterLevelScale",bitNum:8});
+      bitNumArr.push({name:"waterLevelShowRiver",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowDrain",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowAgri",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowSewer",bitNum:1});
+      bitNumArr.push({name:"waterLevelThresh",bitNum:8});
 
-      var typhoonEncode = option.substr(32,8);
-      typhoonEncode = parseInt(typhoonEncode,16);
-      var typhoonShow = typhoonEncode & 1;
-      var typhoonOpacity = (typhoonEncode>>1) & 255;
-      this.typhoonTrajectoryOption.show = typhoonShow==1?true:false;
-      this.typhoonTrajectoryOption.opacity = typhoonOpacity*0.1;
+      //reservoir option
+      bitNumArr.push({name:"reservoirCollapse",bitNum:1});
+      bitNumArr.push({name:"reservoirOpacity",bitNum:8});
+      bitNumArr.push({name:"reservoirScale",bitNum:8});
+      bitNumArr.push({name:"reservoirShow",bitNum:1});
 
-      var alertEncode = option.substr(40,8);
-      alertEncode = parseInt(alertEncode,16);
-      var alertShowTyphoon = alertEncode & 1;
-      var alertShowThunderstorm = (alertEncode>>1) & 1;
-      var alertShowDebrisFlow = (alertEncode>>2) & 1;
-      var alertShowWater = (alertEncode>>3) & 1;
-      var alertShowHighWater = (alertEncode>>4) & 1;
-      var alertShowReservoirDis = (alertEncode>>5) & 1;
-      var alertShowFlow = (alertEncode>>6) & 1;
-      var alertShowRainFall = (alertEncode>>7) & 1;
-      var alertOpacity = (alertEncode>>8) & 255;
-      var alertSeverity = (alertEncode>>16) & 15;
-      var alertCertainty = (alertEncode>>20) & 15;
-      this.alertOption.showTyphoon = alertShowTyphoon;
-      this.alertOption.showThunderstorm = alertShowThunderstorm;
-      this.alertOption.showDebrisFlow = alertShowDebrisFlow;
-      this.alertOption.showWater = alertShowWater;
-      this.alertOption.showHighWater = alertShowHighWater;
-      this.alertOption.showReservoirDis = alertShowReservoirDis;
-      this.alertOption.showFlow = alertShowFlow;
-      this.alertOption.showRainFall = alertShowRainFall;
-      this.alertOption.opacity = alertOpacity*0.1;
-      this.alertOption.severity = this.opAlertSeverity[alertSeverity].value;
-      this.alertOption.certainty = this.opAlertCertainty[alertCertainty].value;
+      //flood option
+      bitNumArr.push({name:"floodCollapse",bitNum:1});
+      bitNumArr.push({name:"floodOpacity",bitNum:8});
+      bitNumArr.push({name:"floodScale",bitNum:8});
+      bitNumArr.push({name:"floodShow",bitNum:1});
+      bitNumArr.push({name:"floodThresh",bitNum:8});
 
-      var mapEncode = option.substr(48,8);
-      mapEncode = parseInt(mapEncode,16);
-      var mapUseSatellite = mapEncode & 1;
-      var mapPlaySpeed = (mapEncode>>1) & 255;
-      var mapType = (mapEncode>>9) & 15;
-      this.mapOption.useSatellite = mapUseSatellite==1?true:false;
-      this.mapOption.playSpeed = mapPlaySpeed;
-      this.mapOption.mapType = this.opMapType[mapType].value;
+      //typhoon option
+      bitNumArr.push({name:"typhoonCollapse",bitNum:1});
+      bitNumArr.push({name:"typhoonOpacity",bitNum:8});
+      bitNumArr.push({name:"typhoonShow",bitNum:1});
 
-      var waterUseEncode = option.substr(56,11);
-      this.waterUse.DecodeOptionString(waterUseEncode);
+      //alert option
+      bitNumArr.push({name:"alertCollapse",bitNum:1});
+      bitNumArr.push({name:"alertCertainty",bitNum:4});
+      bitNumArr.push({name:"alertSeverity",bitNum:4});
+      bitNumArr.push({name:"alertOpacity",bitNum:8});
+      bitNumArr.push({name:"alertShowRainFall",bitNum:1});
+      bitNumArr.push({name:"alertShowFlow",bitNum:1});
+      bitNumArr.push({name:"alertShowReservoirDis",bitNum:1});
+      bitNumArr.push({name:"alertShowHighWater",bitNum:1});
+      bitNumArr.push({name:"alertShowWater",bitNum:1});
+      bitNumArr.push({name:"alertShowDebrisFlow",bitNum:1});
+      bitNumArr.push({name:"alertShowThunderstorm",bitNum:1});
+      bitNumArr.push({name:"alertShowTyphoon",bitNum:1});
+
+      //elevation option
+      bitNumArr.push({name:"elevCollapse",bitNum:1});
+      bitNumArr.push({name:"elevShow",bitNum:1});
+      bitNumArr.push({name:"elevOpacity",bitNum:8});
+      bitNumArr.push({name:"elevMin",bitNum:12});
+      bitNumArr.push({name:"elevMax",bitNum:12});
+
+      //map option
+      bitNumArr.push({name:"mapCollapse",bitNum:1});
+      bitNumArr.push({name:"mapType",bitNum:4});
+      bitNumArr.push({name:"mapPlaySpeed",bitNum:8});
+      bitNumArr.push({name:"mapUseSatellite",bitNum:1});
+
+      var waterUseArr = this.waterUse.GetBitNumArr();
+      bitNumArr = bitNumArr.concat(waterUseArr);
+
+      var valueArr = StringToValueArr(option,bitNumArr);
+      //console.log(valueArr);
+
+      this.rainOption.collapse = valueArr["rainCollapse"]==1?true:false;
+      this.rainOption.opacity = valueArr["rainOpacity"]*0.1;
+      this.rainOption.scale = valueArr["rainScale"]*0.1;
+      this.rainOption.show = valueArr["rainShow"]==1?true:false;
+      this.rainOption.type = this.opRainType[valueArr["rainType"]].value;
+
+      this.waterLevelOption.collapse = valueArr["waterLevelCollapse"]==1?true:false;
+      this.waterLevelOption.opacity = valueArr["waterLevelOpacity"]*0.1;
+      this.waterLevelOption.scale = valueArr["waterLevelScale"]*0.1;
+      this.waterLevelOption.showRiver = valueArr["waterLevelShowRiver"]==1?true:false;
+      this.waterLevelOption.showDrain = valueArr["waterLevelShowDrain"]==1?true:false;
+      this.waterLevelOption.showAgri = valueArr["waterLevelShowAgri"]==1?true:false;
+      this.waterLevelOption.showSewer = valueArr["waterLevelShowSewer"]==1?true:false;
+      this.waterLevelOption.thresh = valueArr["waterLevelThresh"];
+
+      this.reservoirOption.collapse = valueArr["reservoirCollapse"]==1?true:false;
+      this.reservoirOption.opacity = valueArr["reservoirOpacity"]*0.1;
+      this.reservoirOption.scale = valueArr["reservoirScale"]*0.1;
+      this.reservoirOption.show = valueArr["reservoirShow"]==1?true:false;
+
+      this.floodOption.collapse = valueArr["floodCollapse"]==1?true:false;
+      this.floodOption.opacity = valueArr["floodOpacity"]*0.1;
+      this.floodOption.scale = valueArr["floodScale"]*0.1;
+      this.floodOption.show = valueArr["floodShow"]==1?true:false;
+      this.floodOption.thresh = valueArr["floodThresh"];
+
+      this.typhoonTrajectoryOption.collapse = valueArr["typhoonCollapse"]==1?true:false;
+      this.typhoonTrajectoryOption.opacity = valueArr["typhoonOpacity"]*0.1;
+      this.typhoonTrajectoryOption.show = valueArr["floodShow"]==1?true:false;
+
+      this.alertOption.collapse = valueArr["alertCollapse"]==1?true:false;
+      this.alertOption.certainty = this.opAlertCertainty[valueArr["alertCertainty"]].value;
+      this.alertOption.severity = this.opAlertSeverity[valueArr["alertSeverity"]].value;
+      this.alertOption.opacity = valueArr["alertOpacity"]*0.1;
+      this.alertOption.showRainFall = valueArr["alertShowRainFall"]==1?true:false;
+      this.alertOption.showFlow = valueArr["alertShowFlow"]==1?true:false;
+      this.alertOption.showReservoirDis = valueArr["alertShowReservoirDis"]==1?true:false;
+      this.alertOption.showHighWater = valueArr["alertShowHighWater"]==1?true:false;
+      this.alertOption.showWater = valueArr["alertShowWater"]==1?true:false;
+      this.alertOption.showDebrisFlow = valueArr["alertShowDebrisFlow"]==1?true:false;
+      this.alertOption.showThunderstorm = valueArr["alertShowThunderstorm"]==1?true:false;
+      this.alertOption.showTyphoon = valueArr["alertShowTyphoon"]==1?true:false;
+
+      this.elevOption.collapse = valueArr["elevCollapse"]==1?true:false;
+      this.elevOption.show = valueArr["elevShow"]==1?true:false;
+      this.elevOption.opacity = valueArr["elevOpacity"]*0.1;
+      this.elevOption.minElev = valueArr["elevMin"];
+      this.elevOption.maxElev = valueArr["elevMax"];
+
+      this.mapOption.collapse = valueArr["mapCollapse"]==1?true:false;
+      this.mapOption.mapType = this.opMapType[valueArr["mapType"]].value;
+      this.mapOption.playSpeed = valueArr["mapPlaySpeed"];
+      this.mapOption.useSatellite = valueArr["mapUseSatellite"]==1?true:false;
+
+      this.waterUse.RestoreOption(valueArr);
     },
     CopySpaceTimeUrl: function(){
       var url = $("link[rel='canonical']").attr("href");

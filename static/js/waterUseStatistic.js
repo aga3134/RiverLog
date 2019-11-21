@@ -1964,58 +1964,42 @@ WaterUseStatistic.prototype.UpdateReservoirDetail = function(){
 
 };
 
-WaterUseStatistic.prototype.EncodeOptionString = function(){
-	function OpValueToIndex(opArr, value){
-    var index = 0;
-    for(var i=0;i<opArr.length;i++){
-      var op = opArr[i];
-      if(value == op.value){
-        index = i&15;
-      }
-    }
-    return index;
-	}
-	var waterUseType = OpValueToIndex(this.opType, this.type);
-	var agricultureType = OpValueToIndex(this.opAgricultureType, this.agricultureData.type);
-	var cultivationType = OpValueToIndex(this.opCultivationType, this.cultivationData.type);
-	var livestockType = OpValueToIndex(this.opLivestockType, this.livestockData.type);
-	var industryType = OpValueToIndex(this.opIndustryType, this.industryData.type);
-	var livingType = OpValueToIndex(this.opLivingType, this.livingData.type);
-	var reservoirType = OpValueToIndex(this.opReservoirType, this.reservoirData.type);
-	var year = (this.year-1911) & 255;
-	var playSpeed = this.playSpeed & 255;
-
-	var waterUseEncode = "";
-	waterUseEncode += g_Util.PadLeft(waterUseType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(agricultureType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(cultivationType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(livestockType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(industryType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(livingType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(reservoirType.toString(16),1);
-	waterUseEncode += g_Util.PadLeft(year.toString(16),2);
-	waterUseEncode += g_Util.PadLeft(playSpeed.toString(16),2);
-  return waterUseEncode;
+WaterUseStatistic.prototype.GetEncodeOptionArr = function(){
+	var arr = [];
+	arr.push({value: g_APP.OpValueToIndex(this.opType, this.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opAgricultureType, this.agricultureData.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opCultivationType, this.cultivationData.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opLivestockType, this.livestockData.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opIndustryType, this.industryData.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opLivingType, this.livingData.type), bitNum: 4});
+	arr.push({value: g_APP.OpValueToIndex(this.opReservoirType, this.reservoirData.type), bitNum: 4});
+	arr.push({value: (this.year-1911), bitNum: 8});
+	arr.push({value: this.playSpeed, bitNum: 8});
+	return arr;
 };
 
-WaterUseStatistic.prototype.DecodeOptionString = function(option){
-  var waterUseType = parseInt(option[0],16) & 15;
-  var agricultureType = parseInt(option[1],16) & 15;
-  var cultivationType = parseInt(option[2],16) & 15;
-  var livestockType = parseInt(option[3],16) & 15;
-  var industryType = parseInt(option[4],16) & 15;
-  var livingType = parseInt(option[5],16) & 15;
-  var reservoirType = parseInt(option[6],16) & 15;
-  var year = parseInt(option.substr(7,2),16) & 255;
-  var playSpeed = parseInt(option.substr(9,2),16) & 255;
+WaterUseStatistic.prototype.GetBitNumArr = function(){
+	var arr = [];
+	arr.push({name:"waterUseType",bitNum:4});
+	arr.push({name:"waterUseAgricultureType",bitNum:4});
+	arr.push({name:"waterUseCultivationType",bitNum:4});
+	arr.push({name:"waterUseLivestockType",bitNum:4});
+	arr.push({name:"waterUseIndustryType",bitNum:4});
+	arr.push({name:"waterUseLivingType",bitNum:4});
+	arr.push({name:"waterUseReservoirType",bitNum:4});
+	arr.push({name:"waterUseYear",bitNum:8});
+	arr.push({name:"waterUsePlaySpeed",bitNum:8});
+	return arr;
+};
 
-  this.type = this.opType[waterUseType].value;
-  this.agricultureData.type = this.opAgricultureType[agricultureType].value;
-  this.cultivationData.type = this.opCultivationType[cultivationType].value;
-  this.livestockData.type = this.opLivestockType[livestockType].value;
-  this.industryData.type = this.opIndustryType[industryType].value;
-  this.livingData.type = this.opLivingType[livingType].value;
-  this.reservoirData.type = this.opReservoirType[reservoirType].value;
-  this.year = year + 1911;
-  this.playSpeed = playSpeed;
+WaterUseStatistic.prototype.RestoreOption = function(valueArr){
+  this.type = this.opType[valueArr["waterUseType"]].value;
+  this.agricultureData.type = this.opAgricultureType[valueArr["waterUseAgricultureType"]].value;
+  this.cultivationData.type = this.opCultivationType[valueArr["waterUseCultivationType"]].value;
+  this.livestockData.type = this.opLivestockType[valueArr["waterUseLivestockType"]].value;
+  this.industryData.type = this.opIndustryType[valueArr["waterUseIndustryType"]].value;
+  this.livingData.type = this.opLivingType[valueArr["waterUseLivingType"]].value;
+  this.reservoirData.type = this.opReservoirType[valueArr["waterUseReservoirType"]].value;
+  this.year = valueArr["waterUseYear"] + 1911;
+  this.playSpeed = valueArr["waterUsePlaySpeed"];
 };
