@@ -25,7 +25,7 @@ fc.GetData = function(param){
 	var date = new Date(param.date);
 	var t = Util.DateToDateString(date,"");
 	var Flood = mongoose.model("flood"+t, FloodSchema);
-	Flood.find(query, {_id: 0,__v: 0}).lean().exec(function(err, data){
+	Flood.find(query, {_id: 0,__v: 0}).exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});

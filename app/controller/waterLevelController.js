@@ -43,7 +43,7 @@ wlc.GetData = function(param){
 		var date = new Date(param.date);
 		var t = Util.DateToDateString(date,"");
 		var WaterLevel = mongoose.model("waterLevel"+t, WaterLevelSchema);
-		WaterLevel.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
+		WaterLevel.find(query, {_id: 0, __v: 0}).exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -75,7 +75,7 @@ wlc.GridData = function(param){
 		query.$and = condition;
 	}
 	var WaterLevelGrid = mongoose.model('waterLevelGrid'+t, WaterLevelGridSchema);
-	WaterLevelGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
+	WaterLevelGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});
