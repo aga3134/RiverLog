@@ -146,7 +146,7 @@ class WeatherData:
                         self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
                 
-                        self.grid.AddGridRain(d)
+                        #self.grid.AddGridRain(d)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
