@@ -62,6 +62,6 @@ if __name__ == "__main__":
         endDate = args[3]
         weather.GenGridFromDB(startDate,endDate)
 
-    if args[1] == "elevation":
+    if args[1] == "elev":
         folder = args[2]
         elevation.CollectDataFromFolder(folder)
