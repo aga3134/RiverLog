@@ -168,7 +168,7 @@ class WeatherData:
                     self.db["rainDailySum"].bulk_write(opDaily,ordered=False)
                 if len(op10min) > 0:
                     self.db["rain10minSum"].bulk_write(op10min,ordered=False)
-                self.grid.AddGridBatch("rainGrid"+dayStr,gridArr,"time",["now"],"lat","lon")
+                #self.grid.AddGridBatch("rainGrid"+dayStr,gridArr,"time",["now"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

@@ -339,7 +339,7 @@ class WaterData:
 
                 if len(ops) > 0:
                     self.db["waterLevel"+day].bulk_write(ops,ordered=False)
-                self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
+                #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevel(result["@iot.nextLink"])
@@ -418,7 +418,7 @@ class WaterData:
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
                 if len(ops) > 0:
                     self.db["waterLevel"+day].bulk_write(ops,ordered=False)
-                self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
+                #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -625,7 +625,7 @@ class WaterData:
                         gridArr.append(f)
                 if len(ops) > 0:
                     self.db["waterLevelDrain"+day].bulk_write(ops,ordered=False)
-                self.grid.AddGridBatch("waterLevelDrainGrid"+day,gridArr,"time",["value"],"lat","lng")
+                #self.grid.AddGridBatch("waterLevelDrainGrid"+day,gridArr,"time",["value"],"lat","lng")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelDrain(result["@iot.nextLink"])
@@ -684,7 +684,7 @@ class WaterData:
                         gridArr.append(f)
                 if len(ops) > 0:
                     self.db["waterLevelAgri"+day].bulk_write(ops,ordered=False)
-                self.grid.AddGridBatch("waterLevelAgriGrid"+day,gridArr,"time",["value"],"lat","lng")
+                #self.grid.AddGridBatch("waterLevelAgriGrid"+day,gridArr,"time",["value"],"lat","lng")
 
 
                 if "@iot.nextLink" in result:
@@ -783,7 +783,7 @@ class WaterData:
                             gridArr.append(f)
                 if len(ops) > 0:
                     self.db["sewer"+day].bulk_write(ops,ordered=False)
-                self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
+                #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
 
         except:
             print(sys.exc_info()[0])

@@ -5,6 +5,7 @@ class MapLayer{
       this.dataUrl = option.dataUrl;
       this.gridUrl = option.gridUrl;
       this.divideLatLng = option.divideLatLng;
+      this.divideStep = option.divideStep || 0.1;
 
       this.map = option.map;
       this.layer = {};
@@ -64,7 +65,7 @@ class MapLayer{
         var maxLat = bound.getNorthEast().lat();
         var maxLng = bound.getNorthEast().lng(); 
         
-        var step = 0.01*Math.pow(2,this.level);
+        var step = this.divideStep*Math.pow(2,this.level);
         minLat = Math.floor(minLat/step)*step;
         minLng = Math.floor(minLng/step)*step;
         maxLat = Math.ceil(maxLat/step)*step;

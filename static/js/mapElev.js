@@ -4,6 +4,7 @@ class MapElev extends MapLayer{
 		if(!option.divideLatLng) option.divideLatLng = true;
 		if(!option.gridPerUnit) option.gridPerUnit = 1000;
 		if(!option.levelNum) option.levelNum = 8;
+		if(!option.divideStep) option.divideStep = 0.01;
 		super(option);
 	}
 
