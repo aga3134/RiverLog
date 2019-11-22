@@ -73,7 +73,6 @@ MapControl.prototype.InitMap = function(param){
 
 MapControl.prototype.ChangeDate = function(){
   var date = g_APP.curYear+"-"+g_APP.curDate;
-  this.mapRain.ChangeDate(date);
   this.mapReservoir.ChangeDate(date);
   this.mapWaterLevel.ChangeDate(date);
   this.mapWaterLevelDrain.ChangeDate(date);
@@ -83,6 +82,7 @@ MapControl.prototype.ChangeDate = function(){
   this.mapTyphoon.ChangeDate(date);
   this.mapAlert.ChangeDate(date);
   this.mapElev.ChangeDate(date);
+  this.mapRain.ChangeDate(date);
 }
 
 MapControl.prototype.ToggleSatellite = function(useSatellite){

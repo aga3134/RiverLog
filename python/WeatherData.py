@@ -135,6 +135,8 @@ class WeatherData:
                     key = {"stationID":d["stationID"],"time":d["time"]}
                     query = self.db["rain"+dayStr].find_one(key)
                     if query is None:
+                        self.db["rain"+dayStr].create_index("stationID")
+                        self.db["rain"+dayStr].create_index("time")
                         self.db["rain"+dayStr].insert_one(d)
                         inc = {}
                         loc = locHash[d["stationID"]]

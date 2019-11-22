@@ -5,6 +5,12 @@ class MapTyphoon extends MapLayer{
 		super(option);
 	}
 
+	LoadLayer(param){
+		if(!this.map) return;
+		if(!g_APP.typhoonTrajectoryOption.show) return;
+		MapLayer.prototype.LoadLayer.call(this);
+	}
+
 	UpdateInfoWindow(d){
 		var str = "<p class='info-title'>"+d.cwb_typhoon_name+"颱風</p>";
 	    str += "<p>近中心最大風速: "+d.max_wind_speed+" m/s</p>";

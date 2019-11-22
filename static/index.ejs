@@ -32,8 +32,8 @@
 			<div class="topbar">
 				<a href="/">
 					<img class="logo" src="/static/Image/logo-text.png">
+					<img class="logo-mobile" src="/static/Image/logo.png">
 				</a>
-				<img class="logo-mobile" src="/static/Image/logo.png">
 				<select v-model="mapOption.mapType" v-on:change="UpdateMapType();">
 					<option v-for="op in opMapType" v-bind:value="op.value">{{op.name}}</option>
 				</select>

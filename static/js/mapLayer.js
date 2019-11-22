@@ -110,10 +110,13 @@ class MapLayer{
       }
       else{
         var pos = "0-0";
+        
         if(pos in data){
           this.DrawLayer(data[pos]);
         }
-        else this.LoadLayer(param);
+        else{
+          this.LoadLayer(param);
+        }
       }
       
     }
@@ -200,10 +203,12 @@ class MapLayer{
       var daily = this.data.daily;
       
       $.get(url, function(result){
+        console.log(result);
         if(result.status != "ok") return;
         var pos = "";
         if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
         else pos = "0-0";
+        if(!data[pos]) data[pos] = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
           if(!d[this.timeKey]){
@@ -213,10 +218,9 @@ class MapLayer{
           var m = t.minute()-t.minute()%10;
           t = t.minute(m).second(0).format("HH:mm:ss");
           d[this.timeKey] = t;
-          if(!data[pos]) data[pos] = {};
+          
           if(!data[pos][t]) data[pos][t] = [];
           data[pos][t].push(d);
-
           var s = d[this.dataSiteKey];
           if(!daily[s]) daily[s] = [];
           daily[s].push(d);
@@ -247,6 +251,7 @@ class MapLayer{
         var pos = "";
         if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
         else pos = "0-0";
+        if(!grid[pos]) grid[pos] = {};
         for(var i=0;i<data.length;i++){
           var d = data[i];
           if(!d[this.gridTimeKey]){
@@ -256,7 +261,7 @@ class MapLayer{
           var m = t.minute()-t.minute()%10;
           t = t.minute(m).second(0).format("HH:mm:ss");
           d[this.gridTimeKey] = t;
-          if(!grid[pos]) grid[pos] = {};
+          
           if(!grid[pos][t]) grid[pos][t] = [];
           grid[pos][t].push(d);
         }

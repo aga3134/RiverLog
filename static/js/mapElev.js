@@ -7,6 +7,12 @@ class MapElev extends MapLayer{
 		super(option);
 	}
 
+	LoadGrid(param){
+		if(!this.map) return;
+		if(!g_APP.elevOption.show) return;
+		MapLayer.prototype.LoadGrid.call(this);
+	}
+
     GetLevel(){
       if(!this.map) return this.levelNum-1;
       var zoom = this.map.getZoom();

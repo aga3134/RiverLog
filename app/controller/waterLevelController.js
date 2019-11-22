@@ -23,31 +23,41 @@ wlc.GetData = function(param){
 	if(param.maxLat) condition.push({'lat': {$lte: param.maxLat}});
 	if(param.minLng) condition.push({'lon': {$gte: param.minLng}});
 	if(param.maxLng) condition.push({'lon': {$lte: param.maxLng}});
+
+	var date = new Date(param.date);
+	var t = Util.DateToDateString(date,"");
+	var WaterLevel = mongoose.model("waterLevel"+t, WaterLevelSchema);
+
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
+		WaterLevelStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
+			if(err) return param.failFunc({err:err});
+			
+			var idArr = [];
+			for(var i=0;i<sites.length;i++){
+				idArr.push(sites[i].BasinIdentifier);
+			}
+
+			var condition = [];
+			condition.push({StationIdentifier: {$in:idArr}});
+			var query   = {$and: condition};
+
+			
+			WaterLevel.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+				if(err) return param.failFunc({err:err});
+				param.succFunc(data);
+			});
+		});
 	}
-
-	WaterLevelStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
-		if(err) return param.failFunc({err:err});
-		
-		var idArr = [];
-		for(var i=0;i<sites.length;i++){
-			idArr.push(sites[i].BasinIdentifier);
-		}
-
-		var condition = [];
-		condition.push({StationIdentifier: {$in:idArr}});
-		var query   = {$and: condition};
-
-		var date = new Date(param.date);
-		var t = Util.DateToDateString(date,"");
-		var WaterLevel = mongoose.model("waterLevel"+t, WaterLevelSchema);
-		WaterLevel.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+	else{
+		WaterLevel.find({}, {_id: 0, __v: 0}).exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
-	});
+	}
+
+	
 }
 
 wlc.GridData = function(param){

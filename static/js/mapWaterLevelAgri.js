@@ -8,6 +8,12 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		super(option);
     }
 
+    LoadLayer(param){
+		if(!this.map) return;
+		if(!g_APP.waterLevelOption.showAgri) return;
+		MapLayer.prototype.LoadLayer.call(this);
+	}
+
     UpdateInfoWindow(d){
     	var str = "";
 		var loc = null;

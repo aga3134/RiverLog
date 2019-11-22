@@ -8,6 +8,12 @@ class MapReservoir extends MapLayer{
       super(option);
     }
 
+    LoadLayer(param){
+      if(!this.map) return;
+      if(!g_APP.reservoirOption.show) return;
+      MapLayer.prototype.LoadLayer.call(this);
+    }
+
     UpdateInfoWindow(d){
       var s = this.data.site[d.ReservoirIdentifier];
 	    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
@@ -29,7 +35,7 @@ class MapReservoir extends MapLayer{
 
     DrawLayer(data){
       if(!this.map) return;
-      if(!data) return;
+      if(!data || !g_APP.reservoirOption.show) return;
       var hour = g_APP.curTime.split(":")[0];
       var reservoirData = g_APP.GetDataFromTime(data,hour+":00");
       if(!reservoirData || !g_APP.reservoirOption.show) return;

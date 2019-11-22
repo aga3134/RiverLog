@@ -42,31 +42,39 @@ rc.GetData = function(param){
 	if(param.maxLat) condition.push({'lat': {$lte: param.maxLat}});
 	if(param.minLng) condition.push({'lon': {$gte: param.minLng}});
 	if(param.maxLng) condition.push({'lon': {$lte: param.maxLng}});
+
+	var date = new Date(param.date);
+	var t = Util.DateToDateString(date,"");
+	var Rain = mongoose.model("rain"+t, RainSchema);
+
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
+		RainStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
+			if(err) return param.failFunc({err:err});
+			
+			var idArr = [];
+			for(var i=0;i<sites.length;i++){
+				idArr.push(sites[i].stationID);
+			}
+
+			var condition = [];
+			condition.push({stationID: {$in:idArr}});
+			var query   = {$and: condition};
+			Rain.find(query, {_id:0,__v:0,hour12:0,hour24:0}).exec(function(err, data){
+				if(err) return param.failFunc({err:err});
+				param.succFunc(data);
+			});
+		});
 	}
-
-	RainStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
-		if(err) return param.failFunc({err:err});
-		
-		var idArr = [];
-		for(var i=0;i<sites.length;i++){
-			idArr.push(sites[i].stationID);
-		}
-
-		var condition = [];
-		condition.push({stationID: {$in:idArr}});
-		var query   = {$and: condition};
-
-		var date = new Date(param.date);
-		var t = Util.DateToDateString(date,"");
-		var Rain = mongoose.model("rain"+t, RainSchema);
-		Rain.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+	else{
+		Rain.find({}, {_id:0,__v:0,hour12:0,hour24:0}).exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
-	});
+	}
+
+	
 };
 
 rc.Get10minSum = function(param){
