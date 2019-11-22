@@ -19,6 +19,7 @@ import math
 from bs4 import BeautifulSoup
 from GridData import GridData
 import pytz
+import pymongo
 #using Asia/Taipei will cause offset to be +0806
 #taiwan = pytz.timezone('Asia/Taipei')
 taiwan = datetime.timezone(offset = datetime.timedelta(hours = 8))
@@ -126,18 +127,25 @@ class WeatherData:
                     
                 #print(dataArr)
                 #print(stationArr)
+                opSite = []
                 for s in stationArr:
                     key = {"stationID":s["stationID"]}
-                    self.db["rainStation"].update(key,s,upsert=True)
-                    
+                    #self.db["rainStation"].update(key,s,upsert=True)
+                    opSite.append((pymongo.UpdateOne(key, {"$set": s}, upsert=True)))
+                if len(opSite) > 0:
+                    self.db["rainStation"].bulk_write(opSite,ordered=False)
+
+                opData = []
+                opDaily = []
+                op10min = []
+                gridArr = []
                 for d in dataArr:
                     dayStr = d["time"].strftime('%Y%m%d')
                     key = {"stationID":d["stationID"],"time":d["time"]}
                     query = self.db["rain"+dayStr].find_one(key)
                     if query is None:
-                        self.db["rain"+dayStr].create_index("stationID")
-                        self.db["rain"+dayStr].create_index("time")
-                        self.db["rain"+dayStr].insert_one(d)
+                        #self.db["rain"+dayStr].insert_one(d)
+                        opData.append(pymongo.InsertOne(d))
                         inc = {}
                         loc = locHash[d["stationID"]]
                         area = util.LatToArea(loc["lat"])
@@ -145,10 +153,22 @@ class WeatherData:
                         inc[area+"Num"] = 1
                         tday = d["time"].replace(hour=0,minute=0,second=0)
                         t10min = d["time"].replace(minute=(d["time"].minute-d["time"].minute%10),second=0)
-                        self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
-                        self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
-                
+                        #self.db["rainDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
+                        #self.db["rain10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)
+                        opDaily.append(pymongo.UpdateOne({"time":tday}, {"$inc": inc}, upsert=True))
+                        op10min.append(pymongo.UpdateOne({"time":t10min}, {"$inc": inc}, upsert=True))
                         #self.grid.AddGridRain(d)
+                        gridArr.append(d)
+
+                self.db["rain"+dayStr].create_index("stationID")
+                self.db["rain"+dayStr].create_index("time")
+                if len(opData) > 0:
+                    self.db["rain"+dayStr].bulk_write(opData,ordered=False)
+                if len(opDaily) > 0:
+                    self.db["rainDailySum"].bulk_write(opDaily,ordered=False)
+                if len(op10min) > 0:
+                    self.db["rain10minSum"].bulk_write(op10min,ordered=False)
+                self.grid.AddGridBatch("rainGrid"+dayStr,gridArr,"time",["now"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -159,6 +179,7 @@ class WeatherData:
             with open(file,"r",encoding="utf8") as f:
                 soup = BeautifulSoup(f.read(), 'html.parser')
                 typhoon = soup.find_all("tropicalcyclone")
+                ops = []
                 for tp in typhoon:
                     for pos in tp.analysis_data.find_all("fix"):
                         data = {}
@@ -192,7 +213,10 @@ class WeatherData:
                         data["circle_of_15ms"] = util.ToFloat(pos.circle_of_15ms.radius.string)
                         data["circle_of_25ms"] = util.ToFloat(pos.circle_of_25ms.radius.string)
                         key = {"_id":data["_id"]}
-                        self.db["typhoon"].update(key,data,upsert=True)
+                        #self.db["typhoon"].update(key,data,upsert=True)
+                        ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
+                if len(ops) > 0:
+                    self.db["typhoon"].bulk_write(ops,ordered=False)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

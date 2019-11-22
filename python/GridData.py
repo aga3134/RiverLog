@@ -8,6 +8,7 @@ Created on Mon Oct 23 11:38:01 2017
 import datetime
 import math
 import pytz
+import pymongo
 #using Asia/Taipei will cause offset to be +0806
 #taiwan = pytz.timezone('Asia/Taipei')
 taiwan = datetime.timezone(offset = datetime.timedelta(hours = 8))
@@ -69,6 +70,7 @@ class GridData:
         self.AddGridData(table,d,timeKey,valueKey,latKey,lngKey)
 
     def AddGridData(self, table, d, timeKey, valueKey, latKey, lngKey):
+        ops = []
         for level in range(self.levelNum):
             scale = self.gridPerUnit/math.pow(2,level)
             gridX = int(d[lngKey]*scale)
@@ -79,7 +81,12 @@ class GridData:
             for v in valueKey:
                 inc[v+"Sum"] = d[v]
 
-            self.db[table].update(key,{"$inc": inc},upsert=True)
+            #self.db[table].update(key,{"$inc": inc},upsert=True)
+            ops.append(pymongo.UpdateOne(key, {"$inc": inc}, upsert=True))
+
+        self.db[table].create_index([("lev",1),("t",1),("x",1),("y",1)])
+        if len(ops) > 0:
+            self.db[table].bulk_write(ops,ordered=False)
         
     def AddGridBatch(self, table, arr, timeKey, valueKey, latKey, lngKey):
         batch = {}
@@ -109,10 +116,16 @@ class GridData:
                         batch[key][v+"Sum"] = d[v]
 
         print("batch num: "+ str(len(batch)))
+        ops = []
         for key in batch:
             d = batch[key]
             key = {"lev":d["lev"],"t":d["t"],"x":d["x"],"y":d["y"]}
             inc = {"num":d["num"],"latSum":d["latSum"],"lngSum":d["lngSum"]}
             for v in valueKey:
                 inc[v+"Sum"] = d[v+"Sum"]
-            self.db[table].update(key,{"$inc": inc},upsert=True)
+            #self.db[table].update(key,{"$inc": inc},upsert=True)
+            ops.append(pymongo.UpdateOne(key, {"$inc": inc}, upsert=True))
+
+        self.db[table].create_index([("lev",1),("t",1),("x",1),("y",1)])
+        if len(ops) > 0:
+            self.db[table].bulk_write(ops,ordered=False)

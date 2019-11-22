@@ -11,7 +11,7 @@ class MapWaterLevel extends MapLayer{
     LoadLayer(param){
 		if(!this.map) return;
 		if(!g_APP.waterLevelOption.showRiver) return;
-		MapLayer.prototype.LoadLayer.call(this);
+		MapLayer.prototype.LoadLayer.call(this,param);
 	}
 
     UpdateInfoWindow(d){

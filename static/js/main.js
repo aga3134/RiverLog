@@ -49,7 +49,7 @@ var g_APP = new Vue({
       showThunderstorm:false,
       showTyphoon:false
     },
-    elevOption:{collapse:false,opacity:0.5, show:false, minElev:0, maxElev:4000},
+    elevOption:{collapse:false,opacity:0.6, show:false, minElev:0, maxElev:100},
     mapOption: {
       collapse:false,
       mapType: "waterEvent",
@@ -139,7 +139,7 @@ var g_APP = new Vue({
         .range(this.color.floodRange);
 
       this.color.elevDomain = [0,1];
-      this.color.elevRange = ["#0099FF","#8FD2FF"];
+      this.color.elevRange = ["#8FD2FF","#00426E"];
       this.color.elev = d3.scale.linear()
         .domain(this.color.elevDomain)
         .range(this.color.elevRange);

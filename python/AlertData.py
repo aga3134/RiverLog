@@ -15,6 +15,7 @@ import util
 import os
 from bs4 import BeautifulSoup
 import ssl
+import pymongo
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -98,6 +99,8 @@ class AlertData:
                 id = soup.identifier.string
                 day = (soup.sent.string.split("T")[0]).replace("-","")
                 infoArr = soup.find_all("info")
+                opData = []
+                opStatistic = []
                 for i,info in enumerate(infoArr):
                     data = {}
                     data["_id"] = id+"_"+str(i)
@@ -150,7 +153,8 @@ class AlertData:
                     for polygon in info.find_all("polygon"):
                         data["polygon"].append(polygon.string)
 
-                    self.db["alert"+day].insert_one(data)
+                    #self.db["alert"+day].insert_one(data)
+                    opData.append(pymongo.InsertOne(data))
 
                     #add to daily statistic
                     sta = {}
@@ -160,8 +164,13 @@ class AlertData:
                     tday = t.replace(hour=0, minute=0,second=0)
                     inc = {}
                     inc[data["eventcode"]] = 1
-                    self.db["alertStatistic"].update({"time":tday},{"$inc":inc},upsert=True)
-                
+                    #self.db["alertStatistic"].update({"time":tday},{"$inc":inc},upsert=True)
+                    opStatistic.append(pymongo.UpdateOne({"time":tday}, {"$inc":inc}, upsert=True))
+                if len(opData) > 0:
+                    self.db["alert"+day].bulk_write(opData,ordered=False)
+                if len(opStatistiic) > 0:
+                    self.db["alertStatistic"].bulk_write(opStatistic,ordered=False)
+
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

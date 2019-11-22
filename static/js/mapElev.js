@@ -10,7 +10,7 @@ class MapElev extends MapLayer{
 	LoadGrid(param){
 		if(!this.map) return;
 		if(!g_APP.elevOption.show) return;
-		MapLayer.prototype.LoadGrid.call(this);
+		MapLayer.prototype.LoadGrid.call(this,param);
 	}
 
     GetLevel(){
@@ -40,6 +40,7 @@ class MapElev extends MapLayer{
 		if(!data || !g_APP.elevOption.show) return;
 
 		var elevData = data["00:00:00"];
+		if(!elevData) return;
 		for(var i=0;i<elevData.length;i++){
 			var d = elevData[i];
 			var map = this.map;

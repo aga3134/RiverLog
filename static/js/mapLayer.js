@@ -4,7 +4,7 @@ class MapLayer{
       this.siteUrl = option.siteUrl;
       this.dataUrl = option.dataUrl;
       this.gridUrl = option.gridUrl;
-      this.divideLatLng = option.divide;
+      this.divideLatLng = option.divideLatLng;
 
       this.map = option.map;
       this.layer = {};
@@ -64,7 +64,7 @@ class MapLayer{
         var maxLat = bound.getNorthEast().lat();
         var maxLng = bound.getNorthEast().lng(); 
         
-        var step = 0.1*Math.pow(2,level);
+        var step = 0.01*Math.pow(2,this.level);
         minLat = Math.floor(minLat/step)*step;
         minLng = Math.floor(minLng/step)*step;
         maxLat = Math.ceil(maxLat/step)*step;
@@ -203,7 +203,6 @@ class MapLayer{
       var daily = this.data.daily;
       
       $.get(url, function(result){
-        console.log(result);
         if(result.status != "ok") return;
         var pos = "";
         if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;

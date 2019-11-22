@@ -8,6 +8,7 @@ Created on Mon Oct 23 11:38:01 2017
 import util
 import math
 import os
+import pymongo
 
 class ElevationData:
     def __init__(self, db):
@@ -16,8 +17,9 @@ class ElevationData:
         self.gridPerUnit = 1000
 
     def CollectDataFromFolder(self,folder):
+        count = 0
         for filename in os.listdir(folder):
-            print("process "+folder+"/"+filename)
+            print(str(count)+" process "+folder+"/"+filename)
             with open(folder+"/"+filename, 'r') as f:
                 lines = f.readlines()
                 batch = {}
@@ -47,9 +49,10 @@ class ElevationData:
                                 "elevSum":d["elev"]
                             }
                 self.AddGridBatch(batch)
-                
+            count += 1    
 
     def AddGridData(self, d):
+        ops = []
         for level in range(self.levelNum):
             scale = self.gridPerUnit/math.pow(2,level)
             gridX = int(d["lng"]*scale)
@@ -57,12 +60,21 @@ class ElevationData:
 
             key = {"lev":level,"x":gridX,"y":gridY}
             inc = {"num":1,"elevSum":d["elev"]}
-            self.db["elevGrid"].update(key,{"$inc": inc},upsert=True)
+            #self.db["elevGrid"].update(key,{"$inc": inc},upsert=True)
+            ops.append(pymongo.UpdateOne(key, {"$inc": inc}, upsert=True))
+        self.db["elevGrid"].create_index([("lev",1),("x",1),("y",1)])
+        if len(ops) > 0:
+            self.db["elevGrid"].bulk_write(ops,ordered=False)
 
     def AddGridBatch(self,batch):
+        ops = []
         for batchKey in batch:
             d = batch[batchKey]
             key = {"lev":d["lev"],"x":d["x"],"y":d["y"]}
             inc = {"num":d["num"],"elevSum":d["elevSum"]}
-            self.db["elevGrid"].update(key,{"$inc": inc},upsert=True)
+            #self.db["elevGrid"].update(key,{"$inc": inc},upsert=True)
+            ops.append(pymongo.UpdateOne(key, {"$inc": inc}, upsert=True))
+        self.db["elevGrid"].create_index([("lev",1),("x",1),("y",1)])
+        if len(ops) > 0:
+            self.db["elevGrid"].bulk_write(ops,ordered=False)
         
