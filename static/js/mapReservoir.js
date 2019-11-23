@@ -121,8 +121,8 @@ class MapReservoir extends MapLayer{
           for(var j=0;j<this.data.data[pos][t].length;j++){
             var r = this.data.data[pos][t][j];
             if(r){
-              prev[r[this.siteKey]] = r;
-              hasData[r[this.siteKey]] = true;
+              prev[r[this.dataSiteKey]] = r;
+              hasData[r[this.dataSiteKey]] = true;
             }
           }
           for(var key in prev){
