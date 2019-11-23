@@ -166,9 +166,9 @@ class MapWaterLevel extends MapLayer{
 				d.alertL3 = 0;
 				d.alertL2 = 0;
 				d.alertL1 = 0;
-				if(waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
-				else if(waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
-				else if(waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
+				if(s.AlertLevel1 && waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
+				else if(s.AlertLevel2 && waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
+				else if(s.AlertLevel3 && waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
 				clusterHash[key] = d;
 			}
 		}
@@ -248,9 +248,9 @@ class MapWaterLevel extends MapLayer{
 				}
 
 				var color = "#37cc00";
-				if(d.WaterLevel > s.AlertLevel3) color = "#ffcc00";
-				if(d.WaterLevel > s.AlertLevel2) color = "#ff6600";
-				if(d.WaterLevel > s.AlertLevel1) color = "#ff0000";
+				if(s.AlertLevel3 && d.WaterLevel > s.AlertLevel3) color = "#ffcc00";
+				if(s.AlertLevel2 && d.WaterLevel > s.AlertLevel2) color = "#ff6600";
+				if(s.AlertLevel1 && d.WaterLevel > s.AlertLevel1) color = "#ff0000";
 				
 				var clickFn = this.GenClickFn(cluster.data,i,"StationIdentifier");
 				this.DrawWaterLevel(sID,[d.diff],color,s.lat,s.lon,clickFn);
