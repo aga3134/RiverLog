@@ -83,12 +83,13 @@ WaterUseStatistic.prototype.InitMap = function(){
 	  		result[i].radius = 5;
 	  	}
 	    this.agricultureData.association = result;
-	}.bind(this));
 
-	d3.json("/static/geo/county_sim.json", function(data) {
-   	this.county = topojson.feature(data, data.objects["geo"]).features;
-		this.UpdateGraph();
+	    d3.json("/static/geo/county_sim.json", function(data) {
+	   	this.county = topojson.feature(data, data.objects["geo"]).features;
+			this.UpdateGraph();
+		}.bind(this));
 	}.bind(this));
+	
 };
 
 WaterUseStatistic.prototype.PrevYear = function(){
@@ -135,6 +136,8 @@ WaterUseStatistic.prototype.UpdatePlaySpeed = function(){
 };
 
 WaterUseStatistic.prototype.UpdateGraph = function(){
+	if(!this.county || !this.agricultureData.association) return this.InitMap();
+	
 	g_APP.UpdateUrl();
 	Vue.nextTick(function(){
 		switch(this.type){

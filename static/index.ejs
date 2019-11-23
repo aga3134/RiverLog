@@ -605,6 +605,7 @@
 					</div>
 					<div class="option-category">其他資訊</div>
 					<div class="option-item">
+						<div class="action-bt" v-on:click="window.open('https://fhy.wra.gov.tw/fhy/Disaster/AppAction','about:blank');">行動水情APP</div>
 						<div class="action-bt" v-on:click="window.open('http://eocdss.ncdr.nat.gov.tw/web/','about:blank');">災害情資網</div>
 						<div class="action-bt" v-on:click="window.open('https://dmap.ncdr.nat.gov.tw/%e4%b8%bb%e9%81%b8%e5%96%ae/%e5%9c%b0%e5%9c%96%e6%9f%a5%e8%a9%a2/gis%e6%9f%a5%e8%a9%a2/','about:blank');">災害潛勢地圖</div>
 						<div class="action-bt" v-on:click="window.open('https://gis3.moeacgs.gov.tw/gwh/gsb97-1/sys8/t3/index1.cfm','about:blank');">地質查詢</div>
@@ -620,7 +621,6 @@
 						<div v-if="mapOption.mapType == 'waterEvent' ">
 							<div class="content-title">圖示說明</div>
 							<ul>
-								<li>操作介面: <a href="" target="_blank">說明</a></li>
 								<li>日期與時間框<div class="time-block"></div>從上到下分成三個區塊，顏色分別代表台灣北中南部的日累積雨量平均值。</li>
 								<li>
 									<div class="content">
@@ -644,13 +644,16 @@
 
 								<li>
 									<div class="content">
-										河川水位: 水位持平以菱形
+										各類水位: 水位持平以菱形
 										<img class="content-icon" src="/static/Image/icon-water-level.png">
 										表示，水位若上升超過閥值設定則以向上箭頭
 										<img class="content-icon" src="/static/Image/icon-water-level-up.png">
 										表示，水位若下降超過閥值設定以向下箭頭
 										<img class="content-icon" src="/static/Image/icon-water-level-down.png">
-										表示。箭頭越長表示水位變化越大。顏色顯示意義如下：
+										表示。箭頭越長表示水位變化越大。
+										紫色水位<img class="content-icon" src="/static/Image/icon-water-level-drain.png">代表區域排水水位，
+										藍色水位<img class="content-icon" src="/static/Image/icon-water-level-agri.png">代表水利會水位。
+										河川水位顏色顯示意義如下：
 									</div>
 								</li>
 								<div class="h-scroll">
@@ -720,21 +723,41 @@
 									</div>
 								</li>
 
+								<li>
+									<div class="content">
+										高程資料: 顯示台灣高程基準(TWVD 2001)量測的台灣地理高度。調整最低顯示高度、最高顯示高度的數值可篩選出想顯示的高度區間(單位m)。顏色意義如下：
+									</div>
+								</li>
+								<div class="h-scroll">
+									<table>
+										<tr>
+											<td class="color-block" v-bind:style="{background: 'linear-gradient(90deg,'+color.elev(0)+','+color.elev(0.5)+')'}">&nbsp;</td>
+											<td class="color-block" v-bind:style="{background: 'linear-gradient(90deg,'+color.elev(0.5)+','+color.elev(1)+')'}">&nbsp;</td>
+										</tr>
+										<tr>
+											<td class="color-block">最低顯示高度</td>
+											<td class="color-block">最高顯示高度</td>
+										</tr>
+									</table>
+								</div>
+
 							</ul>
 							<div class="content-title">資料來源</div>
 							<ul>
 								<li>雨量: <a href="https://opendata.cwb.gov.tw/dataset/observation/O-A0002-001" target="_blank">氣象資料開放平台-雨量觀測資料</a></li>
 								<li>河川水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra.aspx" target="_blank">民生公共物聯網-河川水位資料</a>，<a href="http://fhy.wra.gov.tw/fhy/Monitor/Water" target="_blank">防災資訊服務網-即時水位</a></li>
+								<li>區域排水水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_regionaldrainage.aspx" target="_blank">民生公共物聯網-區域排水水位資料</a></li>
+								<li>水利會水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_pond_taoyuan.aspx" target="_blank">民生公共物聯網-桃園農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_kaohsiung.aspx" target="_blank">高雄農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_hsinchu.aspx" target="_blank">新竹農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_chianan.aspx" target="_blank">嘉南農田水利會水位</a></li>
 								<li>水庫水位: <a href="http://wise.wra.gov.tw/dataset/reservoirconditiondata" target="_blank">水資料分享站-水庫水情資料</a></li>
 								<li>淹水深度: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_flood.aspx" target="_blank">民生公共物聯網-淹水測站資料</a></li>
 								<li>颱風路徑: <a href="https://opendata.cwb.gov.tw/dataset/warning/W-C0034-005" target="_blank">氣象資料開放平台-熱帶氣旋路徑</a></li>
 								<li>災害警示: <a href="https://ci.taiwan.gov.tw/dsp/environmental_cap.aspx" target="_blank">民生公共物聯網-災害示警資料</a></li>
-								
 								<li>河川水位測站位置: <a href="http://wise.wra.gov.tw/dataset/riverstageobservatoryprofile" target="_blank">水資料分享站-河川水位測站站況</a></li>
 								<li>水庫基本資料: <a href="http://wise.wra.gov.tw/dataset/reservoirsinformation" target="_blank">水資料分享站-水庫基本資料</a></li>
 								<li>縣市界線: <a href="https://data.gov.tw/dataset/7442" target="_blank">政府資料開放平台-直轄市、縣市界線(TWD97經緯度)</a></li>
 								<li>鄉鎮界線: <a href="https://data.gov.tw/dataset/7441" target="_blank">政府資料開放平台-鄉鎮市區界線(TWD97經緯度)</a></li>
 								<li>土石流潛勢溪流位置: <a href="https://246.swcb.gov.tw/Service/OpenData" target="_blank">土石流防災資訊網-土石流潛勢溪流基本資料</a></li>
+								<li>高程資料: <a href="https://data.gov.tw/dataset/7507" target="_blank">內政部100公尺網格數值地形模型資料</a></li>
 							</ul>
 						</div>
 
@@ -774,9 +797,9 @@
 						</ul>
 						<div class="content-title">關於山河事件簿</div>
 						<ul>
-							<li>本專案為<a href="https://www.facebook.com/groups/LASSnet/" target="_blank">LASS社群</a>的水議題開源專案</li>
-							<li><a href="https://github.com/aga3134/RiverLog" target="_blank">網站開源程式碼</a></li>
+							<li>本專案為<a href="https://www.facebook.com/groups/LASSnet/" target="_blank">LASS社群</a>的水議題開源專案，感謝所有出力協助專案的朋友</li>
 							<li>參與2019年<a href="https://ci.taiwan.gov.tw/creativity/index.aspx" target="_blank">民生公共物聯網 資料應用競賽</a></li>
+							<li><a href="https://github.com/aga3134/RiverLog" target="_blank">網站開源程式碼</a></li>
 							<li><a href="https://agawork.tw/" target="_blank">其他專案</a></li>
 							<li>若您對本站有任何建議或合作需求，歡迎來信討論 aga3134@gmail.com</li>
 						</ul>

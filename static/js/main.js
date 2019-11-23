@@ -111,10 +111,10 @@ var g_APP = new Vue({
 
     this.mapControl = new MapControl();
     this.waterUse = new WaterUseStatistic();
-
     this.ParseParameter();
 
     google.maps.event.addDomListener(window, 'load', this.InitMap);
+
   },
   methods: {
     InitColor: function(){
@@ -144,28 +144,38 @@ var g_APP = new Vue({
         .domain(this.color.elevDomain)
         .range(this.color.elevRange);
     },
-    InitMap: function(){
-      if(this.mapControl){
-        var param = {
-          useSatellite: this.mapOption.useSatellite,
-          initLoc: this.initLoc,
-          succFunc: function(){
+    UpdateMapType: function(){
+      this.UpdateUrl();
+      switch(this.mapOption.mapType){
+        case "waterEvent":
+          Vue.nextTick(function(){
             this.ChangeYear(this.curYear);
-            this.searchBox = new google.maps.places.SearchBox(document.getElementById("placeSearch"));
-            google.maps.event.addListener(this.searchBox, 'places_changed', this.SearchPlace);
-          }.bind(this)
-        };
-        this.mapControl.InitMap(param);
+          }.bind(this));
+          break;
+        case "waterUse":
+          Vue.nextTick(function(){
+            this.waterUse.UpdateGraph();
+          }.bind(this));
+          break;
       }
-      if(this.waterUse){
-        this.waterUse.InitMap();
-      }
+    },
+    InitMap: function(){
+      var param = {
+        useSatellite: this.mapOption.useSatellite,
+        initLoc: this.initLoc,
+        succFunc: function(){
+          this.searchBox = new google.maps.places.SearchBox(document.getElementById("placeSearch"));
+          google.maps.event.addListener(this.searchBox, 'places_changed', this.SearchPlace);
+          this.UpdateMapType();
+        }.bind(this)
+      };
+      this.mapControl.InitMap(param);
     },
     SearchPlace: function() {
       var places = this.searchBox.getPlaces();
       if(places.length) {
         var loc = places[0].geometry.location;
-        this.mapControl.map.setZoom(12);
+        this.mapControl.map.setZoom(14);
         this.mapControl.map.panTo({lat: loc.lat(), lng:loc.lng()});
         this.UpdateMap();
       }
@@ -219,21 +229,6 @@ var g_APP = new Vue({
           break;
       }
       this.UpdateUrl();
-    },
-    UpdateMapType: function(){
-      this.UpdateUrl();
-      switch(this.mapOption.mapType){
-        case "waterEvent":
-          Vue.nextTick(function(){
-            this.UpdateMap();
-          }.bind(this));
-          break;
-        case "waterUse":
-          Vue.nextTick(function(){
-            this.waterUse.UpdateGraph();
-          }.bind(this));
-          break;
-      }
     },
     ChangeYear: function(year){
       this.curYear = year;
