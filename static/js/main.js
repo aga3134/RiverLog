@@ -517,13 +517,13 @@ var g_APP = new Vue({
     },
     UpdateMap: function(){
       this.UpdateUrl();
+      this.UpdateMapRain();
       this.UpdateMapWaterLevel();
       this.UpdateMapReservoir();
       this.UpdateMapFlood();
       this.UpdateMapAlert();
       this.UpdateMapTyphoon();
       this.UpdateMapElev();
-      this.UpdateMapRain();
       this.mapControl.UpdateLineChart();
     },
     GetDataFromTime: function(data,time){
