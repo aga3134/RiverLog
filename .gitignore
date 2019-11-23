@@ -2,6 +2,8 @@ config.json
 *.txt
 *.log
 *.map
+*.pyc
+*.out
 log/
 node_modules/
 imageSrc/
