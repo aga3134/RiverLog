@@ -148,9 +148,9 @@ class MapWaterLevel extends MapLayer{
 				d.num += 1;
 				d.latSum += s[latKey];
 				d.lngSum += s[lngKey];
-				if(waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
-				else if(waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
-				else if(waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
+				if(s.AlertLevel1 && waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
+				else if(s.AlertLevel2 && waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
+				else if(s.AlertLevel3 && waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
 			}
 			else{
 				var d = {};
