@@ -1,10 +1,10 @@
 
 class MapWaterLevel extends MapLayer{
     constructor(option){
-		if(!option.siteKey) option.siteKey = "BasinIdentifier";
-		if(!option.dataSiteKey) option.dataSiteKey = "StationIdentifier";
-		if(!option.timeKey) option.timeKey = "RecordTime";
-		if(!option.divideLatLng) option.divideLatLng = false;
+		if(option.siteKey == null) option.siteKey = "BasinIdentifier";
+		if(option.dataSiteKey == null) option.dataSiteKey = "StationIdentifier";
+		if(option.timeKey == null) option.timeKey = "RecordTime";
+		if(option.divideLatLng == null) option.divideLatLng = true;
 		super(option);
     }
 
@@ -21,7 +21,7 @@ class MapWaterLevel extends MapLayer{
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
 			var value = d.valueSum/d.num;
-			var diff = d.diffSum/d.num;
+			var diff = d.diff || (d.diffSum/d.num);
 			str = "<p>河川水位</p>";
 			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
 			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
@@ -258,5 +258,57 @@ class MapWaterLevel extends MapLayer{
 		}
 		
 	}
+
+	DrawGrid(data){
+		if(!this.map) return;
+		if(!data) return;
+
+		var offset = g_APP.TimeToOffset(g_APP.curTime);
+		offset -= 1;
+		if(offset < 0) offset = 0;
+		var preData = g_APP.GetDataFromTime(data,g_APP.OffsetToTime(offset));
+		var waterLevelData = g_APP.GetDataFromTime(data,g_APP.curTime);
+		if(!waterLevelData) return;
+
+
+		var preDataHash = {};
+		if(preData){
+			for(var i=0;i<preData.length;i++){
+				var key = preData[i].x+"-"+preData[i].y;
+				preDataHash[key] = preData[i];
+			}
+		}
+
+		for(var i=0;i<waterLevelData.length;i++){
+			var d = waterLevelData[i];
+			if(d.WaterLevelSum <= 0) continue;
+
+			var key = d.x+"-"+d.y;
+			d.diff = 0;
+			if(preDataHash[key]){
+				if(preDataHash[key].WaterLevelSum && d.WaterLevelSum){
+					var now = d.WaterLevelSum/d.num;
+					var preNow = preDataHash[key].WaterLevelSum/preDataHash[key].num;
+					d.diff = now-preNow;
+				}
+			}
+
+			//info window有打開，更新資訊
+			if(this.map && this.infoTarget == key){
+				this.UpdateInfoWindow(d);
+			}
+
+			var lat = d.latSum/d.num;
+			var lng = d.lngSum/d.num;
+			
+			var clickFn = this.GenClickFn(waterLevelData,i,key);
+			var color = "#37cc00";
+			if(d.alertL3 > 0) color = "#ffcc00";
+			if(d.alertL2 > 0) color = "#ff6600";
+			if(d.alertL1 > 0) color = "#ff0000";
+			this.DrawWaterLevel(key,[d.diff],color,lat,lng,clickFn);
+
+		}
+    }
 
 }

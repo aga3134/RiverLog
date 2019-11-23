@@ -1,10 +1,10 @@
 
 class MapReservoir extends MapLayer{
     constructor(option){
-    	if(!option.siteKey) option.siteKey = "id";
-    	if(!option.dataSiteKey) option.dataSiteKey = "ReservoirIdentifier";
-    	if(!option.timeKey) option.timeKey = "ObservationTime";
-    	if(!option.divideLatLng) option.divideLatLng = false;
+    	if(option.siteKey == null) option.siteKey = "id";
+    	if(option.dataSiteKey == null) option.dataSiteKey = "ReservoirIdentifier";
+    	if(option.timeKey == null) option.timeKey = "ObservationTime";
+    	if(option.divideLatLng == null) option.divideLatLng = false;
       super(option);
     }
 

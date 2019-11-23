@@ -5,7 +5,7 @@ class MapLayer{
       this.dataUrl = option.dataUrl;
       this.gridUrl = option.gridUrl;
       this.divideLatLng = option.divideLatLng;
-      this.divideStep = option.divideStep || 0.1;
+      this.divideStep = option.divideStep || 1;
 
       this.map = option.map;
       this.layer = {};
@@ -65,7 +65,7 @@ class MapLayer{
         var maxLat = bound.getNorthEast().lat();
         var maxLng = bound.getNorthEast().lng(); 
         
-        var step = this.divideStep*Math.pow(2,this.level);
+        var step = this.level==-1?1:this.divideStep*Math.pow(2,this.level);
         minLat = Math.floor(minLat/step)*step;
         minLng = Math.floor(minLng/step)*step;
         maxLat = Math.ceil(maxLat/step)*step;
@@ -189,7 +189,7 @@ class MapLayer{
     }
 
     LoadLayer(param){
-      if(!this.dataUrl) return;
+      if(!this.dataUrl || !this.date) return;
       var url = this.dataUrl;
       url += "?date="+this.date;
       if(this.divideLatLng){
@@ -230,7 +230,7 @@ class MapLayer{
     }
 
     LoadGrid(param){
-      if(!this.gridUrl) return;
+      if(!this.gridUrl || !this.date) return;
 
       var url = this.gridUrl;
       url += "?date="+this.date;

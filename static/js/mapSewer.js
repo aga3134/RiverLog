@@ -1,10 +1,10 @@
 
 class MapSewer extends MapWaterLevel{
     constructor(option){
-		if(!option.siteKey) option.siteKey = "no";
-		if(!option.dataSiteKey) option.dataSiteKey = "stationNo";
-		if(!option.timeKey) option.timeKey = "time";
-		if(!option.divideLatLng) option.divideLatLng = false;
+		if(option.siteKey == null) option.siteKey = "no";
+		if(option.dataSiteKey == null) option.dataSiteKey = "stationNo";
+		if(option.timeKey == null) option.timeKey = "time";
+		if(option.divideLatLng == null) option.divideLatLng = false;
 		super(option);
     }
 

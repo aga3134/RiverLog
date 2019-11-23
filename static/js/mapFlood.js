@@ -1,9 +1,9 @@
 
 class MapFlood extends MapLayer{
 	constructor(option){
-		if(!option.siteKey) option.siteKey = "_id";
-		if(!option.dataSiteKey) option.dataSiteKey = "stationID";
-		if(!option.divideLatLng) option.divideLatLng = false;
+		if(option.siteKey == null) option.siteKey = "_id";
+		if(option.dataSiteKey == null) option.dataSiteKey = "stationID";
+		if(option.divideLatLng == null) option.divideLatLng = false;
 		super(option);
 	}
 

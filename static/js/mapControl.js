@@ -2,7 +2,7 @@
 function MapControl(){
 	this.map = null;
 
-  this.mapRain = new MapRain({"siteUrl":"/rain/station", "dataUrl":"/rain/rainData"});
+  this.mapRain = new MapRain({"siteUrl":"/rain/station", "dataUrl":"/rain/rainData", "gridUrl":"/rain/gridData"});
   this.mapReservoir = new MapReservoir({"siteUrl":"/reservoir/info", "dataUrl":"/reservoir/reservoirData"});
   this.mapWaterLevel = new MapWaterLevel({"siteUrl":"/waterLevel/station", "dataUrl":"/waterLevel/waterLevelData"});
   this.mapWaterLevelDrain = new MapWaterLevelDrain({"siteUrl":"/waterLevelDrain/station", "dataUrl":"/waterLevelDrain/waterLevelDrainData"});

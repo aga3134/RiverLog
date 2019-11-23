@@ -498,7 +498,8 @@ class WaterData:
                         data["WaterLevel"] = util.ToFloat(r["WaterLevel"])
                         if math.isnan(data["WaterLevel"]) or data["WaterLevel"] < 0:
                             continue
-                        t = datetime.datetime.strptime(r["ObservationTime"]+"+0800", "%Y-%m-%dT%H:%M:%S%z")
+                        t = datetime.datetime.strptime(r["ObservationTime"], "%Y-%m-%dT%H:%M:%S")
+                        t = t.replace(tzinfo=taiwan)
                         data["ObservationTime"] = t
                         data["EffectiveWaterStorageCapacity"] = util.ToFloat(r["EffectiveWaterStorageCapacity"])
                         if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
@@ -554,8 +555,13 @@ class WaterData:
                     reservoirName = td[0].find_all('a')[0].string
                     if not reservoirName in siteHash:
                         continue
+                    if td[1].string == "--":
+                        continue
+                    if util.ToFloat(td[4].string) < 0:
+                        continue
                     data["ReservoirIdentifier"] = siteHash[reservoirName]["id"]
-                    t = datetime.datetime.strptime(td[1].string+"+0800", "%Y-%m-%d %H:%M:%S%z")
+                    t = datetime.datetime.strptime(td[1].string, "%Y-%m-%d %H:%M:%S")
+                    t = t.replace(tzinfo=taiwan)
                     data["ObservationTime"] = t
                     key = {"ReservoirIdentifier":data["ReservoirIdentifier"],"ObservationTime":data["ObservationTime"]}
                     query = self.db["reservoir"+day].find_one(key)

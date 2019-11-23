@@ -60,8 +60,8 @@ sc.GetData = function(param){
 }
 
 sc.GridData = function(param){
-	var gridPerUnit = 100;
-	var levelNum = 6;
+	var gridPerUnit = 10;
+	var levelNum = 3;
 	var date = new Date(param.date);
 	var t = Util.DateToDateString(date,"");
 	var level = parseInt(param.level);

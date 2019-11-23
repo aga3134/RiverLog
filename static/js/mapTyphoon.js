@@ -1,7 +1,7 @@
 
 class MapTyphoon extends MapLayer{
 	constructor(option){
-		if(!option.divideLatLng) option.divideLatLng = false;
+		if(option.divideLatLng == null) option.divideLatLng = false;
 		super(option);
 	}
 

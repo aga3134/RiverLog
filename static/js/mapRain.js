@@ -1,9 +1,9 @@
 
 class MapRain extends MapLayer{
 	constructor(option){
-		if(!option.siteKey) option.siteKey = "stationID";
-		if(!option.dataSiteKey) option.dataSiteKey = "stationID";
-		if(!option.divideLatLng) option.divideLatLng = false;
+		if(option.siteKey == null) option.siteKey = "stationID";
+		if(option.dataSiteKey == null) option.dataSiteKey = "stationID";
+		if(option.divideLatLng == null) option.divideLatLng = true;
 		super(option);
 	}
 
@@ -20,7 +20,7 @@ class MapRain extends MapLayer{
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
 			var now = d.nowSum/d.num;
-			var diff = d.diffSum/d.num;
+			var diff = d.diff || (d.diffSum/d.num);
 			str = "<p>日雨量</p>";
 			str += "<p>平均累積雨量 "+now.toFixed(2)+" mm</p>";
 			str += "<p>平均雨量變化 "+diff.toFixed(2)+" mm</p>";
@@ -200,7 +200,7 @@ class MapRain extends MapLayer{
 		}
     }
 
-    /*DrawGrid(data){
+    DrawGrid(data){
 		if(!this.map) return;
 		if(!data) return;
 
@@ -290,6 +290,6 @@ class MapRain extends MapLayer{
 				this.layer[key] = rect;
 			}
 		}
-    }*/
+    }
 
 }

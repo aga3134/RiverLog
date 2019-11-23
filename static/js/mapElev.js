@@ -1,10 +1,10 @@
 
 class MapElev extends MapLayer{
 	constructor(option){
-		if(!option.divideLatLng) option.divideLatLng = true;
-		if(!option.gridPerUnit) option.gridPerUnit = 1000;
-		if(!option.levelNum) option.levelNum = 8;
-		if(!option.divideStep) option.divideStep = 0.01;
+		if(option.divideLatLng == null) option.divideLatLng = true;
+		if(option.gridPerUnit == null) option.gridPerUnit = 1000;
+		if(option.levelNum == null) option.levelNum = 8;
+		if(option.divideStep == null) option.divideStep = 0.01;
 		super(option);
 	}
 
