@@ -26,7 +26,7 @@ ec.GridData = function(param){
 	if(condition.length > 0){
 		query.$and = condition;
 	}
-	ElevGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
+	ElevGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});

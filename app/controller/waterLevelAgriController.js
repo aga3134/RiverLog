@@ -10,7 +10,7 @@ var WaterLevelAgriGridSchema = require("../../db/waterLevelAgriGridSchema");
 var wlc = {};
 
 wlc.GetStation = function(param){
-	WaterLevelAgriSite.find({}, {__v:0}).exec(function(err, sites){
+	WaterLevelAgriSite.find({}, {__v:0}).lean().exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
@@ -32,7 +32,7 @@ wlc.GetData = function(param){
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
-		WaterLevelAgriSite.find(query, { __v:0}).exec(function(err, sites){
+		WaterLevelAgriSite.find(query, { __v:0}).lean().exec(function(err, sites){
 			if(err) return param.failFunc({err:err});
 			
 			var idArr = [];
@@ -43,14 +43,14 @@ wlc.GetData = function(param){
 			var condition = [];
 			condition.push({stationID: {$in:idArr}});
 			var query   = {$and: condition};
-			WaterLevelAgri.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+			WaterLevelAgri.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 				if(err) return param.failFunc({err:err});
 				param.succFunc(data);
 			});
 		});
 	}
 	else{
-		WaterLevelAgri.find({}, {_id: 0, __v: 0}).exec(function(err, data){
+		WaterLevelAgri.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -84,7 +84,7 @@ wlc.GridData = function(param){
 		query.$and = condition;
 	}
 	var WaterLevelAgriGrid = mongoose.model('waterLevelAgriGrid'+t, WaterLevelAgriGridSchema);
-	WaterLevelAgriGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
+	WaterLevelAgriGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});

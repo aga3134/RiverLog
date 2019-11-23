@@ -13,63 +13,63 @@ var ReservoirSiltation = require('../../db/reservoirSiltation');
 var sc = {};
 
 sc.WaterUseAgriculture = function(param){
-	WaterUseAgriculture.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseAgriculture.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.WaterUseCultivation = function(param){
-	WaterUseCultivation.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseCultivation.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.WaterUseIndustry = function(param){
-	WaterUseIndustry.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseIndustry.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.WaterUseLivestock = function(param){
-	WaterUseLivestock.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseLivestock.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.WaterUseLiving = function(param){
-	WaterUseLiving.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseLiving.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.WaterUseOverview = function(param){
-	WaterUseOverview.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	WaterUseOverview.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.MonthWaterUse = function(param){
-	MonthWaterUse.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	MonthWaterUse.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.ReservoirUse = function(param){
-	ReservoirUse.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	ReservoirUse.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
 };
 
 sc.ReservoirSiltation = function(param){
-	ReservoirSiltation.find({}, {_id:0,__v: 0}).exec(function(err, data){
+	ReservoirSiltation.find({}, {_id:0,__v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});

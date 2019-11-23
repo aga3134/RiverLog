@@ -10,7 +10,7 @@ var SewerGridSchema = require("../../db/sewerGridSchema");
 var sc = {};
 
 sc.GetStation = function(param){
-	SewerStation.find({}, {_id: 0, __v:0}).exec(function(err, sites){
+	SewerStation.find({}, {_id: 0, __v:0}).lean().exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
@@ -32,7 +32,7 @@ sc.GetData = function(param){
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
-		SewerStation.find(query, {_id:0,  __v:0}).exec(function(err, sites){
+		SewerStation.find(query, {_id:0,  __v:0}).lean().exec(function(err, sites){
 			if(err) return param.failFunc({err:err});
 			
 			var idArr = [];
@@ -43,14 +43,14 @@ sc.GetData = function(param){
 			var condition = [];
 			condition.push({stationNo: {$in:idArr}});
 			var query   = {$and: condition};
-			Sewer.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+			Sewer.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 				if(err) return param.failFunc({err:err});
 				param.succFunc(data);
 			});
 		});
 	}
 	else{
-		Sewer.find({}, {_id: 0, __v: 0}).exec(function(err, data){
+		Sewer.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -84,7 +84,7 @@ sc.GridData = function(param){
 		query.$and = condition;
 	}
 	var SewerGrid = mongoose.model('sewerGrid'+t, SewerGridSchema);
-	SewerGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
+	SewerGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});

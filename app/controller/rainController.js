@@ -11,7 +11,7 @@ var RainGridSchema = require("../../db/rainGridSchema");
 var rc = {};
 
 rc.GetStation = function(param){
-	RainStation.find({}, {_id: 0, __v:0}).exec(function(err, sites){
+	RainStation.find({}, {_id: 0, __v:0}).lean().exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
@@ -19,12 +19,12 @@ rc.GetStation = function(param){
 
 rc.GetExtremeDate = function(param){
 	var result = {};
-	RainDailySum.findOne({}).sort({time: -1}).exec(function(err, maxDate) {
+	RainDailySum.findOne({}).sort({time: -1}).lean().exec(function(err, maxDate) {
 		if(err) return param.failFunc({err:err});
 		if(!maxDate) return param.failFunc({err:"no max date"});
 
 		result.maxDate = Util.DateToDateString(maxDate.time);
-		RainDailySum.findOne({}).sort({time: 1}).exec(function(err, minDate) {
+		RainDailySum.findOne({}).sort({time: 1}).lean().exec(function(err, minDate) {
 			if(err) return param.failFunc({err:err});
 			if(!minDate) return param.failFunc({err:"no min date"});
 
@@ -50,7 +50,7 @@ rc.GetData = function(param){
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
-		RainStation.find(query, {_id: 0, __v:0}).exec(function(err, sites){
+		RainStation.find(query, {_id: 0, __v:0}).lean().exec(function(err, sites){
 			if(err) return param.failFunc({err:err});
 			
 			var idArr = [];
@@ -61,14 +61,14 @@ rc.GetData = function(param){
 			var condition = [];
 			condition.push({stationID: {$in:idArr}});
 			var query   = {$and: condition};
-			Rain.find(query, {_id:0,__v:0,hour12:0,hour24:0}).exec(function(err, data){
+			Rain.find(query, {_id:0,__v:0,hour12:0,hour24:0}).lean().exec(function(err, data){
 				if(err) return param.failFunc({err:err});
 				param.succFunc(data);
 			});
 		});
 	}
 	else{
-		Rain.find({}, {_id:0,__v:0,hour12:0,hour24:0}).exec(function(err, data){
+		Rain.find({}, {_id:0,__v:0,hour12:0,hour24:0}).lean().exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -85,7 +85,7 @@ rc.Get10minSum = function(param){
 	conditions.push({time: {$lte: new Date(param.date+" 23:59")}});
 	var query   = {$and: conditions};
 
-	Rain10minSum.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+	Rain10minSum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
@@ -99,7 +99,7 @@ rc.GetDailySum = function(param){
 	conditions.push({time: {$lte: new Date(param.year+"-12-31")}});
 	var query   = {$and: conditions};
 
-	RainDailySum.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+	RainDailySum.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 		if(err) return param.failFunc({err:err});
 		param.succFunc(data);
 	});
@@ -130,7 +130,7 @@ rc.GridData = function(param){
 		query.$and = condition;
 	}
 	var RainGrid = mongoose.model('rainGrid'+t, RainGridSchema);
-	RainGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
+	RainGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});

@@ -10,7 +10,7 @@ var WaterLevelDrainGridSchema = require("../../db/waterLevelDrainGridSchema");
 var wlc = {};
 
 wlc.GetStation = function(param){
-	WaterLevelDrainSite.find({}, {__v:0}).exec(function(err, sites){
+	WaterLevelDrainSite.find({}, {__v:0}).lean().exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
@@ -32,7 +32,7 @@ wlc.GetData = function(param){
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
-		WaterLevelDrainSite.find(query, { __v:0}).exec(function(err, sites){
+		WaterLevelDrainSite.find(query, { __v:0}).lean().exec(function(err, sites){
 			if(err) return param.failFunc({err:err});
 			
 			var idArr = [];
@@ -43,14 +43,14 @@ wlc.GetData = function(param){
 			var condition = [];
 			condition.push({stationID: {$in:idArr}});
 			var query   = {$and: condition};
-			WaterLevelDrain.find(query, {_id: 0, __v: 0}).exec(function(err, data){
+			WaterLevelDrain.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 				if(err) return param.failFunc({err:err});
 				param.succFunc(data);
 			});
 		});
 	}
 	else{
-		WaterLevelDrain.find({}, {_id: 0, __v: 0}).exec(function(err, data){
+		WaterLevelDrain.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -84,7 +84,7 @@ wlc.GridData = function(param){
 		query.$and = condition;
 	}
 	var WaterLevelDrainGrid = mongoose.model('waterLevelDrainGrid'+t, WaterLevelDrainGridSchema);
-	WaterLevelDrainGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).exec(function(err, data){
+	WaterLevelDrainGrid.find(query, { '_id': 0, '__v': 0,'lev': 0}).lean().exec(function(err, data){
 		if(err){
 			console.log(err);
 			return param.failFunc({err:"load grid fail"});
