@@ -124,6 +124,7 @@ class MapWaterLevel extends MapLayer{
 				}
 			}
 			waterLevelData[i].diff = value;
+
 		}
 
 		var zoom = this.map.getZoom();
@@ -135,6 +136,7 @@ class MapWaterLevel extends MapLayer{
 			var sID = waterLevelData[i][siteKey];
 			var s = this.data.site[sID];
 			if(!s) continue;
+			if(waterLevelData[i][valueKey] < 0) continue;
 
 			var x = Math.round(s[latKey]/step);
 			var y = Math.round(s[lngKey]/step);
