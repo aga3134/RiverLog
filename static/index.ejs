@@ -46,7 +46,10 @@
 					<img class="icon" src="/static/Image/icon-about.png" title="關於本站" v-on:click="openAbout=true;">
 				</div>
 
-				<div id="map" v-show="mapOption.mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
+				<div class="map-container">
+					<div id="map" v-show="mapOption.mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
+					<img class="logo" src="/static/Image/logo-lass.jpg">
+				</div>
 				
 				<div class="detail-panel" v-if="mapControl" v-bind:class="{open: mapControl.openDailyChart}">
 					<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="mapControl.openDailyChart = false;">
