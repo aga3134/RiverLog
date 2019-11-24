@@ -332,11 +332,14 @@ class WaterData:
                         ops.append(pymongo.InsertOne(w))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        w["lat"] = loc[1]
-                        w["lon"] = loc[0]
+                        grid = w.copy()
+                        grid["lat"] = loc[1]
+                        grid["lon"] = loc[0]
                         #self.grid.AddGridWaterLevel(w)
-                        gridArr.append(w)
+                        gridArr.append(grid)
 
+                self.db["waterLevel"+day].create_index("RecordTime")
+                self.db["waterLevel"+day].create_index("StationIdentifier")
                 if len(ops) > 0:
                     self.db["waterLevel"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
@@ -395,10 +398,11 @@ class WaterData:
                         ops.append(pymongo.InsertOne(w))
 
                         loc = siteHash[name]
-                        w["lat"] = loc["lat"]
-                        w["lon"] = loc["lon"]
+                        grid = w.copy()
+                        grid["lat"] = loc["lat"]
+                        grid["lon"] = loc["lon"]
                         #self.grid.AddGridWaterLevel(w)
-                        gridArr.append(w)
+                        gridArr.append(grid)
                     
                         #計算北中南平均警戒程度
                         """inc = {}
@@ -416,6 +420,8 @@ class WaterData:
                         
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
+                self.db["waterLevel"+day].create_index("RecordTime")
+                self.db["waterLevel"+day].create_index("StationIdentifier")
                 if len(ops) > 0:
                     self.db["waterLevel"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
@@ -625,10 +631,14 @@ class WaterData:
                         ops.append(pymongo.InsertOne(f))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        f["lat"] = loc[1]
-                        f["lng"] = loc[0]
+                        grid = f.copy()
+                        grid["lat"] = loc[1]
+                        grid["lng"] = loc[0]
                         #self.grid.AddGridWaterLevelDrain(f)
-                        gridArr.append(f)
+                        gridArr.append(grid)
+
+                self.db["waterLevelDrain"+day].create_index("time")
+                self.db["waterLevelDrain"+day].create_index("stationID")
                 if len(ops) > 0:
                     self.db["waterLevelDrain"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("waterLevelDrainGrid"+day,gridArr,"time",["value"],"lat","lng")
@@ -684,10 +694,14 @@ class WaterData:
                         ops.append(pymongo.InsertOne(f))
 
                         coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                        f["lat"] = coord[1]
-                        f["lng"] = coord[0]
+                        grid = f.copy()
+                        grid["lat"] = coord[1]
+                        grid["lng"] = coord[0]
                         #self.grid.AddGridWaterLevelAgri(f)
-                        gridArr.append(f)
+                        gridArr.append(grid)
+
+                self.db["waterLevelAgri"+day].create_index("time")
+                self.db["waterLevelAgri"+day].create_index("stationID")
                 if len(ops) > 0:
                     self.db["waterLevelAgri"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("waterLevelAgriGrid"+day,gridArr,"time",["value"],"lat","lng")
@@ -783,10 +797,14 @@ class WaterData:
 
                         if f["stationNo"] in siteHash:
                             s = siteHash[f["stationNo"]]
-                            f["lat"] = s["lat"]
-                            f["lng"] = s["lng"]
+                            grid = f.copy()
+                            grid["lat"] = s["lat"]
+                            grid["lng"] = s["lng"]
                             #self.grid.AddGridSewer(f)
-                            gridArr.append(f)
+                            gridArr.append(grid)
+
+                self.db["sewer"+day].create_index("time")
+                self.db["sewer"+day].create_index("stationNo")
                 if len(ops) > 0:
                     self.db["sewer"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")

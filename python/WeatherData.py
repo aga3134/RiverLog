@@ -98,8 +98,6 @@ class WeatherData:
                     lat = util.ToFloat(location.find(ns+"lat").text)
                     lon = util.ToFloat(location.find(ns+"lon").text)
                     data["stationID"] = sID
-                    data["lat"] = lat
-                    data["lon"] = lon
                     station["stationID"] = sID
                     station["name"] = sName
                     station["lat"] = lat
@@ -158,7 +156,10 @@ class WeatherData:
                         opDaily.append(pymongo.UpdateOne({"time":tday}, {"$inc": inc}, upsert=True))
                         op10min.append(pymongo.UpdateOne({"time":t10min}, {"$inc": inc}, upsert=True))
                         #self.grid.AddGridRain(d)
-                        gridArr.append(d)
+                        grid = d.copy()
+                        grid["lat"] = loc["lat"]
+                        grid["lon"] = loc["lon"]
+                        gridArr.append(grid)
 
                 self.db["rain"+dayStr].create_index("stationID")
                 self.db["rain"+dayStr].create_index("time")

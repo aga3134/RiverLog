@@ -11,7 +11,7 @@
 		<meta property="og:description" content="<%=meta.desc%>" />
 		<meta property="og:site_name" content="<%=meta.title%>" />
 		<meta property="og:title" content="<%=meta.title%>" />
-		<meta property="og:image" content="<%=meta.hostname%>/static/Image/banner.png" />
+		<meta property="og:image" content="<%=meta.hostname%>/static/Image/logo.png?v=<%=meta.version%>"" />
 		<meta property="og:locale" content="zh_TW" />
 		<meta property="og:type" content="website" />
 
@@ -652,7 +652,7 @@
 										<img class="content-icon" src="/static/Image/icon-water-level-down.png">
 										表示。箭頭越長表示水位變化越大。
 										紫色水位<img class="content-icon" src="/static/Image/icon-water-level-drain.png">代表區域排水水位，
-										藍色水位<img class="content-icon" src="/static/Image/icon-water-level-agri.png">代表水利會水位。
+										藍色水位<img class="content-icon" src="/static/Image/icon-water-level-agri.png">代表水利會水位，黑色水位<img class="content-icon" src="/static/Image/icon-water-level-sewer.png">代表下水道水位。
 										河川水位顏色顯示意義如下：
 									</div>
 								</li>
@@ -806,6 +806,10 @@
 					</div>
 				</div>
 			</transition>
+			<div class="welcome-page" v-show="loading">
+				<img class="logo" src="/static/Image/logo.png?v=<%=meta.version%>">
+				<img class="logo-text" src="/static/Image/logo-text.png?v=<%=meta.version%>">
+			</div>
 		</div>
 
 		<script src="https://maps.googleapis.com/maps/api/js?libraries=visualization,places&sensor=false&key=AIzaSyBUGDJex2sQeScb1Wxcm7oiPGwdmyoLhHM"></script>

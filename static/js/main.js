@@ -82,7 +82,8 @@ var g_APP = new Vue({
       {name: "不太有威脅", value:"Minor"},
       {name: "未知", value:"Unknown"},
     ],
-    searchBox: null
+    searchBox: null,
+    loading: true
   },
   created: function () {
     this.InitColor();
@@ -114,7 +115,7 @@ var g_APP = new Vue({
     this.ParseParameter();
 
     google.maps.event.addDomListener(window, 'load', this.InitMap);
-
+    this.loading = false;
   },
   methods: {
     InitColor: function(){
