@@ -637,14 +637,15 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       var loc = this.mapControl.GetLocation();
       if(!loc) return;
-      var hash = "year="+this.curYear;
+      var hash = "#year="+this.curYear;
       hash += "&date="+this.curDate;
       hash += "&time="+this.curTime;
       hash += "&lat="+loc.lat.toFixed(6);
       hash += "&lng="+loc.lng.toFixed(6);
       hash += "&zoom="+loc.zoom;
       hash += "&option="+this.EncodeOptionString();
-      location.hash = hash;
+      //location.hash = hash;
+      history.replaceState(undefined, undefined, hash);
     },
     OpValueToIndex: function(opArr, value){
       for(var i=0;i<opArr.length;i++){
