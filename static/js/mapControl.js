@@ -7,6 +7,7 @@ function MapControl(){
   this.mapWaterLevel = new MapWaterLevel({"siteUrl":"/waterLevel/station", "dataUrl":"/waterLevel/waterLevelData"});
   this.mapWaterLevelDrain = new MapWaterLevelDrain({"siteUrl":"/waterLevelDrain/station", "dataUrl":"/waterLevelDrain/waterLevelDrainData"});
   this.mapWaterLevelAgri = new MapWaterLevelAgri({"siteUrl":"/waterLevelAgri/station", "dataUrl":"/waterLevelAgri/waterLevelAgriData"});
+  this.mapWaterLevelGate = new MapWaterLevelGate({"siteUrl":"/waterLevelGate/station", "dataUrl":"/waterLevelGate/waterLevelGateData"});
   this.mapSewer = new MapSewer({"siteUrl":"/sewer/station", "dataUrl":"/sewer/sewerData"});
   this.mapFlood = new MapFlood({"siteUrl":"/flood/station", "dataUrl":"/flood/floodData"});
   this.mapTyphoon = new MapTyphoon({"dataUrl":"/alert/typhoonData"});
@@ -59,6 +60,7 @@ MapControl.prototype.InitMap = function(param){
     this.mapWaterLevel.map = this.map;
     this.mapWaterLevelDrain.map = this.map;
     this.mapWaterLevelAgri.map = this.map;
+    this.mapWaterLevelGate.map = this.map;
     this.mapSewer.map = this.map;
     this.mapFlood.map = this.map;
     this.mapTyphoon.map = this.map;
@@ -78,6 +80,7 @@ MapControl.prototype.ChangeDate = function(){
   this.mapWaterLevel.ChangeDate(date);
   this.mapWaterLevelDrain.ChangeDate(date);
   this.mapWaterLevelAgri.ChangeDate(date);
+  this.mapWaterLevelGate.ChangeDate(date);
   this.mapSewer.ChangeDate(date);
   this.mapFlood.ChangeDate(date);
   this.mapTyphoon.ChangeDate(date);
@@ -103,6 +106,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(){
   if(this.mapWaterLevel) this.mapWaterLevel.Update();
   if(this.mapWaterLevelDrain) this.mapWaterLevelDrain.Update();
   if(this.mapWaterLevelAgri) this.mapWaterLevelAgri.Update();
+  if(this.mapWaterLevelGate) this.mapWaterLevelGate.Update();
   if(this.mapSewer) this.mapSewer.Update();
 };
 
@@ -137,6 +141,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapWaterLevel.ClearMap();
   this.mapWaterLevelDrain.ClearMap();
   this.mapWaterLevelAgri.ClearMap();
+  this.mapWaterLevelGate.ClearMap();
   this.mapSewer.ClearMap();
   this.mapFlood.ClearMap();
   this.mapTyphoon.ClearMap();

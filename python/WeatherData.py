@@ -143,7 +143,7 @@ class WeatherData:
                     query = self.db["rain"+dayStr].find_one(key)
                     if query is None:
                         #self.db["rain"+dayStr].insert_one(d)
-                        opData.append(pymongo.InsertOne(d))
+                        opData.append(pymongo.UpdateOne(key, {"$set": d}, upsert=True))
                         inc = {}
                         loc = locHash[d["stationID"]]
                         area = util.LatToArea(loc["lat"])

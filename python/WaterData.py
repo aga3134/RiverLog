@@ -329,7 +329,7 @@ class WaterData:
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevel"+day].insert_one(w)
-                        ops.append(pymongo.InsertOne(w))
+                        ops.append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = w.copy()
@@ -395,7 +395,7 @@ class WaterData:
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevel"+day].insert_one(w)
-                        ops.append(pymongo.InsertOne(w))
+                        ops.append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
 
                         loc = siteHash[name]
                         grid = w.copy()
@@ -470,7 +470,7 @@ class WaterData:
                     query = self.db["flood"+day].find_one(key)
                     if query is None:
                         #self.db["flood"+day].insert_one(f)
-                        ops.append(pymongo.InsertOne(f))
+                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
                 if len(ops) > 0:
                     self.db["flood"+day].bulk_write(ops,ordered=False)
 
@@ -511,7 +511,8 @@ class WaterData:
                         if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
                             continue
                         #self.db["reservoir"+day].insert_one(data)
-                        ops.append(pymongo.InsertOne(data))
+                        key = {"ReservoirIdentifier":data["ReservoirIdentifier"],"ObservationTime":data["ObservationTime"]}
+                        ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
                         
                         #計算北中南蓄水百分比
                         """if r["ReservoirIdentifier"] not in siteHash:
@@ -579,7 +580,7 @@ class WaterData:
                         if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
                             continue
                         #self.db["reservoir"+day].insert_one(data)
-                        ops.append(pymongo.InsertOne(data))
+                        ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
                 if len(ops) > 0:
                     self.db["reservoir"+day].bulk_write(ops,ordered=False)
         except:
@@ -628,7 +629,7 @@ class WaterData:
                     query = self.db["waterLevelDrain"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevelDrain"+day].insert_one(f)
-                        ops.append(pymongo.InsertOne(f))
+                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = f.copy()
@@ -685,13 +686,13 @@ class WaterData:
                     t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
                     f["time"] = t
-                    f["value"] = d["Observations"][0]["result"]
+                    f["value."+d["name"]] = d["Observations"][0]["result"]
                     key = {"stationID":f["stationID"],"time":f["time"]}
                     day = datetime.datetime.strftime(t,"%Y%m%d")
                     query = self.db["waterLevelAgri"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevelAgri"+day].insert_one(f)
-                        ops.append(pymongo.InsertOne(f))
+                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = f.copy()
@@ -749,7 +750,7 @@ class WaterData:
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
 
                     f["time"] = t
-                    f[d["name"]] = d["Observations"][0]["result"]
+                    f["value."+d["name"]] = d["Observations"][0]["result"]
                     key = {"stationID":f["stationID"],"time":f["time"]}
                     day = datetime.datetime.strftime(t,"%Y%m%d")
 
@@ -793,7 +794,7 @@ class WaterData:
                     query = self.db["sewer"+day].find_one(key)
                     if query is None:
                         #self.db["sewer"+day].insert_one(f)
-                        ops.append(pymongo.InsertOne(f))
+                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         if f["stationNo"] in siteHash:
                             s = siteHash[f["stationNo"]]

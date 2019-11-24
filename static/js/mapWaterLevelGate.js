@@ -1,5 +1,5 @@
 
-class MapWaterLevelAgri extends MapWaterLevel{
+class MapWaterLevelGate extends MapWaterLevel{
     constructor(option){
 		if(option.siteKey == null) option.siteKey = "_id";
 		if(option.dataSiteKey == null) option.dataSiteKey = "stationID";
@@ -10,14 +10,14 @@ class MapWaterLevelAgri extends MapWaterLevel{
 
     LoadLayer(param){
 		if(!this.map) return;
-		if(!g_APP.waterLevelOption.showAgri) return;
+		if(!g_APP.waterLevelOption.showGate) return;
 		MapWaterLevel.prototype.LoadLayer.call(this,param);
 	}
 
 	ComputeDiff(preValue,curValue){
 		var diff = {};
 		for(var key in curValue){
-			if(!key.includes("水位")) continue;
+			if(!key.includes("水")) continue;
 			if(preValue[key]) diff[key] = curValue[key]-preValue[key];
 	    }
 		return diff;
@@ -70,7 +70,7 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		if(d.num){	//cluster
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
-			str = "<p>水利會水位</p>";
+			str = "<p>閘門水位</p>";
 			for(var key in d.diff){
 				str += "<p>最大"+key+"變化 "+d.maxDiff[key].toFixed(2)+" m</p>";
 				str += "<p>最小"+key+"變化 "+d.minDiff[key].toFixed(2)+" m</p>";
@@ -84,7 +84,7 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		else{
 			var s = this.data.site[d.stationID];
 		    str = "<p>"+s.stationName+"</p>";
-		    for(var key in d.value){
+		    for(var key in d.diff){
 		    	str += "<p>"+key+" "+d.value[key].toFixed(2)+" m";
 		    	if(d.diff[key]){
 		    		str += " (";
@@ -101,10 +101,10 @@ class MapWaterLevelAgri extends MapWaterLevel{
 
     DrawLayer(data){
 		if(!this.map) return;
-		if(!data || !g_APP.waterLevelOption.showAgri) return;
+		if(!data || !g_APP.waterLevelOption.showGate) return;
 
 		var cluster = this.GetDisplayData(data,"stationID","value","time","lat","lng");
-		var color = "#0073FF";
+		var color = "#ffffff";
 		if(cluster.isCluster){
 			for(var i=0;i<cluster.data.length;i++){
 				var d = cluster.data[i];

@@ -52,7 +52,7 @@ class MapWaterLevel extends MapLayer{
 
     GetBaseScale(){
       var zoom = this.map.getZoom();
-      return 1*Math.pow(1.7,9-zoom);
+      return 1*Math.pow(1.5,9-zoom);
     }
 
     GenIcon(lat,lng,value1,value2){
@@ -76,31 +76,77 @@ class MapWaterLevel extends MapLayer{
 			if(maxValue > thresh){
 				if(maxValue > thresh*maxMutiple) maxValue = thresh*maxMutiple;
 				var base = scale*0.5;
-				arr.push({lat: lat, lng: lng-scale*0.5});
+				arr.push({lat: lat, lng: lng-scale*0.3});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.7});
-				arr.push({lat: lat+base+(maxValue-thresh)*valueScale*1.5, lng: lng});
-				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.7});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale*1.3, lng: lng});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.5});
-				arr.push({lat: lat, lng: lng+scale*0.5});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.3});
+				arr.push({lat: lat, lng: lng+scale*0.3});
 			}
 			if(minValue < -thresh){
 				if(minValue < -thresh*maxMutiple) minValue = -thresh*maxMutiple; 
 				var base = -scale*0.5;
-				arr.push({lat: lat, lng: lng-scale*0.5});
+				arr.push({lat: lat, lng: lng-scale*0.3});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.7});
-				arr.push({lat: lat+base+(minValue-thresh)*valueScale*1.5, lng: lng});
-				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.7});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale*1.3, lng: lng});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.5});
-				arr.push({lat: lat, lng: lng+scale*0.5});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.3});
+				arr.push({lat: lat, lng: lng+scale*0.3});
 			}
 			
 	    }
 	    return arr;
 	}
 
-	GetDisplayData(data,siteKey,valueKey,timeKey,latKey,lngKey){
+	ComputeDiff(preValue,curValue){
+		return curValue - preValue;
+	}
+
+	AccumulateValue(acc,data,param){
+		var key = param.clusterKey;
+		var s = param.site;
+		var timeKey = param.timeKey;
+		var valueKey = param.valueKey;
+		var latKey = param.latKey;
+		var lngKey = param.lngKey;
+		var value = data[valueKey];
+		if(value < 0) return acc;
+		else if(!acc){
+			acc = {};
+			acc.key = key;
+			acc.t = data[timeKey];
+			acc[valueKey+"Sum"] = value;
+			acc.diffSum = data.diff;
+			acc.minDiff = data.diff;
+			acc.maxDiff = data.diff;
+			acc.num = 1;
+			acc.latSum = s[latKey];
+			acc.lngSum = s[lngKey];
+			acc.alertL3 = 0;
+			acc.alertL2 = 0;
+			acc.alertL1 = 0;
+			if(s.AlertLevel1 && value > s.AlertLevel1) acc.alertL1++;
+			else if(s.AlertLevel2 && value > s.AlertLevel2) acc.alertL2++;
+			else if(s.AlertLevel3 && value > s.AlertLevel3) acc.alertL3++;
+		}
+		else{
+			acc[valueKey+"Sum"] += value;
+			acc.diffSum += data.diff;
+			if(data.diff < acc.minDiff) acc.minDiff = data.diff;
+			if(data.diff > acc.maxDiff) acc.maxDiff = data.diff;
+			acc.num += 1;
+			acc.latSum += s[latKey];
+			acc.lngSum += s[lngKey];
+			if(s.AlertLevel1 && value > s.AlertLevel1) d.alertL1++;
+			else if(s.AlertLevel2 && value > s.AlertLevel2) d.alertL2++;
+			else if(s.AlertLevel3 && value > s.AlertLevel3) d.alertL3++;
+		}
+		return acc;
+	}
+
+	GetDisplayData(data,siteKey,valueKey,timeKey,latKey,lngKey,doCluster){
 		var offset = g_APP.TimeToOffset(g_APP.curTime);
 		offset -= 1;
 		if(offset < 0) offset = 0;
@@ -123,15 +169,14 @@ class MapWaterLevel extends MapLayer{
 			var value = 0;
 			if(preDataHash[sID]){
 				if(preDataHash[sID][valueKey] && waterLevelData[i][valueKey]){
-					value = waterLevelData[i][valueKey]-preDataHash[sID][valueKey];
+					value = this.ComputeDiff(waterLevelData[i][valueKey],preDataHash[sID][valueKey]);
 				}
 			}
 			waterLevelData[i].diff = value;
-
 		}
 
 		var zoom = this.map.getZoom();
-		if(zoom > 10) return {isCluster:false, data:waterLevelData};
+		if(zoom > 10 || !doCluster) return {isCluster:false, data:waterLevelData};
 
 		var step = 0.04*Math.min(4,Math.pow(2,10-zoom));
 		var clusterHash = {};
@@ -139,44 +184,14 @@ class MapWaterLevel extends MapLayer{
 			var sID = waterLevelData[i][siteKey];
 			var s = this.data.site[sID];
 			if(!s) continue;
-			if(waterLevelData[i][valueKey] < 0) continue;
-
 			var x = Math.round(s[latKey]/step);
 			var y = Math.round(s[lngKey]/step);
 			var key = x+"-"+y;
-			if(key in clusterHash){
-				var d = clusterHash[key];
-				d[valueKey+"Sum"] += waterLevelData[i][valueKey];
-				d.diffSum += waterLevelData[i].diff;
-				if(waterLevelData[i].diff < d.minDiff) d.minDiff = waterLevelData[i].diff;
-				if(waterLevelData[i].diff > d.maxDiff) d.maxDiff = waterLevelData[i].diff;
-				d.num += 1;
-				d.latSum += s[latKey];
-				d.lngSum += s[lngKey];
-				if(s.AlertLevel1 && waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
-				else if(s.AlertLevel2 && waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
-				else if(s.AlertLevel3 && waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
-			}
-			else{
-				var d = {};
-				d.key = key;
-				d.t = waterLevelData[i][timeKey];
-				d[valueKey+"Sum"] = waterLevelData[i][valueKey];
-				d.diffSum = waterLevelData[i].diff;
-				d.minDiff = waterLevelData[i].diff;
-				d.maxDiff = waterLevelData[i].diff;
-				d.num = 1;
-				d.latSum = s[latKey];
-				d.lngSum = s[lngKey];
-				d.alertL3 = 0;
-				d.alertL2 = 0;
-				d.alertL1 = 0;
-				if(s.AlertLevel1 && waterLevelData[i][valueKey] > s.AlertLevel1) d.alertL1++;
-				else if(s.AlertLevel2 && waterLevelData[i][valueKey] > s.AlertLevel2) d.alertL2++;
-				else if(s.AlertLevel3 && waterLevelData[i][valueKey] > s.AlertLevel3) d.alertL3++;
-				clusterHash[key] = d;
-			}
+			var accParam = {clusterKey:key,"site":s, "timeKey":timeKey,"valueKey":valueKey,"latKey":latKey,"lngKey":lngKey};
+			var acc = this.AccumulateValue(clusterHash[key],waterLevelData[i],accParam);
+			if(acc) clusterHash[key] = acc;
 		}
+
 		var cluster = [];
 		for(var key in clusterHash){
 			cluster.push(clusterHash[key]);

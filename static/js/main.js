@@ -30,6 +30,7 @@ var g_APP = new Vue({
       showDrain:true,
       showAgri:true,
       showSewer:true,
+      showGate:false,
       thresh: 10
     },
     reservoirOption: {collapse:false,opacity:0.5, scale:1, show:true},
@@ -744,6 +745,7 @@ var g_APP = new Vue({
       arr.push({value: (this.waterLevelOption.showDrain?1:0),bitNum: 1});
       arr.push({value: (this.waterLevelOption.showAgri?1:0),bitNum: 1});
       arr.push({value: (this.waterLevelOption.showSewer?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showGate?1:0),bitNum: 1});
       arr.push({value: this.waterLevelOption.thresh,bitNum: 8});
 
       //reservoir option
@@ -855,6 +857,7 @@ var g_APP = new Vue({
       bitNumArr.push({name:"waterLevelShowDrain",bitNum:1});
       bitNumArr.push({name:"waterLevelShowAgri",bitNum:1});
       bitNumArr.push({name:"waterLevelShowSewer",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowGate",bitNum:1});
       bitNumArr.push({name:"waterLevelThresh",bitNum:8});
 
       //reservoir option
@@ -921,6 +924,7 @@ var g_APP = new Vue({
       this.waterLevelOption.showDrain = valueArr["waterLevelShowDrain"]==1?true:false;
       this.waterLevelOption.showAgri = valueArr["waterLevelShowAgri"]==1?true:false;
       this.waterLevelOption.showSewer = valueArr["waterLevelShowSewer"]==1?true:false;
+      this.waterLevelOption.showGate = valueArr["waterLevelShowGate"]==1?true:false;
       this.waterLevelOption.thresh = valueArr["waterLevelThresh"];
 
       this.reservoirOption.collapse = valueArr["reservoirCollapse"]==1?true:false;

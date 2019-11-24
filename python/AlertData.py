@@ -154,7 +154,8 @@ class AlertData:
                         data["polygon"].append(polygon.string)
 
                     #self.db["alert"+day].insert_one(data)
-                    opData.append(pymongo.InsertOne(data))
+                    key = {"_id":data["_id"]}
+                    opData.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
 
                     #add to daily statistic
                     sta = {}
