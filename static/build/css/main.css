@@ -264,6 +264,13 @@ a {
         width: 30px;
         height: 30px;
         cursor: pointer; }
+      .riverlog .playbar .play-control .bt {
+        margin: 0px 5px;
+        padding: 2px 7px;
+        background-color: #716242;
+        border-radius: 3px;
+        color: #ffffff;
+        cursor: pointer; }
   .riverlog .close-bt {
     position: absolute;
     top: 5px;
@@ -350,7 +357,7 @@ a {
         font-size: 0.8em;
         border-radius: 3px; }
       .riverlog .side-panel .option-item .action-bt {
-        margin: 10px 5px;
+        margin: 5px;
         padding: 5px 10px;
         background-color: #716242;
         border-radius: 3px;
@@ -428,6 +435,9 @@ a {
           justify-content: flex-start;
           align-items: center;
           flex-wrap: wrap; }
+      .riverlog .full-panel .content-area .logo {
+        width: 200px;
+        border-radius: 5px; }
       .riverlog .full-panel .content-area .time-block {
         display: inline;
         margin: 0px 5px;

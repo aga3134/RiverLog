@@ -353,6 +353,14 @@ a{
 				height: 30px;
 				cursor: pointer;
 			}
+			.bt{
+				margin: 0px 5px;
+				padding: 2px 7px;
+				background-color: #716242;
+				border-radius: 3px;
+				color: #ffffff;
+				cursor: pointer;
+			}
 		}
 	}
 
@@ -465,7 +473,7 @@ a{
 				border-radius: 3px;
 			}
 			.action-bt{
-				margin: 10px 5px;
+				margin: 5px;
 				padding: 5px 10px;
 				background-color: #716242;
 				border-radius: 3px;
@@ -562,6 +570,10 @@ a{
 					align-items: center;
 					flex-wrap: wrap;
 				}
+			}
+			.logo{
+				width: 200px;
+				border-radius: 5px;
 			}
 			.time-block{
 				display: inline;

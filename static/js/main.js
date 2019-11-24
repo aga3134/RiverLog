@@ -261,6 +261,26 @@ var g_APP = new Vue({
         
       }.bind(this));
     },
+    PrevDay: function(){
+      var t = dayjs(this.curYear+"-"+this.curDate);
+      t = t.add(-1,"day");
+      this.curDate = t.format("MM-DD");
+      var year = parseInt(t.format("YYYY"));
+      if(year != this.curYear){
+        this.ChangeYear(year);
+      }
+      else this.ChangeDate(this.curDate);
+    },
+    NextDay: function(){
+      var t = dayjs(this.curYear+"-"+this.curDate);
+      t = t.add(1,"day");
+      this.curDate = t.format("MM-DD");
+      var year = parseInt(t.format("YYYY"));
+      if(year != this.curYear){
+        this.ChangeYear(year);
+      }
+      else this.ChangeDate(this.curDate);
+    },
     ChangeDate: function(date){
       this.curDate = date;
       var selectDate = $(".select-date");

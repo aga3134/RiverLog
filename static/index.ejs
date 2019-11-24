@@ -40,10 +40,10 @@
 			</div>
 			<div class="main-content">
 				<div class="icon-container">
-					<img class="icon" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="openDateSelect=true;" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="icon" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="openOption=true;">
-					<img class="icon" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="openLocation=true;" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="icon" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="openAbout=true;">
+					<img class="icon" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="openDateSelect=true;" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="icon" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="openOption=true;">
+					<img class="icon" src="/static/Image/icon-location.png" title="地理位置" v-on:click="openLocation=true;" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="icon" src="/static/Image/icon-about.png" title="關於本站" v-on:click="openAbout=true;">
 				</div>
 
 				<div id="map" v-show="mapOption.mapType == 'waterEvent' " v-on:click="openDateSelect = false;"></div>
@@ -245,21 +245,27 @@
 					</div>
 				</div>
 				<div class="play-control">
+					<div class="bt" v-on:click="PrevDay();">昨天</div>
 					<div class="time-label" v-on:click="openDateSelect=true;">{{timeStr}}</div>
 					<img class="icon" src="/static/Image/icon-prev.png" v-on:click="PrevTime();">
 					<img class="icon" v-bind:src="playIcon" v-on:click="TogglePlay();">
 					<img class="icon" src="/static/Image/icon-next.png" v-on:click="NextTime();">
+					<div class="bt" v-on:click="NextDay();">明天</div>
 				</div>
 			</div>
 
 			<div class="side-panel" v-bind:class="{open: openDateSelect}">
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openDateSelect=false;">
-					<img class="bt" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="SwitchPanel('option');">
-					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');" >
-					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
+					<img class="bt" src="/static/Image/icon-location.png" title="地理位置" v-on:click="SwitchPanel('location');" >
+					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
-				
+				<div class="option-container">
+					<div class="option-category">
+						<div class="title">日期選擇</div>
+					</div>
+				</div>
 				<select v-model="curYear">
 					<option v-for="y in yearArr" v-bind:value="y">{{y}}年</option>
 				</select>
@@ -289,9 +295,9 @@
 			<div class="side-panel" v-bind:class="{open: openOption, 'full-h': (mapOption.mapType == 'waterEvent')}">
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
-					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="bt" src="/static/Image/icon-location.png" alt="地理位置" v-on:click="SwitchPanel('location');" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="bt" src="/static/Image/icon-location.png" title="地理位置" v-on:click="SwitchPanel('location');" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
 				
 				<div class="option-container" v-if="mapOption.mapType == 'waterEvent' ">
@@ -593,9 +599,9 @@
 			<div class="side-panel full-h" v-bind:class="{open: openLocation}">
 				<div class="panel-switch">
 					<img class="bt" src="/static/Image/icon-close.png" v-on:click="openLocation=false;">
-					<img class="bt" src="/static/Image/icon-date.png" alt="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="bt" src="/static/Image/icon-setting.png" alt="參數設定" v-on:click="SwitchPanel('option');">
-					<img class="bt" src="/static/Image/icon-about.png" alt="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="bt" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
+					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
 				</div>
 				
 				<div class="option-container">
@@ -806,6 +812,7 @@
 							<li><a href="https://github.com/aga3134/RiverLog" target="_blank">網站開源程式碼</a></li>
 							<li><a href="https://agawork.tw/" target="_blank">其他專案</a></li>
 							<li>若您對本站有任何建議或合作需求，歡迎來信討論 aga3134@gmail.com</li>
+							<img class="logo" src="/static/Image/logo-lass.jpg">
 						</ul>
 					</div>
 				</div>
