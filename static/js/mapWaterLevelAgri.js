@@ -93,7 +93,7 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		    	}
 		    }
 		    str += "<p>時間 "+d.time+" </p>";
-		    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevelAgri\");'>今日變化</div></div>";
+		    //str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevelAgri\");'>今日變化</div></div>";
 		    loc = new google.maps.LatLng(s.lat, s.lng); 
 		}
 		this.infoWindow.setOptions({content: str, position: loc});

@@ -209,7 +209,7 @@ MapControl.prototype.UpdateLineChart = function(){
         });
       }
       break;
-    case "waterLevelAgri":
+    /*case "waterLevelAgri":
       title = "水利會水位";
       unitY = "m";
       var s = this.mapWaterLevelAgri.data.site[this.mapWaterLevelAgri.infoTarget];
@@ -223,7 +223,7 @@ MapControl.prototype.UpdateLineChart = function(){
           y: arr[i].value
         });
       }
-      break;
+      break;*/
     case "sewer":
       title = "下水道水位";
       unitY = "m";
