@@ -7,6 +7,7 @@ var g_APP = new Vue({
     openOption: false,
     openAbout: false,
     openLocation: false,
+    openSponsor: false,
     yearArr: [],
     curYear: 2019,
     curDate: "1-1",
@@ -370,6 +371,9 @@ var g_APP = new Vue({
           break;
         case "location":
           this.openLocation = true;
+          break;
+        case "sponsor":
+          this.openSponsor = true;
           break;
       }
     },

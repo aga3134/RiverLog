@@ -81,7 +81,8 @@ a {
         position: absolute;
         bottom: 5px;
         left: 5px;
-        width: 100px; }
+        width: 100px;
+        border-radius: 3px; }
     .riverlog .main-content .overlay-container {
       position: absolute;
       left: 0px;
@@ -431,6 +432,19 @@ a {
       .riverlog .full-panel .content-area .content-title {
         font-size: 1.5em;
         padding: 10px; }
+      .riverlog .full-panel .content-area .content-subtitle {
+        font-size: 1.2em;
+        padding: 10px; }
+      .riverlog .full-panel .content-area .sponsor-container {
+        padding: 5px 10px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-wrap: wrap; }
+        .riverlog .full-panel .content-area .sponsor-container .sponsor-logo {
+          border-radius: 5px;
+          height: 60px;
+          margin: 5px; }
       .riverlog .full-panel .content-area .content-icon {
         text-align: center;
         height: 30px;

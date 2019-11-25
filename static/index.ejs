@@ -40,10 +40,11 @@
 			</div>
 			<div class="main-content">
 				<div class="icon-container">
-					<img class="icon" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="openDateSelect=true;" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="icon" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="openOption=true;">
-					<img class="icon" src="/static/Image/icon-location.png" title="地理位置" v-on:click="openLocation=true;" v-if="mapOption.mapType == 'waterEvent' ">
-					<img class="icon" src="/static/Image/icon-about.png" title="關於本站" v-on:click="openAbout=true;">
+					<img class="icon" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="icon" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
+					<img class="icon" src="/static/Image/icon-location.png" title="地理位置" v-on:click="SwitchPanel('location');" v-if="mapOption.mapType == 'waterEvent' ">
+					<img class="icon" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="icon" src="/static/Image/icon-sponsor.png" title="贊助專案" v-on:click="SwitchPanel('sponsor');">
 				</div>
 
 				<div class="map-container" v-show="mapOption.mapType == 'waterEvent' ">
@@ -263,6 +264,7 @@
 					<img class="bt" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
 					<img class="bt" src="/static/Image/icon-location.png" title="地理位置" v-on:click="SwitchPanel('location');" >
 					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-sponsor.png" title="贊助專案" v-on:click="SwitchPanel('sponsor');">
 				</div>
 				<div class="option-container">
 					<div class="option-category">
@@ -301,6 +303,7 @@
 					<img class="bt" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="bt" src="/static/Image/icon-location.png" title="地理位置" v-on:click="SwitchPanel('location');" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-sponsor.png" title="贊助專案" v-on:click="SwitchPanel('sponsor');">
 				</div>
 				
 				<div class="option-container" v-if="mapOption.mapType == 'waterEvent' ">
@@ -605,6 +608,7 @@
 					<img class="bt" src="/static/Image/icon-date.png" title="選擇日期" v-on:click="SwitchPanel('date');" v-if="mapOption.mapType == 'waterEvent' ">
 					<img class="bt" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
 					<img class="bt" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="bt" src="/static/Image/icon-sponsor.png" title="贊助專案" v-on:click="SwitchPanel('sponsor');">
 				</div>
 				
 				<div class="option-container">
@@ -820,6 +824,25 @@
 					</div>
 				</div>
 			</transition>
+
+			<transition name="fade">
+				<div class="full-panel" v-if="openSponsor">
+					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openSponsor=false;">
+					<div class="content-area">
+						<div class="content-title">贊助方式</div>
+
+						<div class="content-title">致謝區</div>
+						<div class="content-subtitle">社群夥伴</div>
+						<div class="sponsor-container">
+							<img class="sponsor-logo" src="/static/image/sponsor/logo-lass.jpg">
+							<img class="sponsor-logo" src="/static/image/sponsor/logo-ci.png">
+						</div>
+						<div class="content-subtitle">組織夥伴</div>
+					</div>
+				</div>
+			</transition>
+
+
 			<div class="welcome-page" v-show="loading">
 				<img class="logo" src="/static/Image/logo.png?v=<%=meta.version%>">
 				<img class="logo-text" src="/static/Image/logo-text.png?v=<%=meta.version%>">

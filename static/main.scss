@@ -123,7 +123,7 @@ a{
 				bottom: 5px;
 				left: 5px;
 				width: 100px;
-
+				border-radius: 3px;
 			}
 		}
 		
@@ -566,6 +566,22 @@ a{
 			.content-title{
 				font-size: 1.5em;
 				padding: 10px;
+			}
+			.content-subtitle{
+				font-size: 1.2em;
+				padding: 10px;
+			}
+			.sponsor-container{
+				padding: 5px 10px;
+				display: flex;
+				justify-content: flex-start;
+				align-items: center;
+				flex-wrap: wrap;
+				.sponsor-logo{
+					border-radius: 5px;
+					height: 60px;
+					margin: 5px;
+				}
 			}
 			.content-icon{
 				text-align: center;
