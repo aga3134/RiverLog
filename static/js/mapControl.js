@@ -10,6 +10,7 @@ function MapControl(){
   this.mapWaterLevelGate = new MapWaterLevelGate({"siteUrl":"/waterLevelGate/station", "dataUrl":"/waterLevelGate/waterLevelGateData"});
   this.mapSewer = new MapSewer({"siteUrl":"/sewer/station", "dataUrl":"/sewer/sewerData"});
   this.mapPump = new MapPump({"siteUrl":"/pump/station", "dataUrl":"/pump/pumpData"});
+  this.mapTide = new MapTide({"siteUrl":"/tide/station", "dataUrl":"/tide/tideData"});
   this.mapFlood = new MapFlood({"siteUrl":"/flood/station", "dataUrl":"/flood/floodData"});
   this.mapTyphoon = new MapTyphoon({"dataUrl":"/alert/typhoonData"});
   this.mapAlert = new MapAlert({"dataUrl":"/alert/alertData"});
@@ -64,6 +65,7 @@ MapControl.prototype.InitMap = function(param){
     this.mapWaterLevelGate.map = this.map;
     this.mapSewer.map = this.map;
     this.mapPump.map = this.map;
+    this.mapTide.map = this.map;
     this.mapFlood.map = this.map;
     this.mapTyphoon.map = this.map;
     this.mapAlert.map = this.map;
@@ -85,6 +87,7 @@ MapControl.prototype.ChangeDate = function(){
   this.mapWaterLevelGate.ChangeDate(date);
   this.mapSewer.ChangeDate(date);
   this.mapPump.ChangeDate(date);
+  this.mapTide.ChangeDate(date);
   this.mapFlood.ChangeDate(date);
   this.mapTyphoon.ChangeDate(date);
   this.mapAlert.ChangeDate(date);
@@ -112,6 +115,7 @@ MapControl.prototype.UpdateMapWaterLevel = function(){
   if(this.mapWaterLevelGate) this.mapWaterLevelGate.Update();
   if(this.mapSewer) this.mapSewer.Update();
   if(this.mapPump) this.mapPump.Update();
+  if(this.mapTide) this.mapTide.Update();
 };
 
 MapControl.prototype.UpdateMapReservoir = function(){
@@ -148,6 +152,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapWaterLevelGate.ClearMap();
   this.mapSewer.ClearMap();
   this.mapPump.ClearMap();
+  this.mapTide.ClearMap();
   this.mapFlood.ClearMap();
   this.mapTyphoon.ClearMap();
   this.mapAlert.ClearMap();

@@ -79,7 +79,7 @@ class MapWaterLevel extends MapLayer{
 				arr.push({lat: lat, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(maxValue-thresh)*valueScale*1.3, lng: lng});
+				arr.push({lat: lat+base+(maxValue-thresh)*valueScale+base, lng: lng});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.5});
 				arr.push({lat: lat+base+(maxValue-thresh)*valueScale, lng: lng+scale*0.3});
 				arr.push({lat: lat, lng: lng+scale*0.3});
@@ -90,7 +90,7 @@ class MapWaterLevel extends MapLayer{
 				arr.push({lat: lat, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.3});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng-scale*0.5});
-				arr.push({lat: lat+base+(minValue-thresh)*valueScale*1.3, lng: lng});
+				arr.push({lat: lat+base+(minValue-thresh)*valueScale+base, lng: lng});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.5});
 				arr.push({lat: lat+base+(minValue-thresh)*valueScale, lng: lng+scale*0.3});
 				arr.push({lat: lat, lng: lng+scale*0.3});

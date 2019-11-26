@@ -360,6 +360,14 @@
 							<input type="checkbox" v-model="waterLevelOption.showGate" v-on:change="UpdateMapWaterLevel();">
 						</div>-->
 						<div class="option-item">
+							<div class="option-label">抽水站狀態</div>
+							<input type="checkbox" v-model="waterLevelOption.showPump" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">潮位</div>
+							<input type="checkbox" v-model="waterLevelOption.showTide" v-on:change="UpdateMapWaterLevel();">
+						</div>
+						<div class="option-item">
 							<input type="range" min="0" max="1" step="0.1" v-model="waterLevelOption.opacity" v-on:change="UpdateMapWaterLevel();">
 							<div class="option-label">透明度</div>
 						</div>
@@ -871,6 +879,7 @@
 		<script src="/static/js/mapWaterLevelGate.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapSewer.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapPump.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/mapTide.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapFlood.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapTyphoon.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/mapAlert.js?v=<%=meta.version%>"></script>

@@ -32,7 +32,7 @@ class WeatherData:
         self.grid = GridData(db)
         
     def Init(self):
-        pass
+        self.AddTideSite()
     
     def CollectData10min(self):
         try:
@@ -41,13 +41,7 @@ class WeatherData:
             now = now.replace(minute=(now.minute-now.minute%10))
             t = now.strftime("%Y-%m-%d_%H-%M")
             #rain data
-            url = "https://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key
-            folder = "data/rain/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"rain_"+t+".xml"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessRain(file)
+            self.ProcessRain("https://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -58,26 +52,38 @@ class WeatherData:
             now = datetime.datetime.now()
             t = now.strftime("%Y-%m-%d_%H")
             #typhoon trajectory
-            url = "https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key
-            folder = "data/typhoon/"
-            if not os.path.exists(folder):
-                os.makedirs(folder)
-            file = folder+"typhoon_"+t+".xml"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessTyphoon(file)
+            self.ProcessTyphoon("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key)
+            self.ProcessTide("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0017-001?format=JSON&Authorization="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
             
     def CollectData1day(self):
         pass
-    
-    def ProcessRain(self,file):
-        print("process file %s" % file)
+
+    def AddTideSite(self):
         try:
-            with open(file,"r",encoding="utf8") as f:
+            print("add tide sites")
+            with open("tide.json","r",encoding="utf-8-sig") as f:
                 data = f.read()
-                root = ET.fromstring(data)
+                site = json.loads(data)
+                ops = []
+                for s in site:
+                    key = {"id":s["id"]}
+                    ops.append(pymongo.UpdateOne(key, {"$set": s}, upsert=True))
+                if len(ops) > 0:
+                    self.db["tideStation"].bulk_write(ops,ordered=False)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+    
+    def ProcessRain(self,url):
+        print("process rain url: %s" % url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                root = ET.fromstring(r.text)
                 pos = root.tag.find("}")
                 ns = root.tag[:pos+1]
     
@@ -133,17 +139,22 @@ class WeatherData:
                 if len(opSite) > 0:
                     self.db["rainStation"].bulk_write(opSite,ordered=False)
 
-                opData = []
+                opData = {}
                 opDaily = []
                 op10min = []
-                gridArr = []
+                gridArr = {}
                 for d in dataArr:
                     dayStr = d["time"].strftime('%Y%m%d')
+                    if dayStr not in opData:
+                        opData[dayStr] = []
+                    if dayStr not in gridArr:
+                        gridArr[dayStr] = []
+
                     key = {"stationID":d["stationID"],"time":d["time"]}
                     query = self.db["rain"+dayStr].find_one(key)
                     if query is None:
                         #self.db["rain"+dayStr].insert_one(d)
-                        opData.append(pymongo.UpdateOne(key, {"$set": d}, upsert=True))
+                        opData[dayStr].append(pymongo.UpdateOne(key, {"$set": d}, upsert=True))
                         inc = {}
                         loc = locHash[d["stationID"]]
                         area = util.LatToArea(loc["lat"])
@@ -159,26 +170,32 @@ class WeatherData:
                         grid = d.copy()
                         grid["lat"] = loc["lat"]
                         grid["lon"] = loc["lon"]
-                        gridArr.append(grid)
+                        gridArr[dayStr].append(grid)
 
-                self.db["rain"+dayStr].create_index("stationID")
-                self.db["rain"+dayStr].create_index("time")
-                if len(opData) > 0:
-                    self.db["rain"+dayStr].bulk_write(opData,ordered=False)
+                for key in opData:
+                    self.db["rain"+key].create_index("stationID")
+                    self.db["rain"+key].create_index("time")
+                    if len(opData[key]) > 0:
+                        self.db["rain"+key].bulk_write(opData[key],ordered=False)
+
                 if len(opDaily) > 0:
                     self.db["rainDailySum"].bulk_write(opDaily,ordered=False)
                 if len(op10min) > 0:
                     self.db["rain10minSum"].bulk_write(op10min,ordered=False)
-                self.grid.AddGridBatch("rainGrid"+dayStr,gridArr,"time",["now"],"lat","lon")
+
+                for key in gridArr:
+                    self.grid.AddGridBatch("rainGrid"+key,gridArr[key],"time",["now"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
 
-    def ProcessTyphoon(self, file):
-        print("process file %s" % file)
+    def ProcessTyphoon(self, url):
+        print("process typhoon url: %s" % url)
         try:
-            with open(file,"r",encoding="utf8") as f:
-                soup = BeautifulSoup(f.read(), 'html.parser')
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                soup = BeautifulSoup(r.text, 'html.parser')
                 typhoon = soup.find_all("tropicalcyclone")
                 ops = []
                 for tp in typhoon:
@@ -221,15 +238,43 @@ class WeatherData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
+
+    def ProcessTide(self, url):
+        print("process tide url: %s" % url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                ops = {}
+                tideArr = result["cwbopendata"]["dataset"]["location"]
+                for tide in tideArr:
+                    for time in tide["time"]:
+                        dateStr = ''.join(time["obsTime"].rsplit(':', 1))   #去掉時區的:
+                        dateObj = datetime.datetime.strptime(dateStr, "%Y-%m-%dT%H:%M:%S%z")
+                        t10min = dateObj.replace(minute=(dateObj.minute-dateObj.minute%10),second=0)
+                        dayStr = dateObj.strftime('%Y%m%d')
+                        if not dayStr in ops:
+                            ops[dayStr] = []
+                        
+                        value = time["weatherElement"]["elementValue"]["value"]
+                        if not value:
+                            continue
+                        d = {}
+                        d["stationID"] = tide["stationId"]
+                        d["time"] = t10min
+                        d["value"] = util.ToFloat(value)*0.01
+                        key = {"stationID":d["stationID"],"time":d["time"]}
+                        ops[dayStr].append(pymongo.UpdateOne(key, {"$set": d}, upsert=True))
+                for key in ops:
+                    self.db["tide"+key].create_index("stationID")
+                    self.db["tide"+key].create_index("time")
+                    if len(ops[key]) > 0:
+                        self.db["tide"+key].bulk_write(ops[key],ordered=False)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
             
-    def ProcessHistory(self):
-        batchNum = 16
-        folder = "data/rain/"
-        for i,filename in enumerate(os.listdir(folder)):
-            self.ProcessRain(folder+filename)
-            if i % batchNum == 0:
-                print("garbage collection")
-                gc.collect()
 
     def GenGridFromDB(self,startDate,endDate):
         try:

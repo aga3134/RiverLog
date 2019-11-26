@@ -33,6 +33,7 @@ var g_APP = new Vue({
       showSewer:true,
       showGate:false,
       showPump:true,
+      showTide:true,
       thresh: 10
     },
     reservoirOption: {collapse:false,opacity:0.5, scale:1, show:true},

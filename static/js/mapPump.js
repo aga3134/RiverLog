@@ -31,7 +31,7 @@ class MapPump extends MapLayer{
     UpdateIcon(id,lat,lng,levelIn,levelOut,pumping,clickFn){
     	var baseScale = Math.min(4,this.GetBaseScale());
 	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
-	    var valueScale = 0.02*baseScale*g_APP.waterLevelOption.scale;
+	    var valueScale = 0.01*baseScale*g_APP.waterLevelOption.scale;
 
 	    //arrow
 	    var arrowPath = [];
@@ -145,6 +145,7 @@ class MapPump extends MapLayer{
 		if(!data || !g_APP.waterLevelOption.showPump) return;
 		var offset = g_APP.TimeToOffset(g_APP.curTime);
 		var pumpData = g_APP.GetDataFromTime(data,g_APP.curTime);
+		if(!pumpData) return;
 
 		var baseSize = this.GetBaseScale()*g_APP.waterLevelOption.scale;
 		for(var i=0;i<pumpData.length;i++){
