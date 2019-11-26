@@ -128,13 +128,13 @@ class MapTyphoon extends MapLayer{
 	}
 
 	ClearMap(){
-    for(var key in this.layer){
-    	if(this.layer[key]){
-    		for(var graph in this.layer[key]){
-    			this.layer[key][graph].setMap(null);
-    		}
-    	}
-    }
-  }
+		for(var key in this.layer){
+			if(this.layer[key]){
+				for(var graph in this.layer[key]){
+					this.layer[key][graph].setMap(null);
+				}
+			}
+		}
+	}
 
 }

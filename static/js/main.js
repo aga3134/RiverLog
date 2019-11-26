@@ -32,6 +32,7 @@ var g_APP = new Vue({
       showAgri:true,
       showSewer:true,
       showGate:false,
+      showPump:true,
       thresh: 10
     },
     reservoirOption: {collapse:false,opacity:0.5, scale:1, show:true},

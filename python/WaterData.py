@@ -35,6 +35,7 @@ class WaterData:
         self.AddWaterLevelSite()
         self.AddReservoirSite()
         self.AddSewerSite()
+        self.AddPumpSite()
             
     def CollectData10min(self):
         try:
@@ -56,6 +57,7 @@ class WaterData:
             #collect water level from fhy website for more real time data
             self.ProcessWaterLevelFromWebsite()
             self.ProcessSewerData()
+            self.ProcessPumpData()
 
             self.ProcessFlood("https://sta.ci.taiwan.gov.tw/STA_WaterResource_lastest/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E6%B7%B1%E5%BA%A6%27,Datastream/name)%20&$count=true")
             self.ProcessWaterLevel("https://sta.ci.taiwan.gov.tw/STA_WaterLevel_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)&$count=true")
@@ -216,6 +218,46 @@ class WaterData:
                     ops.append(pymongo.UpdateOne(key, {"$set": site}, upsert=True))
                 if len(ops) > 0:
                     self.db["sewerStation"].bulk_write(ops,ordered=False)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def AddPumpSite(self):
+        try:
+            print("add pump sites")
+            url = "https://data.taipei/api/getDatasetInfo/downloadResource?id=b2f7eeba-34a2-4239-a434-ea7986b2bb12&rid=90441775-dda1-461c-8424-9dae7a8ab776"
+            r = requests.get(url)
+            r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                soup = BeautifulSoup(r.text, "xml")
+                placeArr = soup.Folder.find_all("Placemark")
+                ops = []
+                for place in placeArr:
+                    coord = place.find("coordinates").string.split(",")
+                    site = {}
+                    site["lat"] = util.ToFloat(coord[1])
+                    site["lng"] = util.ToFloat(coord[0])
+
+                    data = place.find_all("SimpleData")
+                    for d in data:
+                        name = d.get("name")
+                        if name == "PUMP_ID":
+                            site["id"] = d.string
+                        elif name == "行政區域":
+                            site["district"] = d.string
+                        elif name == "河系":
+                            site["system"] = d.string
+                        elif name == "管理單位別":
+                            site["admin"] = d.string
+                        elif name == "站名":
+                            site["name"] = d.string
+                        elif name == "建置年度":
+                            site["buildDate"] = d.string
+                    key = {"id":site["id"]}
+                    #self.db["sewerStation"].update(key,site,upsert=True)
+                    ops.append(pymongo.UpdateOne(key, {"$set": site}, upsert=True))
+                if len(ops) > 0:
+                    self.db["pumpStation"].bulk_write(ops,ordered=False)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -789,7 +831,7 @@ class WaterData:
                     t = t.replace(tzinfo=taiwan)
                     f["time"] = t
                     f["value"] = d["levelOut"]
-                    key = {"stationID":f["stationNo"],"time":f["time"]}
+                    key = {"stationNo":f["stationNo"],"time":f["time"]}
                     day = datetime.datetime.strftime(t,"%Y%m%d")
                     query = self.db["sewer"+day].find_one(key)
                     if query is None:
@@ -808,6 +850,59 @@ class WaterData:
                 self.db["sewer"+day].create_index("stationNo")
                 if len(ops) > 0:
                     self.db["sewer"+day].bulk_write(ops,ordered=False)
+                #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
+
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessPumpData(self):
+        print("process pump data")
+        try:
+            r = requests.get("http://117.56.59.17/OpenData/API/Pump/Get?stationNo=&loginId=pumping&dataKey=3D9A9570")
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                data = result["data"]
+
+                cursor = self.db["pumpStation"].find({})
+                siteHash = {}
+                for site in cursor:
+                    siteHash[site["id"]] = site
+                
+                ops = []
+                gridArr = []
+                for d in data:
+                    f = {}
+                    f["stationNo"] = d["stationNo"]
+                    t = datetime.datetime.strptime(d["recTime"],'%Y%m%d%H%M')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
+                    t = t.replace(tzinfo=taiwan)
+                    f["time"] = t
+                    f["levelIn"] = d["levelIn"]
+                    f["levelOut"] = d["levelOut"]
+                    f["allPumbLights"] = d["allPumbLights"]
+                    f["pumbNum"] = d["pumbNum"]
+                    f["doorNum"] = d["doorNum"]
+                    key = {"stationNo":f["stationNo"],"time":f["time"]}
+                    day = datetime.datetime.strftime(t,"%Y%m%d")
+                    query = self.db["pump"+day].find_one(key)
+                    if query is None:
+                        #self.db["pump"+day].insert_one(f)
+                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+
+                        if f["stationNo"] in siteHash:
+                            s = siteHash[f["stationNo"]]
+                            grid = f.copy()
+                            grid["lat"] = s["lat"]
+                            grid["lng"] = s["lng"]
+                            #self.grid.AddGridSewer(f)
+                            gridArr.append(grid)
+
+                self.db["pump"+day].create_index("time")
+                self.db["pump"+day].create_index("stationNo")
+                if len(ops) > 0:
+                    self.db["pump"+day].bulk_write(ops,ordered=False)
                 #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
 
         except:
