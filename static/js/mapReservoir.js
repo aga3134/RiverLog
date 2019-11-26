@@ -98,12 +98,12 @@ class MapReservoir extends MapLayer{
         if(result.status != "ok") return;
         if(result.data.length == 0) return;
         var pos = "0-0";
+        if(!data[pos]) data[pos] = {};
 
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
           var t = dayjs(d[this.timeKey]).format("HH:mm:ss");
           d[this.timeKey] = t;
-          if(!data[pos]) data[pos] = {};
           if(!data[pos][t]) data[pos][t] = [];
           data[pos][t].push(d);
 
