@@ -14,6 +14,11 @@ class MapPump extends MapLayer{
 		MapLayer.prototype.LoadLayer.call(this,param);
 	}
 
+	GetBaseScale(){
+      var zoom = this.map.getZoom();
+      return Math.min(4,Math.pow(1.6,9-zoom));
+    }
+
     UpdateInfoWindow(d){
     	var str = "";
 		var loc = null;
@@ -29,9 +34,9 @@ class MapPump extends MapLayer{
     }
 
     UpdateIcon(id,lat,lng,levelIn,levelOut,pumping,clickFn){
-    	var baseScale = Math.min(4,this.GetBaseScale());
-	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
-	    var valueScale = 0.01*baseScale*g_APP.waterLevelOption.scale;
+    	var baseScale = this.GetBaseScale();
+	    var scale = 0.02*baseScale*g_APP.waterLevelOption.scale;
+	    var valueScale = 0.007*baseScale*g_APP.waterLevelOption.scale;
 
 	    //arrow
 	    var arrowPath = [];

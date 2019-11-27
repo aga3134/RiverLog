@@ -52,7 +52,7 @@ class MapWaterLevel extends MapLayer{
 
     GetBaseScale(){
       var zoom = this.map.getZoom();
-      return 1*Math.pow(1.5,9-zoom);
+      return Math.min(4,Math.pow(1.7,9-zoom));
     }
 
     GenIcon(lat,lng,value1,value2){
@@ -60,7 +60,7 @@ class MapWaterLevel extends MapLayer{
     	var minValue = Math.min(value1,value2);
     	var maxValue = Math.max(value1,value2);
 
-    	var baseScale = Math.min(4,this.GetBaseScale());
+    	var baseScale = this.GetBaseScale();
 	    var scale = 0.03*baseScale*g_APP.waterLevelOption.scale;
 	    var valueScale = 0.03*baseScale*g_APP.waterLevelOption.scale;
 	    var thresh = g_APP.waterLevelOption.thresh*0.01;
