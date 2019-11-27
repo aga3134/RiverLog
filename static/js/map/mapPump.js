@@ -26,6 +26,7 @@ class MapPump extends MapLayer{
 	    str = "<p>"+s.name+" 抽水站</p>";
 	    str += "<p>內水水位 "+d.levelIn.toFixed(2)+" m";
 	    str += "<p>外水水位 "+d.levelOut.toFixed(2)+" m";
+	    str += "<p>總抽水狀態: "+d.allPumbLights;
 	    str += "<p>時間 "+d.time+" </p>";
 	    //str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"pump\");'>今日變化</div></div>";
 	    loc = new google.maps.LatLng(s.lat, s.lng); 

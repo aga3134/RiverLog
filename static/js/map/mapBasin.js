@@ -33,6 +33,7 @@ class MapBasin extends MapLayer{
 	}
 
 	FeatureClick(event){
+		if(!g_APP.mapOption.showBasin) return;
 		var name = event.feature.getProperty("name");
 		var content = name+"流域";
 		var loc = event.feature.getProperty("loc");
