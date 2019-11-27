@@ -169,7 +169,7 @@ class MapWaterLevel extends MapLayer{
 			var value = 0;
 			if(preDataHash[sID]){
 				if(preDataHash[sID][valueKey] && waterLevelData[i][valueKey]){
-					value = this.ComputeDiff(waterLevelData[i][valueKey],preDataHash[sID][valueKey]);
+					value = this.ComputeDiff(preDataHash[sID][valueKey],waterLevelData[i][valueKey]);
 				}
 			}
 			waterLevelData[i].diff = value;
