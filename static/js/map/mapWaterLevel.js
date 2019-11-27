@@ -36,7 +36,7 @@ class MapWaterLevel extends MapLayer{
 		}
 		else{
 			var s = this.data.site[d.StationIdentifier];
-		    str = "<p>"+s.ObservatoryName+"</p>";
+		    str = "<p>"+s.ObservatoryName+" 河川水位</p>";
 		    str += "<p>溪流 "+s.RiverName+"</p>";
 		    str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
 		    if(d.diff >= 0) str += "+";

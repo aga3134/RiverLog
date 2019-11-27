@@ -37,7 +37,7 @@ class MapBasin extends MapLayer{
 		var content = name+"流域";
 		var loc = event.feature.getProperty("loc");
 		if(content != ""){
-			this.infoWindow.setOptions({content: name,position: loc});
+			this.infoWindow.setOptions({content: content,position: loc});
 			this.infoWindow.open(this.map);
 			this.infoTarget = event.feature.getId();
 		}

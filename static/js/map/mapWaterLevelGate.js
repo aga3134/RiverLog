@@ -83,7 +83,7 @@ class MapWaterLevelGate extends MapWaterLevel{
 		}
 		else{
 			var s = this.data.site[d.stationID];
-		    str = "<p>"+s.stationName+"</p>";
+		    str = "<p>"+s.stationName+" 閘門水位</p>";
 		    for(var key in d.diff){
 		    	str += "<p>"+key+" "+d.value[key].toFixed(2)+" m";
 		    	if(d.diff[key]){

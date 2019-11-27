@@ -33,7 +33,7 @@ class MapTide extends MapWaterLevel{
 		}
 		else{
 			var s = this.data.site[d.stationID];
-		    str = "<p>"+s.name+"</p>";
+		    str = "<p>"+s.name+" 潮位</p>";
 		    str += "<p>潮位 "+d.value.toFixed(2)+" m (";
 		    if(d.diff >= 0) str += "+";
 		    str += d.diff.toFixed(2)+" m)</p>";

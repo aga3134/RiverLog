@@ -23,7 +23,7 @@ class MapPump extends MapLayer{
     	var str = "";
 		var loc = null;
 		var s = this.data.site[d.stationNo];
-	    str = "<p>"+s.name+"</p>";
+	    str = "<p>"+s.name+" 抽水站</p>";
 	    str += "<p>內水水位 "+d.levelIn.toFixed(2)+" m";
 	    str += "<p>外水水位 "+d.levelOut.toFixed(2)+" m";
 	    str += "<p>時間 "+d.time+" </p>";

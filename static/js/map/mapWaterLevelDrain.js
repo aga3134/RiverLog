@@ -33,7 +33,7 @@ class MapWaterLevelDrain extends MapWaterLevel{
 		}
 		else{
 			var s = this.data.site[d.stationID];
-		    str = "<p>"+s.stationName+"</p>";
+		    str = "<p>"+s.stationName+" 區域排水水位</p>";
 		    str += "<p>水位 "+d.value.toFixed(2)+" m (";
 		    if(d.diff >= 0) str += "+";
 		    str += d.diff.toFixed(2)+" m)</p>";

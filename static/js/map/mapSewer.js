@@ -33,7 +33,7 @@ class MapSewer extends MapWaterLevel{
 		}
 		else{
 			var s = this.data.site[d.stationNo];
-		    str = "<p>"+s.name+"</p>";
+		    str = "<p>"+s.name+" 下水道水位</p>";
 		    str += "<p>水位 "+d.value.toFixed(2)+" m (";
 		    if(d.diff >= 0) str += "+";
 		    str += d.diff.toFixed(2)+" m)</p>";
