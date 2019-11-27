@@ -1967,6 +1967,33 @@ WaterUseStatistic.prototype.UpdateReservoirDetail = function(){
 
 };
 
+WaterUseStatistic.prototype.GetEncodeOptionArr = function(){
+	var arr = [];
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opType, this.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opAgricultureType, this.agricultureData.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opCultivationType, this.cultivationData.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opLivestockType, this.livestockData.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opIndustryType, this.industryData.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opLivingType, this.livingData.type), bitNum: 4});
+	arr.push({value: g_WaterUse.OpValueToIndex(this.opReservoirType, this.reservoirData.type), bitNum: 4});
+	arr.push({value: (this.year-1911), bitNum: 8});
+	arr.push({value: this.playSpeed, bitNum: 8});
+	return arr;
+};
+
+WaterUseStatistic.prototype.GetBitNumArr = function(){
+	var arr = [];
+	arr.push({name:"waterUseType",bitNum:4});
+	arr.push({name:"waterUseAgricultureType",bitNum:4});
+	arr.push({name:"waterUseCultivationType",bitNum:4});
+	arr.push({name:"waterUseLivestockType",bitNum:4});
+	arr.push({name:"waterUseIndustryType",bitNum:4});
+	arr.push({name:"waterUseLivingType",bitNum:4});
+	arr.push({name:"waterUseReservoirType",bitNum:4});
+	arr.push({name:"waterUseYear",bitNum:8});
+	arr.push({name:"waterUsePlaySpeed",bitNum:8});
+	return arr;
+};
 
 WaterUseStatistic.prototype.RestoreOption = function(valueArr){
   this.type = this.opType[valueArr["waterUseType"]].value;

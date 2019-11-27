@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+	<head>
+		<% include head %>
+	</head>
+	<body>
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.16/dayjs.min.js"></script>
+
+		<div id="waterUse" class="riverlog">
+			<div class="topbar">
+				<a href="/">
+					<img class="logo" src="/static/Image/logo-text.png">
+					<img class="logo-mobile" src="/static/Image/logo.png">
+				</a>
+				<select v-model="url" v-on:change="ChangeUrl();">
+					<option v-for="op in opUrl" v-bind:value="op.url">{{op.name}}</option>
+				</select>
+			</div>
+			
+			<div class="main-content">
+				<div class="icon-container">
+					<img class="icon" src="/static/Image/icon-setting.png" title="參數設定" v-on:click="SwitchPanel('option');">
+					<img class="icon" src="/static/Image/icon-about.png" title="關於本站" v-on:click="SwitchPanel('about');">
+					<img class="icon" src="/static/Image/icon-sponsor.png" title="贊助專案" v-on:click="SwitchPanel('sponsor');">
+				</div>
+
+				<div class="side-panel" v-bind:class="{open: openOption}">
+					<div class="panel-switch">
+						<img class="bt" src="/static/Image/icon-close.png" v-on:click="openOption=false;">
+					</div>
+
+					<div v-show="waterUse.type == 'agriculture'">
+						<div class="option-category">灌溉用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.agricultureData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opAgricultureType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div v-show="waterUse.type == 'cultivation'">
+						<div class="option-category">養殖用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.cultivationData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opCultivationType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div v-show="waterUse.type == 'livestock'">
+						<div class="option-category">畜牧用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.livestockData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opLivestockType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div v-show="waterUse.type == 'industry'">
+						<div class="option-category">工業用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.industryData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opIndustryType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div v-show="waterUse.type == 'living'">
+						<div class="option-category">生活用水</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.livingData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opLivingType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div v-show="waterUse.type == 'reservoir'">
+						<div class="option-category">水庫統計</div>
+						<div class="option-item">
+							<div class="option-label">統計項目</div>
+							<select v-model="waterUse.reservoirData.type" v-on:change="waterUse.UpdateGraph();">
+								<option v-for="op in waterUse.opReservoirType" v-bind:value="op.value">{{op.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="option-category">動態播放</div>
+					<div class="option-item">
+						<input type="range" min="1" max="10" step="1" v-model="waterUse.playSpeed" v-on:change="waterUse.UpdatePlaySpeed();">
+						<div class="option-label">播放速度</div>
+					</div>
+				</div>
+				
+				<div class="graph-content" v-if="waterUse">
+					<select v-model="waterUse.type" v-on:change="waterUse.UpdateGraph();">
+						<option v-for="op in waterUse.opType" v-bind:value="op.value">{{op.name}}</option>
+					</select>
+
+					<div class="graph-container" v-if="waterUse.type == 'overview' ">
+						<div class="half-w">
+							<div class="graph-title">總用水供給</div>
+							<div class="graph" id="overviewSupply"></div>
+							<div class="graph-info" id="overviewSupplyText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">總用水需求</div>
+							<div class="graph" id="overviewConsumption"></div>
+							<div class="graph-info" id="overviewConsumptionText"></div>
+						</div>
+					</div>
+						
+					<div class="graph-container" v-if="waterUse.type == 'agriculture' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.agricultureData.type}}統計</div>
+							<div class="graph graph-border" id="agricultureMap"></div>
+							<div class="graph-info" id="agricultureMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.agricultureData.type}}排名</div>
+							<div class="graph graph-border" id="agricultureRank"></div>
+							<div class="graph-info" id="agricultureRankText"></div>
+						</div>
+					</div>
+						
+					<div class="graph-container" v-if="waterUse.type == 'cultivation' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.cultivationData.type}}統計</div>
+							<div class="graph graph-border" id="cultivationMap"></div>
+							<div class="graph-info" id="cultivationMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.cultivationData.type}}排名</div>
+							<div class="graph graph-border" id="cultivationRank"></div>
+							<div class="graph-info" id="cultivationRankText"></div>
+						</div>
+					</div>
+
+					<div class="graph-container" v-if="waterUse.type == 'livestock' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.livestockData.type}}統計</div>
+							<div class="graph graph-border" id="livestockMap"></div>
+							<div class="graph-info" id="livestockMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.livestockData.type}}排名</div>
+							<div class="graph graph-border" id="livestockRank"></div>
+							<div class="graph-info" id="livestockRankText"></div>
+						</div>
+					</div>
+
+					<div class="graph-container" v-if="waterUse.type == 'industry' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.industryData.type}}統計</div>
+							<div class="graph graph-border" id="industryMap"></div>
+							<div class="graph-info" id="industryMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.industryData.type}}排名</div>
+							<div class="graph graph-border" id="industryRank"></div>
+							<div class="graph-info" id="industryRankText"></div>
+						</div>
+					</div>
+
+					<div class="graph-container" v-if="waterUse.type == 'living' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.livingData.type}}統計</div>
+							<div class="graph graph-border" id="livingMap"></div>
+							<div class="graph-info" id="livingMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.livingData.type}}排名</div>
+							<div class="graph graph-border" id="livingRank"></div>
+							<div class="graph-info" id="livingRankText"></div>
+						</div>
+					</div>
+
+					<div class="graph-container" v-if="waterUse.type == 'reservoir' ">
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.reservoirData.type}}統計</div>
+							<div class="graph graph-border" id="reservoirMap"></div>
+							<div class="graph-info" id="reservoirMapText"></div>
+						</div>
+						<div class="half-w">
+							<div class="graph-title">{{waterUse.reservoirData.type}}排名</div>
+							<div class="graph graph-border" id="reservoirRank"></div>
+							<div class="graph-info" id="reservoirRankText"></div>
+						</div>
+					</div>
+
+					<div class="detail-panel" v-bind:class="{open: waterUse.openDetailPanel}">
+						<img src="/static/Image/icon-close.png" class="close-bt" v-on:click="waterUse.openDetailPanel = false;">
+
+						<div class="graph-container" v-if="waterUse.type == 'agriculture' ">
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} {{waterUse.agricultureData.type}}</div>
+								<div class="graph" id="agricultureCategory"></div>
+								<div class="graph-info" id="agricultureCategoryText"></div>
+							</div>
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.agricultureData.select">{{waterUse.agricultureData.select.name}} {{waterUse.agricultureData.type}}比例</div>
+								<div class="graph" id="agricultureRatio"></div>
+								<div class="graph-info" id="agricultureRatioText"></div>
+							</div>
+						</div>
+
+						<div class="graph-container" v-if="waterUse.type == 'cultivation' ">
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.cultivationData.select">{{waterUse.cultivationData.select.name}} {{waterUse.cultivationData.type}}</div>
+								<div class="graph" id="cultivationCategory"></div>
+								<div class="graph-info" id="cultivationCategoryText"></div>
+							</div>
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.cultivationData.select">{{waterUse.cultivationData.select.name}} {{waterUse.cultivationData.type}}比例</div>
+								<div class="graph" id="cultivationRatio"></div>
+								<div class="graph-info" id="cultivationRatioText"></div>
+							</div>
+						</div>
+
+						<div class="graph-container" v-if="waterUse.type == 'livestock' ">
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.livestockData.select">{{waterUse.livestockData.select.name}} {{waterUse.livestockData.type}}</div>
+								<div class="graph" id="livestockCategory"></div>
+								<div class="graph-info" id="livestockCategoryText"></div>
+							</div>
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.livestockData.select">{{waterUse.livestockData.select.name}} {{waterUse.livestockData.type}}比例</div>
+								<div class="graph" id="livestockRatio"></div>
+								<div class="graph-info" id="livestockRatioText"></div>
+							</div>
+						</div>
+
+						<div class="graph-container" v-if="waterUse.type == 'industry' ">
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.industryData.select">{{waterUse.industryData.select.name}} {{waterUse.industryData.type}}</div>
+								<div class="graph" id="industryCategory"></div>
+								<div class="graph-info" id="industryCategoryText"></div>
+							</div>
+							<div class="half-w">
+								<div class="graph-title" v-if="waterUse.industryData.select">{{waterUse.industryData.select.name}} {{waterUse.industryData.type}}比例</div>
+								<div class="graph" id="industryRatio"></div>
+								<div class="graph-info" id="industryRatioText"></div>
+							</div>
+						</div>
+
+						<div class="graph-container" v-if="waterUse.type == 'living' ">
+							<div class="full-w">
+								<div class="graph-title" v-if="waterUse.livingData.select">{{waterUse.livingData.select.name}} 每人每日生活用水量</div>
+								<div class="graph" id="monthUse"></div>
+								<div class="graph-info" id="monthUseText"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="fix-bottom">
+						<div class="time-bar" id="timeBar">
+							<div class="label">{{waterUse.year}} 年</div>
+							<input id="timeRange"
+								v-on:change="waterUse.UpdateGraph();"
+								type="range" v-bind:min="waterUse.minYear" v-bind:max="waterUse.maxYear" v-model="waterUse.year" class="slider">
+							<div>
+								<img id="prevBt" class="control-icon" src="/static/Image/icon-prev.png" v-on:click="waterUse.PrevYear();">
+								<img id="playBt" class="control-icon" v-if="waterUse.isPlay" src="/static/Image/icon-pause.png" v-on:click="waterUse.ToggleYearPlay();">
+								<img id="playBt" class="control-icon" v-else src="/static/Image/icon-play.png" v-on:click="waterUse.ToggleYearPlay();">
+								<img id="nextBt" class="control-icon" src="/static/Image/icon-next.png" v-on:click="waterUse.NextYear();">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<transition name="fade">
+				<div class="full-panel" v-if="openAbout">
+					<img class="close-bt" src="/static/Image/icon-close.png" v-on:click="openAbout=false;">
+					<div class="content-area">
+						<div class="content-title">資料來源</div>
+						<ul>
+							<li>總供/用水量: <a href="https://erdb.epa.gov.tw/DataRepository/Statistics/StatSceWaterrecNew.aspx" target="_blank">環境資源資料庫 - 水資源供需</a></li>
+							<li>灌溉用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencyirrigationareaandwaterconsumptionstatisticsforagriculturalusage" target="_blank">水資料分享站 - 灌溉面積與灌溉用水量統計</a></li>
+							<li>養殖用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencycultivaionareaandwaterconsumptionstatisticsforagriculturalusage" target="_blank">水資料分享站 - 養殖面積與養殖用水量統計</a></li>
+							<li>畜牧用水量: <a href="https://scidm.nchc.org.tw/en/dataset/waterresourcesagencylivestockquantityandwaterconsumptionstatisticsforagriculturalusage" target="_blank">資料集平台 - 畜牧數與畜牧用水量統計</a></li>
+							<li>工業用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencywaterconsumptionandareaforindustrialusage" target="_blank">水資料分享站 - 工業用水量與工業面積</a></li>
+							<li>生活用水量: <a href="http://wise.wra.gov.tw/dataset/waterresourcesagencywaterconsumptionstatisticsfordomesticusage" target="_blank">水資料分享站 - 生活用水量統計</a></li>
+							<li>自來水每月用水量: <a href="http://wise.wra.gov.tw/dataset/theconsumptionofwater" target="_blank">水資料分享站 - 自來水用水量</a></li>
+							<li>水庫統計:
+								<a href="http://wise.wra.gov.tw/dataset/reservoirsoperationstatisticaldata" target="_blank">水資料分享站 - 水庫營運</a>，
+								<a href="http://wise.wra.gov.tw/dataset/reservoirssedimentationstatisticaldata" target="_blank">水資料分享站 - 水庫淤積量</a>
+							</li>
+							<li>水利會位置: <a href="https://www.google.com.tw/maps" target="_blank">google map搜尋</a></li>
+							<li>工業業別: <a href="https://www.stat.gov.tw/ct.asp?mp=4&xItem=42276&ctNode=1309" target="_blank">中華民國統計資訊網 - 第10次修訂行業分類查詢</a></li>
+							<li>縣市界線: <a href="https://data.gov.tw/dataset/7442" target="_blank">政府資料開放平台-直轄市、縣市界線(TWD97經緯度)</a></li>
+							<li>鄉鎮界線: <a href="https://data.gov.tw/dataset/7441" target="_blank">政府資料開放平台-鄉鎮市區界線(TWD97經緯度)</a></li>
+						</ul>
+
+						<div class="content-title">參考資料</div>
+						<ul>
+							<li><a href="https://www.taiwanstat.com/statistics/" target="_blank">用數據看台灣 - 台灣開放統計資料</a></li>
+							<li><a href="https://deathnote.agawork.tw/" target="_blank">台灣の死亡筆記本</a></li>
+							<li><a href="https://www.books.com.tw/products/0010790443" target="_blank">真確：扭轉十大直覺偏誤，發現事情比你想的美好</a></li>
+						</ul>
+						<% include about %>
+					</div>
+				</div>
+			</transition>
+
+			<% include sponsor %>
+
+			<div class="welcome-page" v-show="loading">
+				<img class="logo" src="/static/Image/logo.png?v=<%=meta.version%>">
+				<img class="logo-text" src="/static/Image/logo-text.png?v=<%=meta.version%>">
+			</div>
+		</div>
+
+		
+		<script src="/static/js/util.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/optionCodec.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/svgGraph.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/waterUse/waterUseStatistic.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/waterUse/waterUse.js?v=<%=meta.version%>"></script>
+	</body>
+</html>

@@ -13,7 +13,7 @@ var g_Util = function(){
 	};
 
 	var GetUrlHash = function(){
-		var queryStr = window.location.hash;
+		var queryStr = window.location.hash.substr(1);
 		var paramArr = queryStr.split('&');
 
 		var result = {};

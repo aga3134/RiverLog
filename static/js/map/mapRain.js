@@ -202,7 +202,7 @@ class MapRain extends MapLayer{
 
     DrawGrid(data){
 		if(!this.map) return;
-		if(!data) return;
+		if(!data || !g_APP.rainOption.show) return;
 
 		var offset = g_APP.TimeToOffset(g_APP.curTime);
 		offset -= 1;

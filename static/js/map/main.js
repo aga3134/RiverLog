@@ -56,17 +56,16 @@ var g_APP = new Vue({
     elevOption:{collapse:false,opacity:0.6, show:false, minElev:0, maxElev:100},
     mapOption: {
       collapse:false,
-      mapType: "waterEvent",
       useSatellite: false,
       waterHighlight: false,
       showBasin: false,
       playSpeed: 5,
     },
-    waterUse: null,
     dateInfo: {date: "", alert: ""},
-    opMapType: [
-      {name: "水事件地圖", value:"waterEvent"},
-      {name: "用水統計", value:"waterUse"},
+    url: "/",
+    opUrl: [
+      {name: "水事件地圖", url:"/"},
+      {name: "用水統計", url:"/waterUse"},
     ],
     opRainType: [
       {name: "日累積雨量", value:"daily"},
@@ -117,9 +116,7 @@ var g_APP = new Vue({
     });
 
     this.mapControl = new MapControl();
-    this.waterUse = new WaterUseStatistic();
     this.ParseParameter();
-
     google.maps.event.addDomListener(window, 'load', this.InitMap);
     this.loading = false;
   },
@@ -151,20 +148,8 @@ var g_APP = new Vue({
         .domain(this.color.elevDomain)
         .range(this.color.elevRange);
     },
-    UpdateMapType: function(){
-      this.UpdateUrl();
-      switch(this.mapOption.mapType){
-        case "waterEvent":
-          Vue.nextTick(function(){
-            this.ChangeYear(this.curYear);
-          }.bind(this));
-          break;
-        case "waterUse":
-          Vue.nextTick(function(){
-            this.waterUse.UpdateGraph();
-          }.bind(this));
-          break;
-      }
+    ChangeUrl: function(){
+      window.location.href = this.url;
     },
     InitMap: function(){
       var param = {
@@ -173,7 +158,7 @@ var g_APP = new Vue({
         succFunc: function(){
           this.searchBox = new google.maps.places.SearchBox(document.getElementById("placeSearch"));
           google.maps.event.addListener(this.searchBox, 'places_changed', this.SearchPlace);
-          this.UpdateMapType();
+          this.ChangeYear(this.curYear);
         }.bind(this)
       };
       this.mapControl.InitMap(param);
@@ -368,6 +353,7 @@ var g_APP = new Vue({
       this.openOption = false;
       this.openAbout = false;
       this.openLocation = false;
+      this.openSponsor = false;
       switch(type){ 
         case "date":
           this.openDateSelect = true;
@@ -668,147 +654,67 @@ var g_APP = new Vue({
       if(param.zoom){
         this.initLoc.zoom = parseInt(param.zoom);
       }
-      if(param.option){
-        this.DecodeOptionString(param.option);
+      if(param.option && param.v){
+        this.DecodeOptionString(param.option,param.v);
       }
     },
     UpdateUrl: function(){
       if(!this.mapControl) return;
       var loc = this.mapControl.GetLocation();
       if(!loc) return;
+      var version = 1;
       var hash = "#year="+this.curYear;
       hash += "&date="+this.curDate;
       hash += "&time="+this.curTime;
       hash += "&lat="+loc.lat.toFixed(6);
       hash += "&lng="+loc.lng.toFixed(6);
       hash += "&zoom="+loc.zoom;
+      hash += "&v="+version;
       hash += "&option="+this.EncodeOptionString();
       //location.hash = hash;
       history.replaceState(undefined, undefined, hash);
     },
-    OpValueToIndex: function(opArr, value){
-      for(var i=0;i<opArr.length;i++){
-        var op = opArr[i];
-        if(value == op.value){
-          return i;
-        }
-      }
-      return 0;
-    },
     EncodeOptionString: function(){
-
-      function NumberToChar(number){  //5bit number only
-        var chArr = [];
-        for(var i=0;i<10;i++){  //0~10
-          var ch = String.fromCharCode(48+i);
-          chArr.push(ch);
-        }
-        for(var i=10;i<32;i++){  //a~z
-          var ch = String.fromCharCode(97+i-10);
-          chArr.push(ch);
-        }
-        if(number < 0 || number >= chArr.length) return "";
-        else return chArr[number];
-      }
-
-      function ValueArrToString(arr){
-        var str = "";
-        var encodeBit = 5;
-        var bitValue = 0, bitPos = 0;
-        //console.log("======================");
-        for(var i=0;i<arr.length;i++){
-          var value = arr[i].value;
-          var bitNum = arr[i].bitNum;
-          //console.log("value:"+value+" bitNum:"+bitNum);
-          var bitMask = (1<<bitNum)-1;
-          value = value & bitMask;
-          while(bitNum > 0){
-            //console.log("init bit:"+bitNum);
-            if(bitPos + bitNum >= encodeBit){ //bit數已滿，輸出新字元後buffer歸零
-              var useBit = encodeBit-bitPos;
-              //console.log("use bit: "+useBit);
-              var useMask = (1<<useBit)-1;
-              var useValue = (value & useMask)<<bitPos;
-              var encodeValue = bitValue + useValue;
-              str = NumberToChar(encodeValue)+str;
-              value = value >> useBit;
-              bitNum -= useBit;
-              //console.log("str: "+str);
-              //console.log("remain bit:"+bitNum);
-              //console.log("remain value:"+value);
-              bitValue = 0;
-              bitPos = 0;
-            }
-            else{ //bit數未滿，更新buffer
-              //console.log("residual bit:"+bitNum);
-              var useMask = (1<<bitNum)-1;
-              var useValue = (value & useMask)<<bitPos;
-              bitValue += useValue;
-              bitPos += bitNum;
-              bitNum = 0;
-              //console.log("residual value:"+bitValue);
-              //console.log("residual pos:"+bitPos);
-            }
-            
-          }
-        }
-        if(bitPos > 0){
-          str = NumberToChar(bitValue)+str;
-        }
-        return str;
-      }
-
-      /*
-      //test: should be 1og
-      var arr = [
-        {value: 16, bitNum:8},
-        {value: 1, bitNum:1},
-        {value: 3, bitNum:4},
-      ];
-      console.log(ValueArrToString(arr));*/
-
       var arr = [];
       //rain option
       arr.push({value: (this.rainOption.collapse?1:0),bitNum: 1});
+      arr.push({value: (this.rainOption.show?1:0),bitNum: 1});
+      arr.push({value: g_OptionCodec.OpValueToIndex(this.opRainType,this.rainOption.type),bitNum: 4});
       arr.push({value: Math.round(this.rainOption.opacity*10),bitNum: 8});
       arr.push({value: Math.round(this.rainOption.scale*10),bitNum: 8});
-      arr.push({value: (this.rainOption.show?1:0),bitNum: 1});
-      arr.push({value: this.OpValueToIndex(this.opRainType,this.rainOption.type),bitNum: 4});
-      
+
       //water level option
       arr.push({value: (this.waterLevelOption.collapse?1:0),bitNum: 1});
-      arr.push({value: Math.round(this.waterLevelOption.opacity*10),bitNum: 8});
-      arr.push({value: Math.round(this.waterLevelOption.scale*10),bitNum: 8});
       arr.push({value: (this.waterLevelOption.showRiver?1:0),bitNum: 1});
       arr.push({value: (this.waterLevelOption.showDrain?1:0),bitNum: 1});
       arr.push({value: (this.waterLevelOption.showAgri?1:0),bitNum: 1});
       arr.push({value: (this.waterLevelOption.showSewer?1:0),bitNum: 1});
-      //arr.push({value: (this.waterLevelOption.showGate?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showPump?1:0),bitNum: 1});
+      arr.push({value: (this.waterLevelOption.showTide?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.waterLevelOption.opacity*10),bitNum: 8});
+      arr.push({value: Math.round(this.waterLevelOption.scale*10),bitNum: 8});
       arr.push({value: this.waterLevelOption.thresh,bitNum: 8});
 
       //reservoir option
       arr.push({value: (this.reservoirOption.collapse?1:0),bitNum: 1});
+      arr.push({value: (this.reservoirOption.show?1:0),bitNum: 1});
       arr.push({value: Math.round(this.reservoirOption.opacity*10),bitNum: 8});
       arr.push({value: Math.round(this.reservoirOption.scale*10),bitNum: 8});
-      arr.push({value: (this.reservoirOption.show?1:0),bitNum: 1});
 
       //flood option
       arr.push({value: (this.floodOption.collapse?1:0),bitNum: 1});
+      arr.push({value: (this.floodOption.show?1:0),bitNum: 1});
       arr.push({value: Math.round(this.floodOption.opacity*10),bitNum: 8});
       arr.push({value: Math.round(this.floodOption.scale*10),bitNum: 8});
-      arr.push({value: (this.floodOption.show?1:0),bitNum: 1});
       arr.push({value: this.floodOption.thresh,bitNum: 8});
 
       //typhoon option
       arr.push({value: (this.typhoonTrajectoryOption.collapse?1:0),bitNum: 1});
-      arr.push({value: Math.round(this.typhoonTrajectoryOption.opacity*10),bitNum: 8});
       arr.push({value: (this.typhoonTrajectoryOption.show?1:0),bitNum: 1});
+      arr.push({value: Math.round(this.typhoonTrajectoryOption.opacity*10),bitNum: 8});
 
       //alert option
       arr.push({value: (this.alertOption.collapse?1:0),bitNum: 1});
-      arr.push({value: this.OpValueToIndex(this.opAlertCertainty,this.alertOption.certainty),bitNum: 4});
-      arr.push({value: this.OpValueToIndex(this.opAlertSeverity,this.alertOption.severity),bitNum: 4});
-      arr.push({value: Math.round(this.alertOption.opacity*10),bitNum: 8});
       arr.push({value: (this.alertOption.showRainFall?1:0),bitNum: 1});
       arr.push({value: (this.alertOption.showFlow?1:0),bitNum: 1});
       arr.push({value: (this.alertOption.showReservoirDis?1:0),bitNum: 1});
@@ -817,6 +723,9 @@ var g_APP = new Vue({
       arr.push({value: (this.alertOption.showDebrisFlow?1:0),bitNum: 1});
       arr.push({value: (this.alertOption.showThunderstorm?1:0),bitNum: 1});
       arr.push({value: (this.alertOption.showTyphoon?1:0),bitNum: 1});
+      arr.push({value: g_OptionCodec.OpValueToIndex(this.opAlertCertainty,this.alertOption.certainty),bitNum: 4});
+      arr.push({value: g_OptionCodec.OpValueToIndex(this.opAlertSeverity,this.alertOption.severity),bitNum: 4});
+      arr.push({value: Math.round(this.alertOption.opacity*10),bitNum: 8});
 
       //elevation option
       arr.push({value: (this.elevOption.collapse?1:0),bitNum: 1});
@@ -827,100 +736,63 @@ var g_APP = new Vue({
 
       //map option
       arr.push({value: (this.mapOption.collapse?1:0),bitNum: 1});
-      arr.push({value: this.OpValueToIndex(this.opMapType,this.mapOption.mapType),bitNum: 4});
-      arr.push({value: this.mapOption.playSpeed,bitNum: 8});
       arr.push({value: (this.mapOption.useSatellite?1:0),bitNum: 1});
+      arr.push({value: (this.mapOption.waterHighlight?1:0),bitNum: 1});
+      arr.push({value: (this.mapOption.showBasin?1:0),bitNum: 1});
+      arr.push({value: this.mapOption.playSpeed,bitNum: 8});
       
-      var waterUseArr = this.waterUse.GetEncodeOptionArr();
-
-      arr = arr.concat(waterUseArr);
-      return ValueArrToString(arr);
+      return g_OptionCodec.Encode(arr);
     },
-    DecodeOptionString: function(option){
-      function CharToBit(ch,encodeBit){
-        var code = ch.charCodeAt(0);
-        var value = 0;
-        if(code >= 48 && code < 58) value = code-48;
-        else if(code >= 97 && code < 97+26) value = code+10-97;
-        return g_Util.PadLeft(value.toString(2),encodeBit);
+    DecodeOptionString: function(option,version){
+      switch(version){
+        case "1":
+          var bitNumArr = this.GetBitNumV1();
+          var valueArr = g_OptionCodec.Decode(option,bitNumArr);
+          this.ApplyOptionV1(valueArr);
+          break;
       }
-
-      function StringToValueArr(str,bitNumArr){
-        var encodeBit = 5;
-        //console.log("str: "+str);
-        var valueHash = {};
-        var bitArr = "";
-        for(var i=str.length-1;i>=0;i--){
-          var ch = str[i];
-          bitArr = CharToBit(ch,encodeBit)+bitArr;
-        }
-        //console.log("bitArr: "+bitArr);
-        var index = bitArr.length-1;
-        for(var i=0;i<bitNumArr.length;i++){
-          var bitNum = bitNumArr[i].bitNum;
-          var valueName = bitNumArr[i].name;
-          var binaryValue = bitArr.substr(index-bitNum+1,index);
-          //console.log("binary value:"+binaryValue);
-          var value = 0;
-          for(var j=0;j<bitNum;j++){
-            value = (value<<1)+parseInt(binaryValue[j]);
-          }
-          valueHash[valueName] = value;
-          index-=bitNum;
-        }
-        return valueHash;
-      }
-      /*//test, should be {test1:16,test2:1,test3:3}
-      var str = "1og";
-      var bitNumArr = [
-        {name:"test1",bitNum:8},
-        {name:"test2",bitNum:1},
-        {name:"test3",bitNum:4}
-      ];
-      console.log(StringToValueArr(str,bitNumArr));*/
-
+    },
+    GetBitNumV1: function(){
       var bitNumArr = [];
       //rain option
       bitNumArr.push({name:"rainCollapse",bitNum:1});
+      bitNumArr.push({name:"rainShow",bitNum:1});
+      bitNumArr.push({name:"rainType",bitNum:4});
       bitNumArr.push({name:"rainOpacity",bitNum:8});
       bitNumArr.push({name:"rainScale",bitNum:8});
-      bitNumArr.push({name:"rainShow",bitNum:1});
-      bitNumArr.push({"name":"rainType",bitNum:4});
 
       //water level option
       bitNumArr.push({name:"waterLevelCollapse",bitNum:1});
-      bitNumArr.push({name:"waterLevelOpacity",bitNum:8});
-      bitNumArr.push({name:"waterLevelScale",bitNum:8});
       bitNumArr.push({name:"waterLevelShowRiver",bitNum:1});
       bitNumArr.push({name:"waterLevelShowDrain",bitNum:1});
       bitNumArr.push({name:"waterLevelShowAgri",bitNum:1});
       bitNumArr.push({name:"waterLevelShowSewer",bitNum:1});
-      //bitNumArr.push({name:"waterLevelShowGate",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowPump",bitNum:1});
+      bitNumArr.push({name:"waterLevelShowTide",bitNum:1});
+      bitNumArr.push({name:"waterLevelOpacity",bitNum:8});
+      bitNumArr.push({name:"waterLevelScale",bitNum:8});
       bitNumArr.push({name:"waterLevelThresh",bitNum:8});
 
       //reservoir option
       bitNumArr.push({name:"reservoirCollapse",bitNum:1});
+      bitNumArr.push({name:"reservoirShow",bitNum:1});
       bitNumArr.push({name:"reservoirOpacity",bitNum:8});
       bitNumArr.push({name:"reservoirScale",bitNum:8});
-      bitNumArr.push({name:"reservoirShow",bitNum:1});
 
       //flood option
       bitNumArr.push({name:"floodCollapse",bitNum:1});
+      bitNumArr.push({name:"floodShow",bitNum:1});
       bitNumArr.push({name:"floodOpacity",bitNum:8});
       bitNumArr.push({name:"floodScale",bitNum:8});
-      bitNumArr.push({name:"floodShow",bitNum:1});
       bitNumArr.push({name:"floodThresh",bitNum:8});
 
       //typhoon option
       bitNumArr.push({name:"typhoonCollapse",bitNum:1});
-      bitNumArr.push({name:"typhoonOpacity",bitNum:8});
       bitNumArr.push({name:"typhoonShow",bitNum:1});
-
+      bitNumArr.push({name:"typhoonOpacity",bitNum:8});
+      
       //alert option
       bitNumArr.push({name:"alertCollapse",bitNum:1});
-      bitNumArr.push({name:"alertCertainty",bitNum:4});
-      bitNumArr.push({name:"alertSeverity",bitNum:4});
-      bitNumArr.push({name:"alertOpacity",bitNum:8});
       bitNumArr.push({name:"alertShowRainFall",bitNum:1});
       bitNumArr.push({name:"alertShowFlow",bitNum:1});
       bitNumArr.push({name:"alertShowReservoirDis",bitNum:1});
@@ -929,6 +801,9 @@ var g_APP = new Vue({
       bitNumArr.push({name:"alertShowDebrisFlow",bitNum:1});
       bitNumArr.push({name:"alertShowThunderstorm",bitNum:1});
       bitNumArr.push({name:"alertShowTyphoon",bitNum:1});
+      bitNumArr.push({name:"alertCertainty",bitNum:4});
+      bitNumArr.push({name:"alertSeverity",bitNum:4});
+      bitNumArr.push({name:"alertOpacity",bitNum:8});
 
       //elevation option
       bitNumArr.push({name:"elevCollapse",bitNum:1});
@@ -939,51 +814,47 @@ var g_APP = new Vue({
 
       //map option
       bitNumArr.push({name:"mapCollapse",bitNum:1});
-      bitNumArr.push({name:"mapType",bitNum:4});
-      bitNumArr.push({name:"mapPlaySpeed",bitNum:8});
       bitNumArr.push({name:"mapUseSatellite",bitNum:1});
+      bitNumArr.push({name:"mapWaterHighlight",bitNum:1});
+      bitNumArr.push({name:"mapShowBasin",bitNum:1});
+      bitNumArr.push({name:"mapPlaySpeed",bitNum:8});
 
-      var waterUseArr = this.waterUse.GetBitNumArr();
-      bitNumArr = bitNumArr.concat(waterUseArr);
-
-      var valueArr = StringToValueArr(option,bitNumArr);
-      //console.log(valueArr);
-
+      return bitNumArr;
+    },
+    ApplyOptionV1: function(valueArr){
       this.rainOption.collapse = valueArr["rainCollapse"]==1?true:false;
-      this.rainOption.opacity = valueArr["rainOpacity"]*0.1;
-      this.rainOption.scale = valueArr["rainScale"]*0.1;
       this.rainOption.show = valueArr["rainShow"]==1?true:false;
       this.rainOption.type = this.opRainType[valueArr["rainType"]].value;
-
+      this.rainOption.opacity = valueArr["rainOpacity"]*0.1;
+      this.rainOption.scale = valueArr["rainScale"]*0.1;
+      
       this.waterLevelOption.collapse = valueArr["waterLevelCollapse"]==1?true:false;
-      this.waterLevelOption.opacity = valueArr["waterLevelOpacity"]*0.1;
-      this.waterLevelOption.scale = valueArr["waterLevelScale"]*0.1;
       this.waterLevelOption.showRiver = valueArr["waterLevelShowRiver"]==1?true:false;
       this.waterLevelOption.showDrain = valueArr["waterLevelShowDrain"]==1?true:false;
       this.waterLevelOption.showAgri = valueArr["waterLevelShowAgri"]==1?true:false;
       this.waterLevelOption.showSewer = valueArr["waterLevelShowSewer"]==1?true:false;
-      //this.waterLevelOption.showGate = valueArr["waterLevelShowGate"]==1?true:false;
+      this.waterLevelOption.showPump = valueArr["waterLevelShowPump"]==1?true:false;
+      this.waterLevelOption.showTide = valueArr["waterLevelShowTide"]==1?true:false;
+      this.waterLevelOption.opacity = valueArr["waterLevelOpacity"]*0.1;
+      this.waterLevelOption.scale = valueArr["waterLevelScale"]*0.1;
       this.waterLevelOption.thresh = valueArr["waterLevelThresh"];
 
       this.reservoirOption.collapse = valueArr["reservoirCollapse"]==1?true:false;
-      this.reservoirOption.opacity = valueArr["reservoirOpacity"]*0.1;
-      this.reservoirOption.scale = valueArr["reservoirScale"]*0.1;
       this.reservoirOption.show = valueArr["reservoirShow"]==1?true:false;
+      this.reservoirOption.opacity = valueArr["reservoirOpacity"]*0.1;
+      this.reservoirOption.scale = valueArr["reservoirScale"]*0.1; 
 
       this.floodOption.collapse = valueArr["floodCollapse"]==1?true:false;
-      this.floodOption.opacity = valueArr["floodOpacity"]*0.1;
-      this.floodOption.scale = valueArr["floodScale"]*0.1;
       this.floodOption.show = valueArr["floodShow"]==1?true:false;
+      this.floodOption.opacity = valueArr["floodOpacity"]*0.1;
+      this.floodOption.scale = valueArr["floodScale"]*0.1; 
       this.floodOption.thresh = valueArr["floodThresh"];
 
       this.typhoonTrajectoryOption.collapse = valueArr["typhoonCollapse"]==1?true:false;
+      this.typhoonTrajectoryOption.show = valueArr["typhoonShow"]==1?true:false;
       this.typhoonTrajectoryOption.opacity = valueArr["typhoonOpacity"]*0.1;
-      this.typhoonTrajectoryOption.show = valueArr["floodShow"]==1?true:false;
 
       this.alertOption.collapse = valueArr["alertCollapse"]==1?true:false;
-      this.alertOption.certainty = this.opAlertCertainty[valueArr["alertCertainty"]].value;
-      this.alertOption.severity = this.opAlertSeverity[valueArr["alertSeverity"]].value;
-      this.alertOption.opacity = valueArr["alertOpacity"]*0.1;
       this.alertOption.showRainFall = valueArr["alertShowRainFall"]==1?true:false;
       this.alertOption.showFlow = valueArr["alertShowFlow"]==1?true:false;
       this.alertOption.showReservoirDis = valueArr["alertShowReservoirDis"]==1?true:false;
@@ -992,6 +863,9 @@ var g_APP = new Vue({
       this.alertOption.showDebrisFlow = valueArr["alertShowDebrisFlow"]==1?true:false;
       this.alertOption.showThunderstorm = valueArr["alertShowThunderstorm"]==1?true:false;
       this.alertOption.showTyphoon = valueArr["alertShowTyphoon"]==1?true:false;
+      this.alertOption.certainty = this.opAlertCertainty[valueArr["alertCertainty"]].value;
+      this.alertOption.severity = this.opAlertSeverity[valueArr["alertSeverity"]].value;
+      this.alertOption.opacity = valueArr["alertOpacity"]*0.1;
 
       this.elevOption.collapse = valueArr["elevCollapse"]==1?true:false;
       this.elevOption.show = valueArr["elevShow"]==1?true:false;
@@ -1000,31 +874,11 @@ var g_APP = new Vue({
       this.elevOption.maxElev = valueArr["elevMax"];
 
       this.mapOption.collapse = valueArr["mapCollapse"]==1?true:false;
-      this.mapOption.mapType = this.opMapType[valueArr["mapType"]].value;
-      this.mapOption.playSpeed = valueArr["mapPlaySpeed"];
       this.mapOption.useSatellite = valueArr["mapUseSatellite"]==1?true:false;
+      this.mapOption.waterHighlight = valueArr["mapWaterHighlight"]==1?true:false;
+      this.mapOption.showBasin = valueArr["mapShowBasin"]==1?true:false;
+      this.mapOption.playSpeed = valueArr["mapPlaySpeed"];
 
-      this.waterUse.RestoreOption(valueArr);
-    },
-    CopySpaceTimeUrl: function(){
-      var url = $("link[rel='canonical']").attr("href");
-      url += "#year="+this.curYear;
-      url += "&date="+this.curDate;
-      url += "&time="+this.curTime;
-
-      var loc = this.mapControl.GetLocation();
-      url += "&lat="+loc.lat;
-      url += "&lng="+loc.lng;
-      url += "&zoom="+loc.zoom;
-
-      var aux = document.createElement("input");
-      aux.setAttribute("value", url);
-      document.body.appendChild(aux);
-      aux.select();
-      document.execCommand("copy");
-
-      document.body.removeChild(aux);
-      alert("已複製目前時間地點的網址至剪貼簿");
     }
   }
 });
@@ -1034,5 +888,5 @@ window.addEventListener('load', function() {
 });
 
 window.addEventListener('resize', function(e) {
-  g_APP.UpdateMapType();
+  g_APP.UpdateMap();
 });

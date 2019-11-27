@@ -11,7 +11,14 @@ router.get('/', function(req, res) {
 	meta.title = "山河事件簿";
 	meta.path = req.originalUrl;
 	meta.desc = Config.desc;
-	res.render("static/index.ejs",{meta: meta});
+	res.render("view/index.ejs",{meta: meta});
+});
+
+router.get('/waterUse', function(req, res) {
+	meta.title = "山河事件簿";
+	meta.path = req.originalUrl;
+	meta.desc = Config.desc;
+	res.render("view/waterUse.ejs",{meta: meta});
 });
 
 

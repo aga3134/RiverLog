@@ -34,7 +34,7 @@ class MapBasin extends MapLayer{
 
 	FeatureClick(event){
 		var name = event.feature.getProperty("name");
-		var content = name;
+		var content = name+"流域";
 		var loc = event.feature.getProperty("loc");
 		if(content != ""){
 			this.infoWindow.setOptions({content: name,position: loc});
@@ -75,10 +75,10 @@ class MapBasin extends MapLayer{
 				basin.properties.loc = {lat: lat/num, lng: lng/num};
 			}
 			this.map.data.addGeoJson(geoJsonObject);
+			this.Update();
 		}.bind(this));
 
 	}
-
 
 	Update(){
 		if(!this.map) return;
