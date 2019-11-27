@@ -58,6 +58,8 @@ var g_APP = new Vue({
       collapse:false,
       mapType: "waterEvent",
       useSatellite: false,
+      waterHighlight: false,
+      showBasin: false,
       playSpeed: 5,
     },
     waterUse: null,
@@ -205,6 +207,11 @@ var g_APP = new Vue({
       this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.ToggleSatellite(this.mapOption.useSatellite);
+    },
+    ToggleWaterHighlight: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.ToggleWaterHighlight(this.mapOption.waterHighlight);
     },
     ToggleCollapse: function(type){
       switch(type){
@@ -610,6 +617,11 @@ var g_APP = new Vue({
       this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.UpdateMapElev();
+    },
+    UpdateMapBasin: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.UpdateMapBasin();
     },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;

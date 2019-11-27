@@ -15,10 +15,12 @@ function MapControl(){
   this.mapTyphoon = new MapTyphoon({"dataUrl":"/alert/typhoonData"});
   this.mapAlert = new MapAlert({"dataUrl":"/alert/alertData"});
   this.mapElev = new MapElev({"gridUrl":"/elev/gridData"});
+  this.mapBasin = new MapBasin({});
   
   this.openDailyChart = false;
   this.dailyChartTitle = "";
   this.lineChartType = "";
+  this.mapStyle = "";
 };
 
 MapControl.prototype.InitMap = function(param){
@@ -31,6 +33,7 @@ MapControl.prototype.InitMap = function(param){
   var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
   $.get("/static/mapStyle.json",function(style){
+    this.mapStyle = style;
     this.map = new google.maps.Map(document.getElementById('map'), {
       center: taiwan,
       zoom: loc.zoom,
@@ -56,6 +59,43 @@ MapControl.prototype.InitMap = function(param){
       g_APP.UpdateMap();
     });
 
+    this.map.data.setStyle(function(feature){
+      var type = feature.getProperty('type');
+      switch(type){
+        case "alert":
+          return this.mapAlert.SetFeatureStyle(feature);
+        case "basin":
+          return this.mapBasin.SetFeatureStyle(feature);
+      }
+    }.bind(this));
+
+    this.map.data.addListener('click',function(event){
+      var type = event.feature.getProperty('type');
+      switch(type){
+        case "alert":
+          return this.mapAlert.FeatureClick(event);
+        case "basin":
+          return this.mapBasin.FeatureClick(event);
+      }
+      
+    }.bind(this));
+
+    this.map.data.addListener('mouseover',function(event){
+      var type = event.feature.getProperty('type');
+      switch(type){
+        case "basin":
+          return this.mapBasin.FeatureMouseOver(event);
+      }
+    }.bind(this));
+
+    this.map.data.addListener('mouseout',function(event){
+      var type = event.feature.getProperty('type');
+      switch(type){
+        case "basin":
+          return this.mapBasin.FeatureMouseOut(event);
+      }
+    }.bind(this));
+
     
     this.mapRain.map = this.map;
     this.mapReservoir.map = this.map;
@@ -70,6 +110,8 @@ MapControl.prototype.InitMap = function(param){
     this.mapTyphoon.map = this.map;
     this.mapAlert.map = this.map;
     this.mapAlert.InitMapInfo();
+    this.mapBasin.map = this.map;
+    this.mapBasin.InitMapInfo();
     this.mapElev.map = this.map;
     param.succFunc();
 
@@ -101,6 +143,22 @@ MapControl.prototype.ToggleSatellite = function(useSatellite){
   else{
     this.map.setMapTypeId('terrain');
   }
+};
+
+MapControl.prototype.ToggleWaterHighlight = function(highlight){
+  if(highlight){
+    this.map.setOptions({styles: [{
+      featureType: "water",
+      elementType: "geometry.fill",
+      stylers: [
+        {"color": "#0000ff"}
+      ]
+    }]});
+  }
+  else{
+    this.map.setOptions({styles: this.mapStyle});
+  }
+  
 };
 
 MapControl.prototype.UpdateMapRain = function(){
@@ -143,6 +201,11 @@ MapControl.prototype.UpdateMapElev = function(typhoonData){
   this.mapElev.Update();
 };
 
+MapControl.prototype.UpdateMapBasin = function(){
+  if(!this.mapBasin) return;
+  this.mapBasin.Update();
+};
+
 MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
@@ -157,6 +220,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapTyphoon.ClearMap();
   this.mapAlert.ClearMap();
   this.mapElev.ClearMap();
+  this.mapBasin.ClearMap();
 };
 
 

@@ -480,7 +480,8 @@ a {
     justify-content: center;
     align-items: center;
     background-color: #ebe4cb;
-    flex-direction: column; }
+    flex-direction: column;
+    z-index: 100; }
     .riverlog .welcome-page .logo {
       width: 100px; }
     .riverlog .welcome-page .logo-text {

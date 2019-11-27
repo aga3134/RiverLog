@@ -31,6 +31,7 @@ class MapAlert extends MapLayer{
 							num += 1;
 						}
 					}
+					village.properties.type = "alert";
 					village.properties.loc = {lat: lat/num, lng: lng/num};
 					village.properties.debrisFlow = [];
 				}
@@ -126,71 +127,70 @@ class MapAlert extends MapLayer{
 		return content;
 	};
 
-	InitMapInfo(){
-		this.map.data.setStyle(function(feature){
-			var alert = false;
-			var floodArr = feature.getProperty('Flood');
-			if(floodArr && floodArr.length > 0) alert = true;
-			var reservoirDisArr = feature.getProperty('ReservoirDis');
-			if(reservoirDisArr && reservoirDisArr.length > 0) alert = true;
-			var rainfallArr = feature.getProperty('rainfall');
-			if(rainfallArr && rainfallArr.length > 0) alert = true;
-			var highWaterArr = feature.getProperty('highWater');
-			if(highWaterArr && highWaterArr.length > 0) alert = true;
-			var waterArr = feature.getProperty('water');
-			if(waterArr && waterArr.length > 0) alert = true;
-			var debrisFlowArr = feature.getProperty('debrisFlow');
-			if(debrisFlowArr && debrisFlowArr.length > 0) alert = true;
-			var typhoonArr = feature.getProperty('typhoon');
-			if(typhoonArr && typhoonArr.length > 0) alert = true;
+	SetFeatureStyle(feature){
+		var alert = false;
+		var floodArr = feature.getProperty('Flood');
+		if(floodArr && floodArr.length > 0) alert = true;
+		var reservoirDisArr = feature.getProperty('ReservoirDis');
+		if(reservoirDisArr && reservoirDisArr.length > 0) alert = true;
+		var rainfallArr = feature.getProperty('rainfall');
+		if(rainfallArr && rainfallArr.length > 0) alert = true;
+		var highWaterArr = feature.getProperty('highWater');
+		if(highWaterArr && highWaterArr.length > 0) alert = true;
+		var waterArr = feature.getProperty('water');
+		if(waterArr && waterArr.length > 0) alert = true;
+		var debrisFlowArr = feature.getProperty('debrisFlow');
+		if(debrisFlowArr && debrisFlowArr.length > 0) alert = true;
+		var typhoonArr = feature.getProperty('typhoon');
+		if(typhoonArr && typhoonArr.length > 0) alert = true;
 
-			if(alert){
-				if(feature.getProperty("Debrisno")){
-					var color="#000";
-					for(var i=0;i<debrisFlowArr.length;i++){
-						var debris = debrisFlowArr[i];
-						if(debris.severity_level == "黃色警戒" && color != "#f00"){
-						  color = "#ff0";
-						}
-						else if(debris.severity_level == "紅色警戒"){
-						  color = "#f00";
-						}
+		if(alert){
+			if(feature.getProperty("Debrisno")){
+				var color="#000";
+				for(var i=0;i<debrisFlowArr.length;i++){
+					var debris = debrisFlowArr[i];
+					if(debris.severity_level == "黃色警戒" && color != "#f00"){
+					  color = "#ff0";
 					}
-					return {
-						strokeWeight: 5,
-						strokeOpacity: g_APP.alertOption.opacity,
-						strokeColor: color,
-						fillColor: '#000',
-						fillOpacity: 0
+					else if(debris.severity_level == "紅色警戒"){
+					  color = "#f00";
 					}
 				}
-				else return {
-					strokeWeight: 1,
-					strokeOpacity: g_APP.alertOption.opacity,
-					strokeColor: '#000',
-					fillColor: '#f00',
-					fillOpacity: g_APP.alertOption.opacity
-				}
-			}
-			else{
 				return {
-				  strokeOpacity: 0,
-				  fillOpacity: 0
+					strokeWeight: 5,
+					strokeOpacity: g_APP.alertOption.opacity,
+					strokeColor: color,
+					fillColor: '#000',
+					fillOpacity: 0
 				}
 			}
-		}.bind(this));
-
-		this.map.data.addListener('click',function(event){
-			var content = this.GenAlertContent(event.feature);
-			var loc = event.feature.getProperty("loc");
-			if(content != ""){
-				this.infoWindow.setOptions({content: content,position: loc});
-				this.infoWindow.open(this.map);
-				this.infoTarget = event.feature.getId();
+			else return {
+				strokeWeight: 1,
+				strokeOpacity: g_APP.alertOption.opacity,
+				strokeColor: '#000',
+				fillColor: '#f00',
+				fillOpacity: g_APP.alertOption.opacity
 			}
+		}
+		else{
+			return {
+			  strokeOpacity: 0,
+			  fillOpacity: 0
+			}
+		}
+	}
 
-		}.bind(this));
+	FeatureClick(event){
+		var content = this.GenAlertContent(event.feature);
+		var loc = event.feature.getProperty("loc");
+		if(content != ""){
+			this.infoWindow.setOptions({content: content,position: loc});
+			this.infoWindow.open(this.map);
+			this.infoTarget = event.feature.getId();
+		}
+	}
 
+	InitMapInfo(){
 		$.getJSON("/static/geo/debris_sim.json", function(data){
 			var geoJsonObject = topojson.feature(data, data.objects["Debris"]);
 			for(var i=0;i<geoJsonObject.features.length;i++){
@@ -201,6 +201,7 @@ class MapAlert extends MapLayer{
 				var coord = debris.geometry.coordinates[0][0];
 				debris.properties.loc = {lat: coord[1], lng: coord[0]};
 				debris.properties.debrisFlow = [];
+				debris.properties.type = "alert";
 			}
 			//this.map.data.addGeoJson(geoJsonObject);
 		}.bind(this));
@@ -230,6 +231,7 @@ class MapAlert extends MapLayer{
 				county.properties.water = [];
 				county.properties.debrisFlow = [];
 				county.properties.typhoon = [];
+				county.properties.type = "alert";
 			}
 			//this.map.data.addGeoJson(geoJsonObject); 
 		}.bind(this));
@@ -268,6 +270,7 @@ class MapAlert extends MapLayer{
 				town.properties.water = [];
 				town.properties.debrisFlow = [];
 				town.properties.typhoon = [];
+				town.properties.type = "alert";
 			}
 			//this.map.data.addGeoJson(geoJsonObject); 
 		}.bind(this));
