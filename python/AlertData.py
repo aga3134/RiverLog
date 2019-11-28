@@ -80,20 +80,22 @@ class AlertData:
                         os.makedirs(folder)
                     file = folder+entry["id"]+".xml"
                     print(link)
-                    opener = urllib.request.build_opener()
-                    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-                    urllib.request.install_opener(opener)
-                    urllib.request.urlretrieve(link, file)
-                    self.ProcessAlertFile(file)
+                    #opener = urllib.request.build_opener()
+                    #opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+                    #urllib.request.install_opener(opener)
+                    #urllib.request.urlretrieve(link, file)
+                    self.ProcessAlert(link)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
 
-    def ProcessAlertFile(self,file):
-        print("process file %s" % file)
+    def ProcessAlert(self,url):
+        print("process url %s" % url)
         try:
-            with open(file,"r",encoding="utf8") as f:
-                soup = BeautifulSoup(f.read(), 'html.parser')
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                soup = BeautifulSoup(r.text, 'html.parser')
                 if soup.status.string != "Actual":  #keep only actual alert
                     return
                 id = soup.identifier.string
@@ -169,7 +171,7 @@ class AlertData:
                     opStatistic.append(pymongo.UpdateOne({"time":tday}, {"$inc":inc}, upsert=True))
                 if len(opData) > 0:
                     self.db["alert"+day].bulk_write(opData,ordered=False)
-                if len(opStatistiic) > 0:
+                if len(opStatistic) > 0:
                     self.db["alertStatistic"].bulk_write(opStatistic,ordered=False)
 
         except:

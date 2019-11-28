@@ -76,12 +76,12 @@ class WaterData:
             t = now.strftime("%Y-%m-%d_%H")
             #reservoir data
             url = "https://data.wra.gov.tw/Service/OpenData.aspx?format=json&amp=&id=1602CA19-B224-4CC3-AA31-11B1B124530F"
-            folder = "data/reservoir/"
+            """folder = "data/reservoir/"
             if not os.path.exists(folder):
                 os.makedirs(folder)
             file = folder+"reservoir_"+t+".json"
-            urllib.request.urlretrieve(url, file)
-            self.ProcessReservoir(file)
+            urllib.request.urlretrieve(url, file)"""
+            self.ProcessReservoir(url)
 
             self.ProcessReservoirFromWebsite()
         except:
@@ -522,8 +522,8 @@ class WaterData:
             print(sys.exc_info()[0])
             traceback.print_exc()
             
-    def ProcessReservoir(self,file):
-        print("process file %s" % file)
+    def ProcessReservoir(self,url):
+        print("process reservoir url: "+url)
         try:
             #map site info from id
             attr = {"id":1,"lat":1,"lng":1,"EffectiveCapacity":1}
@@ -532,9 +532,10 @@ class WaterData:
             for site in cursor:
                 siteHash[site["id"]] = site
                 
-            with open(file,"r",encoding="utf-8-sig") as f:
-                data = f.read()
-                reservoir = json.loads(data)
+            r = requests.get(url,verify=False)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                reservoir = r.json()
                 ops = []
                 for r in reservoir["ReservoirConditionData_OPENDATA"]:
                     day = (r["ObservationTime"].split("T")[0]).replace("-","")
