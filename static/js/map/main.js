@@ -671,7 +671,7 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       var loc = this.mapControl.GetLocation();
       if(!loc) return;
-      var version = 1;
+      var version = 2;
       var hash = "#year="+this.curYear;
       hash += "&date="+this.curDate;
       hash += "&time="+this.curTime;
@@ -689,7 +689,6 @@ var g_APP = new Vue({
       arr.push({value: (this.rainOption.collapse?1:0),bitNum: 1});
       arr.push({value: (this.rainOption.show?1:0),bitNum: 1});
       arr.push({value: g_OptionCodec.OpValueToIndex(this.opRainType,this.rainOption.type),bitNum: 4});
-      arr.push({value: Math.round(this.rainOption.accHour),bitNum: 8});
       arr.push({value: Math.round(this.rainOption.opacity*10),bitNum: 8});
       arr.push({value: Math.round(this.rainOption.scale*10),bitNum: 8});
 
@@ -750,6 +749,9 @@ var g_APP = new Vue({
       arr.push({value: (this.mapOption.waterHighlight?1:0),bitNum: 1});
       arr.push({value: (this.mapOption.showBasin?1:0),bitNum: 1});
       arr.push({value: this.mapOption.playSpeed,bitNum: 8});
+
+      //v2
+      arr.push({value: Math.round(this.rainOption.accHour),bitNum: 8});
       
       return g_OptionCodec.Encode(arr);
     },
@@ -760,6 +762,11 @@ var g_APP = new Vue({
           var valueArr = g_OptionCodec.Decode(option,bitNumArr);
           this.ApplyOptionV1(valueArr);
           break;
+        case "2":
+          var bitNumArr = this.GetBitNumV2();
+          var valueArr = g_OptionCodec.Decode(option,bitNumArr);
+          this.ApplyOptionV2(valueArr);
+          break;
       }
     },
     GetBitNumV1: function(){
@@ -768,7 +775,6 @@ var g_APP = new Vue({
       bitNumArr.push({name:"rainCollapse",bitNum:1});
       bitNumArr.push({name:"rainShow",bitNum:1});
       bitNumArr.push({name:"rainType",bitNum:4});
-      bitNumArr.push({name:"rainAccHour",bitNum:8});
       bitNumArr.push({name:"rainOpacity",bitNum:8});
       bitNumArr.push({name:"rainScale",bitNum:8});
 
@@ -832,11 +838,15 @@ var g_APP = new Vue({
 
       return bitNumArr;
     },
+    GetBitNumV2: function(){
+      var bitNumArr = this.GetBitNumV1();
+      bitNumArr.push({name:"rainAccHour",bitNum:8});
+      return bitNumArr;
+    },
     ApplyOptionV1: function(valueArr){
       this.rainOption.collapse = valueArr["rainCollapse"]==1?true:false;
       this.rainOption.show = valueArr["rainShow"]==1?true:false;
       this.rainOption.type = this.opRainType[valueArr["rainType"]].value;
-      this.rainOption.accHour = valueArr["rainAccHour"];
       this.rainOption.opacity = valueArr["rainOpacity"]*0.1;
       this.rainOption.scale = valueArr["rainScale"]*0.1;
       
@@ -891,6 +901,10 @@ var g_APP = new Vue({
       this.mapOption.showBasin = valueArr["mapShowBasin"]==1?true:false;
       this.mapOption.playSpeed = valueArr["mapPlaySpeed"];
 
+    },
+    ApplyOptionV2: function(valueArr){
+      this.ApplyOptionV1(valueArr);
+      this.rainOption.accHour = valueArr["rainAccHour"];
     }
   }
 });
