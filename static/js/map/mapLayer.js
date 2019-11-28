@@ -173,6 +173,16 @@ class MapLayer{
 
     }
 
+    SetupTime(time){
+      if(!time){
+        time = "2019-1-1 00:00:00";
+      }
+      var t = dayjs(time);
+      var m = t.minute()-t.minute()%10;
+      t = t.minute(m).second(0).format("HH:mm:ss");
+      return t;
+    }
+
     LoadSite(){
       if(!this.siteUrl) return;
       $.get(this.siteUrl, function(result){
@@ -211,12 +221,7 @@ class MapLayer{
         if(!data[pos]) data[pos] = {};
         for(var i=0;i<result.data.length;i++){
           var d = result.data[i];
-          if(!d[this.timeKey]){
-            d[this.timeKey] = "2019-1-1 00:00:00";
-          }
-          var t = dayjs(d[this.timeKey]);
-          var m = t.minute()-t.minute()%10;
-          t = t.minute(m).second(0).format("HH:mm:ss");
+          var t = this.SetupTime(d[this.timeKey]);
           d[this.timeKey] = t;
           
           if(!data[pos][t]) data[pos][t] = [];
@@ -254,12 +259,7 @@ class MapLayer{
         if(!grid[pos]) grid[pos] = {};
         for(var i=0;i<data.length;i++){
           var d = data[i];
-          if(!d[this.gridTimeKey]){
-            d[this.gridTimeKey] = "2019-1-1 00:00:00";
-          }
-          var t = dayjs(d[this.gridTimeKey]);
-          var m = t.minute()-t.minute()%10;
-          t = t.minute(m).second(0).format("HH:mm:ss");
+          var t = this.SetupTime(d[this.gridTimeKey]);
           d[this.gridTimeKey] = t;
           
           if(!grid[pos][t]) grid[pos][t] = [];

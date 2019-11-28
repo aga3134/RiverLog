@@ -127,9 +127,13 @@
 						</div>
 						<div class="option-item">
 							<div class="option-label">類型</div>
-							<select v-model="rainOption.type" v-on:change="UpdateMapRain();">
+							<select v-model="rainOption.type" v-on:change="UpdateRainType();">
 								<option v-for="op in opRainType" v-bind:value="op.value">{{op.name}}</option>
 							</select>
+						</div>
+						<div class="option-item" v-show="rainOption.type == 'custom' ">
+							<div class="option-label">累積時數</div>
+							<input type="number" min="1" max="24" step="1" v-model="rainOption.accHour" v-on:change="UpdateRainType();">
 						</div>
 						<div class="option-item">
 							<input type="range" min="0" max="1" step="0.1" v-model="rainOption.opacity" v-on:change="UpdateMapRain();">
@@ -542,6 +546,7 @@
 							<li>抽水站即時水位: <a href="http://163.29.157.32:8080/dataset/3005657c-1fdf-4658-8c3e-8bc26d33a01f" target="_blank">水利處抽水站運轉狀態</a></li>
 							<li>潮位站位置: <a href="https://opendata.cwb.gov.tw/opendatadoc/MMC/A0017-001.pdf" target="_blank">氣象資料開放平台-潮位說明資料</a></li>
 							<li>即時潮位: <a href="https://opendata.cwb.gov.tw/dataset/observation/O-A0017-001" target="_blank">氣象資料開放平台-沿岸潮位站監測資料</a></li>
+							<li>河川流域: <a href="https://data.gov.tw/dataset/9823" target="_blank">政府資料開放平台-河川流域範圍圖</a></li>
 						</ul>
 
 						<div class="content-title">參考資料</div>
@@ -554,6 +559,7 @@
 							<li><a href="https://purbao.lass-net.org/" target="_blank">紫豹在哪裡</a></li>
 							<li><a href="https://www.books.com.tw/products/0010829596" target="_blank">颱風：在下一次巨災來臨前</a></li>
 							<li><a href="https://www.books.com.tw/products/0010723018" target="_blank">台灣的十大地理議題</a></li>
+							<li><a href="https://www.youtube.com/watch?v=9BPCTHYlvv8" target="_blank">人文講堂 - 都市防洪</a></li>
 						</ul>
 						<% include about %>
 					</div>

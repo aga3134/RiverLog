@@ -22,7 +22,7 @@ var g_APP = new Vue({
     playTimer: null,
     playIcon: "/static/Image/icon-play.png",
     mapControl: null,
-    rainOption: {collapse:false,opacity:0.8, scale:1, show:true, type:"daily"},
+    rainOption: {collapse:false,opacity:0.8, scale:1, show:true, type:"daily",accHour:1},
     waterLevelOption: {
       collapse:false,
       opacity:0.5,
@@ -70,6 +70,7 @@ var g_APP = new Vue({
     opRainType: [
       {name: "日累積雨量", value:"daily"},
       {name: "雨量變化", value:"diff"},
+      {name: "累積時數", value:"custom"},
     ],
     opAlertCertainty: [
       {name: "全部", value:"All"},
@@ -569,6 +570,14 @@ var g_APP = new Vue({
       }
       return null;
     },
+    UpdateRainType: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      if(this.rainOption.type == "custom"){
+        this.mapControl.UpdateRainAcc();
+      }
+      else this.mapControl.UpdateMapRain();
+    },
     UpdateMapRain: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
@@ -680,6 +689,7 @@ var g_APP = new Vue({
       arr.push({value: (this.rainOption.collapse?1:0),bitNum: 1});
       arr.push({value: (this.rainOption.show?1:0),bitNum: 1});
       arr.push({value: g_OptionCodec.OpValueToIndex(this.opRainType,this.rainOption.type),bitNum: 4});
+      arr.push({value: Math.round(this.rainOption.accHour),bitNum: 8});
       arr.push({value: Math.round(this.rainOption.opacity*10),bitNum: 8});
       arr.push({value: Math.round(this.rainOption.scale*10),bitNum: 8});
 
@@ -758,6 +768,7 @@ var g_APP = new Vue({
       bitNumArr.push({name:"rainCollapse",bitNum:1});
       bitNumArr.push({name:"rainShow",bitNum:1});
       bitNumArr.push({name:"rainType",bitNum:4});
+      bitNumArr.push({name:"rainAccHour",bitNum:8});
       bitNumArr.push({name:"rainOpacity",bitNum:8});
       bitNumArr.push({name:"rainScale",bitNum:8});
 
@@ -825,6 +836,7 @@ var g_APP = new Vue({
       this.rainOption.collapse = valueArr["rainCollapse"]==1?true:false;
       this.rainOption.show = valueArr["rainShow"]==1?true:false;
       this.rainOption.type = this.opRainType[valueArr["rainType"]].value;
+      this.rainOption.accHour = valueArr["rainAccHour"];
       this.rainOption.opacity = valueArr["rainOpacity"]*0.1;
       this.rainOption.scale = valueArr["rainScale"]*0.1;
       

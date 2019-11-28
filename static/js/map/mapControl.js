@@ -161,6 +161,11 @@ MapControl.prototype.ToggleWaterHighlight = function(highlight){
   
 };
 
+MapControl.prototype.UpdateRainAcc = function(){
+  if(!this.mapRain) return;
+  this.mapRain.UpdateRainAcc();
+};
+
 MapControl.prototype.UpdateMapRain = function(){
   if(!this.mapRain) return;
   this.mapRain.Update();
