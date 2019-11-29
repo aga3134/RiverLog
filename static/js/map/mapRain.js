@@ -278,6 +278,7 @@ class MapRain extends MapLayer{
 
 		var baseScale = Math.min(4,this.GetBaseScale());
 		var value = 0, scaleH = 0, scaleW = 0.01*baseScale;
+		var warn = false, warnColor = "#ff0000";
 		switch(g_APP.rainOption.type){
 			case "daily":
 				value = data.now;
@@ -292,6 +293,30 @@ class MapRain extends MapLayer{
 			case "custom":
 				value = data.acc;
 				scaleH = 0.0005*baseScale;
+				var accHour = g_APP.rainOption.accHour;
+				if(accHour == 1){
+					if(value >= 40) warn = true;
+				}
+				else if(accHour == 2){
+					if(value >= 80) warn = true;
+				}
+				else if(accHour == 3){
+					if(value >= 120) warn = true;
+				}
+				else if(accHour == 24){
+					if(value >= 200){
+						warn = true;
+						warnColor = "#ffff00";
+					}
+					if(value >= 350){
+						warn = true;
+						warnColor = "#ff9900";
+					}
+					if(value >= 500){
+						warn = true;
+						warnColor = "#ff0000";
+					}
+				}
 			break;
 		}
 		if(!value) return;
@@ -302,6 +327,8 @@ class MapRain extends MapLayer{
 			var rect = this.layer[id];
 			rect.setOptions({
 				map: this.map,
+				strokeWeight: warn?2:0,
+				strokeColor: warnColor,
 				fillColor: g_APP.color.rain(value),
 				fillOpacity: g_APP.rainOption.opacity,
 				bounds: {
@@ -316,7 +343,8 @@ class MapRain extends MapLayer{
 		}
 		else{
 			var rect = new google.maps.Rectangle({
-				strokeWeight: 0,
+				strokeWeight: warn?2:0,
+				strokeColor: warnColor,
 				fillColor: g_APP.color.rain(value),
 				fillOpacity: g_APP.rainOption.opacity,
 				map: this.map,

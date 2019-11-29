@@ -400,10 +400,10 @@
 							<li>日期與時間框<div class="time-block"></div>從上到下分成三個區塊，顏色分別代表台灣北中南部的日累積雨量平均值。</li>
 							<li>
 								<div class="content">
-									日累積雨量、雨量變化: 以柱狀圖
+									雨量: 可選擇日累積雨量、雨量變化、以及自訂累積時數，觀看不同時間區間內累積雨量。圖示以柱狀圖
 									<img class="content-icon" src="/static/Image/icon-rain.png">
-									高度表示雨量大小。越高代表雨量越多，顏色依
-									<a href="https://www.cwb.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
+									高度表示雨量大小，越高代表雨量越多。
+									顏色依 <a href="https://www.cwb.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
 									顏色內插顯示(單位mm)：
 								</div>
 							</li>
@@ -414,6 +414,50 @@
 									</tr>
 									<tr>
 										<td class="color-block" v-for="(d,i) in color.rainDomain" v-if="i<color.rainRange.length-1">{{color.rainDomain[i]}}~{{color.rainDomain[i+1]}}</td>
+									</tr>
+								</table>
+							</div>
+							<li>
+								<div class="content">
+									若自定雨量累積時數且雨量累積超過特定閥值，柱狀圖外框會變色警示。顏色如下表所示。
+								</div>
+							</li>
+							<div class="h-scroll">
+								<table class="info-table">
+									<tr>
+										<th>累積時數</th>
+										<th>累積雨量(mm)</th>
+										<th>顏色</th>
+									</tr>
+									<tr>
+										<td>1</td>
+										<td>40</td>
+										<td>紅色</td>
+									</tr>
+									<tr>
+										<td>2</td>
+										<td>80</td>
+										<td>紅色</td>
+									</tr>
+									<tr>
+										<td>3</td>
+										<td>120</td>
+										<td>紅色</td>
+									</tr>
+									<tr>
+										<td>24</td>
+										<td>200</td>
+										<td>黃色</td>
+									</tr>
+									<tr>
+										<td>24</td>
+										<td>350</td>
+										<td>橘色</td>
+									</tr>
+									<tr>
+										<td>24</td>
+										<td>500</td>
+										<td>紅色</td>
 									</tr>
 								</table>
 							</div>

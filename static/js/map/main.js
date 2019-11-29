@@ -261,6 +261,7 @@ var g_APP = new Vue({
       var t = dayjs(this.curYear+"-"+this.curDate);
       t = t.add(-1,"day");
       this.curDate = t.format("MM-DD");
+      this.curTime = "00:00";
       var year = parseInt(t.format("YYYY"));
       if(year != this.curYear){
         this.ChangeYear(year);
@@ -271,6 +272,7 @@ var g_APP = new Vue({
       var t = dayjs(this.curYear+"-"+this.curDate);
       t = t.add(1,"day");
       this.curDate = t.format("MM-DD");
+      this.curTime = "00:00";
       var year = parseInt(t.format("YYYY"));
       if(year != this.curYear){
         this.ChangeYear(year);
