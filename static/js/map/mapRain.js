@@ -380,11 +380,13 @@ class MapRain extends MapLayer{
 			}
 		}
 
+		var bound = this.map.getBounds();
 		for(var i=0;i<rainData.length;i++){
 			var d = rainData[i];
 			var sID = d.stationID;
 			var s = this.data.site[sID];
 			if(!s) continue;
+			if(!bound.contains({lat:s.lat,lng:s.lon})) continue;
 
 			var value = 0;
 			if(preDataHash[sID]){
@@ -418,8 +420,12 @@ class MapRain extends MapLayer{
 			}
 		}
 
+		var bound = this.map.getBounds();
 		for(var i=0;i<rainData.length;i++){
 			if(rainData[i].nowSum <= 0) continue;
+			var lat = rainData[i].latSum/rainData[i].num;
+			var lng = rainData[i].lngSum/rainData[i].num;
+			if(!bound.contains({lat:lat,lng:lng})) continue;
 
 			var key = rainData[i].x+"-"+rainData[i].y;
 			rainData[i].diff = 0;
@@ -430,8 +436,7 @@ class MapRain extends MapLayer{
 					rainData[i].diff = now-preNow;
 				}
 			}
-			var lat = rainData[i].latSum/rainData[i].num;
-			var lng = rainData[i].lngSum/rainData[i].num;
+			
 			var clickFn = this.GenClickFn(rainData,i,rainData[i].x+"-"+rainData[i].y);
 			this.DrawRain(key,rainData[i],lat,lng,clickFn);
 		}

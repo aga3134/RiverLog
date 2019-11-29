@@ -42,10 +42,17 @@ class MapElev extends MapLayer{
 
 		var elevData = data["00:00:00"];
 		if(!elevData) return;
+		var bound = this.map.getBounds();
 		for(var i=0;i<elevData.length;i++){
 			var d = elevData[i];
 			var map = this.map;
 			if(!d.num) continue;
+
+			var scale = Math.pow(2,this.level)/this.gridPerUnit;
+	        var lat = d.y*scale;
+	        var lng = d.x*scale;
+	        if(!bound.contains({lat:lat,lng:lng})) continue;
+
 			var value = d.elevSum/d.num;
 	        value = (value-g_APP.elevOption.minElev)/(g_APP.elevOption.maxElev-g_APP.elevOption.minElev);
 	        if(value <= 0 || value > 1) map = null;
@@ -55,9 +62,7 @@ class MapElev extends MapLayer{
 			if(this.map && this.infoTarget == key){
 				this.UpdateInfoWindow(d);
 			}
-			var scale = Math.pow(2,this.level)/this.gridPerUnit;
-	        var lat = d.y*scale;
-	        var lng = d.x*scale;
+			
 	        
 			var clickFn = this.GenClickFn(elevData,i,key);
 			if(this.layer[key]){

@@ -162,10 +162,12 @@ class MapWaterLevel extends MapLayer{
 			}
 		}
 
+		var bound = this.map.getBounds();
 		for(var i=0;i<waterLevelData.length;i++){
 			var sID = waterLevelData[i][siteKey];
 			var s = this.data.site[sID];
 			if(!s) continue;
+			if(!bound.contains({lat:s[latKey],lng:s[lngKey]})) continue;
 			var value = 0;
 			if(preDataHash[sID]){
 				if(preDataHash[sID][valueKey] && waterLevelData[i][valueKey]){
@@ -184,6 +186,7 @@ class MapWaterLevel extends MapLayer{
 			var sID = waterLevelData[i][siteKey];
 			var s = this.data.site[sID];
 			if(!s) continue;
+			if(!bound.contains({lat:s[latKey],lng:s[lngKey]})) continue;
 			var x = Math.round(s[latKey]/step);
 			var y = Math.round(s[lngKey]/step);
 			var key = x+"-"+y;
@@ -234,10 +237,14 @@ class MapWaterLevel extends MapLayer{
 
 		var cluster = this.GetDisplayData(data,"StationIdentifier","WaterLevel","RecordTime","lat","lon");
 		
+		var bound = this.map.getBounds();
 		if(cluster.isCluster){
 			for(var i=0;i<cluster.data.length;i++){
 				var d = cluster.data[i];
 				var sID = d.key;
+				var lat = d.latSum/d.num;
+				var lng = d.lngSum/d.num;
+				if(!bound.contains({lat:lat,lng:lng})) continue;
 
 				//info window有打開，更新資訊
 				if(this.infoWindow.getMap() && this.infoTarget == sID){
@@ -248,8 +255,7 @@ class MapWaterLevel extends MapLayer{
 				if(d.alertL3 > 0) color = "#ffcc00";
 				if(d.alertL2 > 0) color = "#ff6600";
 				if(d.alertL1 > 0) color = "#ff0000";
-				var lat = d.latSum/d.num;
-				var lng = d.lngSum/d.num;
+				
 				var diff = d.diffSum/d.num;
 
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
@@ -262,6 +268,7 @@ class MapWaterLevel extends MapLayer{
 				var sID = d.StationIdentifier;
 				var s = this.data.site[sID];
 				if(!s) continue;
+				if(!bound.contains({lat:s.lat,lng:s.lon})) continue;
 				//info window有打開，更新資訊
 				if(this.infoWindow.getMap() && this.infoTarget == sID){
 					this.UpdateInfoWindow(d);
@@ -299,9 +306,13 @@ class MapWaterLevel extends MapLayer{
 			}
 		}
 
+		var bound = this.map.getBounds();
 		for(var i=0;i<waterLevelData.length;i++){
 			var d = waterLevelData[i];
 			if(d.WaterLevelSum <= 0) continue;
+			var lat = d.latSum/d.num;
+			var lng = d.lngSum/d.num;
+			if(!bound.contains({lat:lat,lng:lng})) continue;
 
 			var key = d.x+"-"+d.y;
 			d.diff = 0;
@@ -318,9 +329,6 @@ class MapWaterLevel extends MapLayer{
 				this.UpdateInfoWindow(d);
 			}
 
-			var lat = d.latSum/d.num;
-			var lng = d.lngSum/d.num;
-			
 			var clickFn = this.GenClickFn(waterLevelData,i,key);
 			var color = "#37cc00";
 			if(d.alertL3 > 0) color = "#ffcc00";

@@ -5,7 +5,7 @@ class MapLayer{
       this.dataUrl = option.dataUrl;
       this.gridUrl = option.gridUrl;
       this.divideLatLng = option.divideLatLng;
-      this.divideStep = option.divideStep || 1;
+      this.divideStep = option.divideStep || 5;
 
       this.map = option.map;
       this.layer = {};
