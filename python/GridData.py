@@ -90,6 +90,7 @@ class GridData:
         
     def AddGridBatch(self, table, arr, timeKey, valueKey, latKey, lngKey):
         batch = {}
+        attrArr = []
         for d in arr:
             for level in range(self.levelNum):
                 scale = self.gridPerUnit/math.pow(2,level)
@@ -102,7 +103,11 @@ class GridData:
                     batch[key]["latSum"] += d[latKey]
                     batch[key]["lngSum"] += d[lngKey]
                     for v in valueKey:
-                        batch[key][v+"Sum"] += d[v]
+                        if v in d:
+                            batch[key][v+"Sum"] += d[v]
+                            if (v+"Sum") not in attrArr:
+                                attrArr.append(v+"Sum")
+                        
                 else:
                     batch[key] = {}
                     batch[key]["lev"] = level
@@ -113,7 +118,20 @@ class GridData:
                     batch[key]["latSum"] = d[latKey]
                     batch[key]["lngSum"] = d[lngKey]
                     for v in valueKey:
-                        batch[key][v+"Sum"] = d[v]
+                        if v in d:
+                            batch[key][v+"Sum"] = d[v]
+                            if (v+"Sum") not in attrArr:
+                                attrArr.append(v+"Sum")
+
+                #accumulate dict attribute
+                for v in valueKey:   
+                    for attr in d:
+                        if (v+".") in attr: #attribute name start with v.
+                            if not (attr+"Sum") in batch[key]:
+                                batch[key][attr+"Sum"] = 0
+                            batch[key][attr+"Sum"] += d[attr]
+                            if (attr+"Sum") not in attrArr:
+                                attrArr.append(attr+"Sum")
 
         print("batch num: "+ str(len(batch)))
         ops = []
@@ -121,8 +139,9 @@ class GridData:
             d = batch[key]
             key = {"lev":d["lev"],"t":d["t"],"x":d["x"],"y":d["y"]}
             inc = {"num":d["num"],"latSum":d["latSum"],"lngSum":d["lngSum"]}
-            for v in valueKey:
-                inc[v+"Sum"] = d[v+"Sum"]
+            for attr in attrArr:
+                if attr in d:
+                    inc[attr] = d[attr]
             #self.db[table].update(key,{"$inc": inc},upsert=True)
             ops.append(pymongo.UpdateOne(key, {"$inc": inc}, upsert=True))
 

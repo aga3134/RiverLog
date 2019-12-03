@@ -353,8 +353,8 @@ class WaterData:
                     self.db["waterLevelStation"].bulk_write(ops,ordered=False)
 
                 #add data
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for d in data:
                     if len(d["Observations"]) == 0:
                         continue
@@ -371,20 +371,25 @@ class WaterData:
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevel"+day].insert_one(w)
-                        ops.append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = w.copy()
                         grid["lat"] = loc[1]
                         grid["lon"] = loc[0]
                         #self.grid.AddGridWaterLevel(w)
-                        gridArr.append(grid)
+                        if not day in gridArr:
+                            gridArr[day] = []
+                        gridArr[day].append(grid)
 
-                self.db["waterLevel"+day].create_index("RecordTime")
-                self.db["waterLevel"+day].create_index("StationIdentifier")
-                if len(ops) > 0:
-                    self.db["waterLevel"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
+                for key in ops:
+                    self.db["waterLevel"+key].create_index("RecordTime")
+                    self.db["waterLevel"+key].create_index("StationIdentifier")
+                    if len(ops[key]) > 0:
+                        self.db["waterLevel"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevel(result["@iot.nextLink"])
@@ -417,8 +422,8 @@ class WaterData:
                 #print(r.text)
                 soup = BeautifulSoup(r.text, 'html.parser')
                 tr = soup.find_all('tr')
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for i in range(2,len(tr)):
                     td = tr[i].find_all("td")
                     name = td[2].string
@@ -437,14 +442,18 @@ class WaterData:
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevel"+day].insert_one(w)
-                        ops.append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
 
                         loc = siteHash[name]
                         grid = w.copy()
                         grid["lat"] = loc["lat"]
                         grid["lon"] = loc["lon"]
                         #self.grid.AddGridWaterLevel(w)
-                        gridArr.append(grid)
+                        if not day in gridArr:
+                            gridArr[day] = []
+                        gridArr[day].append(grid)
                     
                         #計算北中南平均警戒程度
                         """inc = {}
@@ -462,11 +471,12 @@ class WaterData:
                         
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
-                self.db["waterLevel"+day].create_index("RecordTime")
-                self.db["waterLevel"+day].create_index("StationIdentifier")
-                if len(ops) > 0:
-                    self.db["waterLevel"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("waterLevelGrid"+day,gridArr,"RecordTime",["WaterLevel"],"lat","lon")
+                for key in ops:
+                    self.db["waterLevel"+key].create_index("RecordTime")
+                    self.db["waterLevel"+key].create_index("StationIdentifier")
+                    if len(ops[key]) > 0:
+                        self.db["waterLevel"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -496,7 +506,7 @@ class WaterData:
                     self.db["floodSite"].bulk_write(ops,ordered=False)
 
                 #add data
-                ops = []
+                ops = {}
                 for d in data:
                     if len(d["Observations"]) == 0:
                         continue
@@ -512,9 +522,13 @@ class WaterData:
                     query = self.db["flood"+day].find_one(key)
                     if query is None:
                         #self.db["flood"+day].insert_one(f)
-                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
-                if len(ops) > 0:
-                    self.db["flood"+day].bulk_write(ops,ordered=False)
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+                
+                for key in ops:
+                    if len(ops[key]) > 0:
+                        self.db["flood"+key].bulk_write(ops[key],ordered=False)
 
                 if "@iot.nextLink" in result:
                     self.ProcessFlood(result["@iot.nextLink"])
@@ -536,7 +550,7 @@ class WaterData:
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 reservoir = r.json()
-                ops = []
+                ops = {}
                 for r in reservoir["ReservoirConditionData_OPENDATA"]:
                     day = (r["ObservationTime"].split("T")[0]).replace("-","")
                     key = {"ReservoirIdentifier":r["ReservoirIdentifier"],"ObservationTime":r["ObservationTime"]}
@@ -555,7 +569,9 @@ class WaterData:
                             continue
                         #self.db["reservoir"+day].insert_one(data)
                         key = {"ReservoirIdentifier":data["ReservoirIdentifier"],"ObservationTime":data["ObservationTime"]}
-                        ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
                         
                         #計算北中南蓄水百分比
                         """if r["ReservoirIdentifier"] not in siteHash:
@@ -573,8 +589,9 @@ class WaterData:
                         t10min = t.replace(minute=(t.minute-t.minute%10),second=0)
                         self.db["reservoirDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["reservoirHourSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
-                if len(ops) > 0:
-                    self.db["reservoir"+day].bulk_write(ops,ordered=False)
+                for key in ops:
+                    if len(ops[key]) > 0:
+                        self.db["reservoir"+key].bulk_write(ops[key],ordered=False)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -595,7 +612,7 @@ class WaterData:
                 #print(r.text)
                 soup = BeautifulSoup(r.text, 'html.parser')
                 tr = soup.find_all('tr')
-                ops = []
+                ops = {}
                 for i in range(2,len(tr)):
                     td = tr[i].find_all("td")
                     if(len(td) < 7):
@@ -623,9 +640,12 @@ class WaterData:
                         if math.isnan(data["EffectiveWaterStorageCapacity"]) or data["EffectiveWaterStorageCapacity"] < 0:
                             continue
                         #self.db["reservoir"+day].insert_one(data)
-                        ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
-                if len(ops) > 0:
-                    self.db["reservoir"+day].bulk_write(ops,ordered=False)
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))
+                for key in ops:
+                    if len(ops[key]) > 0:
+                        self.db["reservoir"+key].bulk_write(ops[key],ordered=False)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -655,8 +675,8 @@ class WaterData:
                     self.db["waterLevelDrainSite"].bulk_write(ops,ordered=False)
 
                 #add data
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for d in data:
                     if len(d["Observations"]) == 0:
                         continue
@@ -672,20 +692,25 @@ class WaterData:
                     query = self.db["waterLevelDrain"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevelDrain"+day].insert_one(f)
-                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+                        if day not in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         loc = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = f.copy()
                         grid["lat"] = loc[1]
                         grid["lng"] = loc[0]
                         #self.grid.AddGridWaterLevelDrain(f)
-                        gridArr.append(grid)
+                        if day not in gridArr:
+                            gridArr[day] = []
+                        gridArr[day].append(grid)
 
-                self.db["waterLevelDrain"+day].create_index("time")
-                self.db["waterLevelDrain"+day].create_index("stationID")
-                if len(ops) > 0:
-                    self.db["waterLevelDrain"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("waterLevelDrainGrid"+day,gridArr,"time",["value"],"lat","lng")
+                for key in ops:
+                    self.db["waterLevelDrain"+key].create_index("time")
+                    self.db["waterLevelDrain"+key].create_index("stationID")
+                    if len(ops[key]) > 0:
+                        self.db["waterLevelDrain"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("waterLevelDrainGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelDrain(result["@iot.nextLink"])
@@ -718,8 +743,8 @@ class WaterData:
                     self.db["waterLevelAgriSite"].bulk_write(ops,ordered=False)
 
                 #add data
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for d in data:
                     if len(d["Observations"]) == 0:
                         continue
@@ -735,20 +760,25 @@ class WaterData:
                     query = self.db["waterLevelAgri"+day].find_one(key)
                     if query is None:
                         #self.db["waterLevelAgri"+day].insert_one(f)
-                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
                         grid = f.copy()
                         grid["lat"] = coord[1]
                         grid["lng"] = coord[0]
                         #self.grid.AddGridWaterLevelAgri(f)
-                        gridArr.append(grid)
+                        if not day in gridArr:
+                            gridArr[day] = []
+                        gridArr[day].append(grid)
 
-                self.db["waterLevelAgri"+day].create_index("time")
-                self.db["waterLevelAgri"+day].create_index("stationID")
-                if len(ops) > 0:
-                    self.db["waterLevelAgri"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("waterLevelAgriGrid"+day,gridArr,"time",["value"],"lat","lng")
+                for key in ops:
+                    self.db["waterLevelAgri"+key].create_index("time")
+                    self.db["waterLevelAgri"+key].create_index("stationID")
+                    if len(ops[key]) > 0:
+                        self.db["waterLevelAgri"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("waterLevelAgriGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
 
                 if "@iot.nextLink" in result:
@@ -782,7 +812,7 @@ class WaterData:
                     self.db["waterLevelGateSite"].bulk_write(ops,ordered=False)
 
                 #add data
-                ops = []
+                ops = {}
                 for d in data:
                     if len(d["Observations"]) == 0:
                         continue
@@ -798,9 +828,12 @@ class WaterData:
                     day = datetime.datetime.strftime(t,"%Y%m%d")
 
                     #self.db["waterLevelGate"+day].update(key,{"$set":f},upsert=True)
-                    ops.append(pymongo.UpdateOne(key,{"$set":f},upsert=True))
-                if len(ops) > 0:
-                    self.db["waterLevelGate"+day].bulk_write(ops,ordered=False)
+                    if not day in ops:
+                        ops[day] = []
+                    ops[day].append(pymongo.UpdateOne(key,{"$set":f},upsert=True))
+                for key in ops:
+                    if len(ops[key]) > 0:
+                        self.db["waterLevelGate"+key].bulk_write(ops[key],ordered=False)
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelGate(result["@iot.nextLink"])
@@ -822,8 +855,8 @@ class WaterData:
                 for site in cursor:
                     siteHash[site["no"]] = site
                 
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for d in data:
                     f = {}
                     f["stationNo"] = d["stationNo"]
@@ -837,7 +870,9 @@ class WaterData:
                     query = self.db["sewer"+day].find_one(key)
                     if query is None:
                         #self.db["sewer"+day].insert_one(f)
-                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         if f["stationNo"] in siteHash:
                             s = siteHash[f["stationNo"]]
@@ -845,13 +880,16 @@ class WaterData:
                             grid["lat"] = s["lat"]
                             grid["lng"] = s["lng"]
                             #self.grid.AddGridSewer(f)
-                            gridArr.append(grid)
+                            if day not in gridArr:
+                                gridArr[day] = []
+                            gridArr[day].append(grid)
 
-                self.db["sewer"+day].create_index("time")
-                self.db["sewer"+day].create_index("stationNo")
-                if len(ops) > 0:
-                    self.db["sewer"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
+                for key in ops:
+                    self.db["sewer"+key].create_index("time")
+                    self.db["sewer"+key].create_index("stationNo")
+                    if len(ops[key]) > 0:
+                        self.db["sewer"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("sewerGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
         except:
             print(sys.exc_info()[0])
@@ -871,8 +909,8 @@ class WaterData:
                 for site in cursor:
                     siteHash[site["id"]] = site
                 
-                ops = []
-                gridArr = []
+                ops = {}
+                gridArr = {}
                 for d in data:
                     f = {}
                     f["stationNo"] = d["stationNo"]
@@ -890,21 +928,30 @@ class WaterData:
                     query = self.db["pump"+day].find_one(key)
                     if query is None:
                         #self.db["pump"+day].insert_one(f)
-                        ops.append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
 
                         if f["stationNo"] in siteHash:
                             s = siteHash[f["stationNo"]]
                             grid = f.copy()
                             grid["lat"] = s["lat"]
                             grid["lng"] = s["lng"]
+                            if f["allPumbLights"] != "-":
+                                grid["allPumbLights"] = 1
+                            else:
+                                grid["allPumbLights"] = 0
                             #self.grid.AddGridSewer(f)
-                            gridArr.append(grid)
+                            if not day in gridArr:
+                                gridArr[day] = []
+                            gridArr[day].append(grid)
 
-                self.db["pump"+day].create_index("time")
-                self.db["pump"+day].create_index("stationNo")
-                if len(ops) > 0:
-                    self.db["pump"+day].bulk_write(ops,ordered=False)
-                #self.grid.AddGridBatch("sewerGrid"+day,gridArr,"time",["value"],"lat","lng")
+                for key in ops:
+                    self.db["pump"+key].create_index("time")
+                    self.db["pump"+key].create_index("stationNo")
+                    if len(ops[key]) > 0:
+                        self.db["pump"+key].bulk_write(ops[key],ordered=False)
+                    self.grid.AddGridBatch("pumpGrid"+key,gridArr[key],"time",["levelIn","levelOut","pumbNum","doorNum","allPumbLights"],"lat","lng")
 
         except:
             print(sys.exc_info()[0])

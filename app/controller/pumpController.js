@@ -36,7 +36,7 @@ pc.GetData = function(param){
 			
 			var idArr = [];
 			for(var i=0;i<sites.length;i++){
-				idArr.push(sites[i].no);
+				idArr.push(sites[i].id);
 			}
 
 			var condition = [];
