@@ -577,10 +577,16 @@ a{
 				justify-content: flex-start;
 				align-items: center;
 				flex-wrap: wrap;
-				.sponsor-logo{
+				.sponsor-logo-long{
 					max-width: calc(100% - 20px);
 					border-radius: 5px;
 					max-height: 60px;
+					margin: 10px;
+				}
+				.sponsor-logo-mid{
+					max-width: calc(100% - 20px);
+					border-radius: 5px;
+					max-height: 80px;
 					margin: 10px;
 				}
 			}

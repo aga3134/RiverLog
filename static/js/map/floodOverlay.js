@@ -71,15 +71,17 @@ class FloodOverlay extends SvgOverlay{
                 opacity: this.opacity
             });
 
+            var strokeColor = (this.value>=50?"#3333ff":"#333333");
+            var strokeWidth = (this.value>=50?2:1)
             svg.append("path").attr({
                 d: d,
-                stroke: "#333333",
-                "stroke-width": 2,
+                stroke: strokeColor,
+                "stroke-width": strokeWidth,
                 fill: "None"
             });
         }.bind(this);
 
-        if(this.value >= 50){
+        /*if(this.value >= 50){
             for(var i=-1;i<2;i++){
                 svg.append("text").attr({
                     "x": this.size*(0.5+i*0.1),
@@ -94,7 +96,7 @@ class FloodOverlay extends SvgOverlay{
                     "transform": "rotate("+15*i+"deg)"
                 }).text("!");
             }
-        }
+        }*/
 
         var headR = this.size*0.12;
         var bodyW = this.size*0.42;
