@@ -389,7 +389,7 @@ class WaterData:
                     self.db["waterLevel"+key].create_index("StationIdentifier")
                     if len(ops[key]) > 0:
                         self.db["waterLevel"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
+                    #self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevel(result["@iot.nextLink"])
@@ -476,7 +476,7 @@ class WaterData:
                     self.db["waterLevel"+key].create_index("StationIdentifier")
                     if len(ops[key]) > 0:
                         self.db["waterLevel"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
+                    #self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -710,7 +710,7 @@ class WaterData:
                     self.db["waterLevelDrain"+key].create_index("stationID")
                     if len(ops[key]) > 0:
                         self.db["waterLevelDrain"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("waterLevelDrainGrid"+key,gridArr[key],"time",["value"],"lat","lng")
+                    #self.grid.AddGridBatch("waterLevelDrainGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
                 if "@iot.nextLink" in result:
                     self.ProcessWaterLevelDrain(result["@iot.nextLink"])
@@ -778,7 +778,7 @@ class WaterData:
                     self.db["waterLevelAgri"+key].create_index("stationID")
                     if len(ops[key]) > 0:
                         self.db["waterLevelAgri"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("waterLevelAgriGrid"+key,gridArr[key],"time",["value"],"lat","lng")
+                    #self.grid.AddGridBatch("waterLevelAgriGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
 
                 if "@iot.nextLink" in result:
@@ -889,7 +889,7 @@ class WaterData:
                     self.db["sewer"+key].create_index("stationNo")
                     if len(ops[key]) > 0:
                         self.db["sewer"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("sewerGrid"+key,gridArr[key],"time",["value"],"lat","lng")
+                    #self.grid.AddGridBatch("sewerGrid"+key,gridArr[key],"time",["value"],"lat","lng")
 
         except:
             print(sys.exc_info()[0])
@@ -951,7 +951,7 @@ class WaterData:
                     self.db["pump"+key].create_index("stationNo")
                     if len(ops[key]) > 0:
                         self.db["pump"+key].bulk_write(ops[key],ordered=False)
-                    self.grid.AddGridBatch("pumpGrid"+key,gridArr[key],"time",["levelIn","levelOut","pumbNum","doorNum","allPumbLights"],"lat","lng")
+                    #self.grid.AddGridBatch("pumpGrid"+key,gridArr[key],"time",["levelIn","levelOut","pumbNum","doorNum","allPumbLights"],"lat","lng")
 
         except:
             print(sys.exc_info()[0])

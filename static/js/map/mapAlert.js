@@ -463,15 +463,14 @@ class MapAlert extends MapLayer{
 
 		$.get(url, function(result){
 			if(result.status != "ok") return;
-			if(result.data.length == 0) return;
 			var pos = "0-0";
+			if(!data[pos]) data[pos] = {};
 
 			for(var i=0;i<result.data.length;i++){
 				var alertInfo = result.data[i];
 				alertInfo.effective = dayjs(alertInfo.effective);
 				alertInfo.expires = dayjs(alertInfo.expires);
 				var e = alertInfo.eventcode;
-				if(!data[pos]) data[pos] = {};
 				if(!data[pos][e]) data[pos][e] = [];
 				data[pos][e].push(alertInfo);
 			}
