@@ -42,10 +42,12 @@ class MapReservoir extends MapLayer{
       if(!reservoirData || !g_APP.reservoirOption.show) return;
 
 		  var baseSize = this.GetBaseScale()*g_APP.reservoirOption.scale;
+		  var bound = this.map.getBounds();
 		  for(var i=0;i<reservoirData.length;i++){
 		    var sID = reservoirData[i].ReservoirIdentifier;
 		    var s = this.data.site[sID];
 		    if(!s) continue;
+		    if(!bound.contains({lat:s.lat,lng:s.lng})) continue;
 
 		    var d = reservoirData[i];
 		    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
