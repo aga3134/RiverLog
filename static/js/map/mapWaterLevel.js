@@ -24,6 +24,8 @@ class MapWaterLevel extends MapLayer{
 			var value = d.valueSum/d.num;
 			var diff = d.diff || (d.diffSum/d.num);
 			str = "<p>河川水位</p>";
+			str += "<p>測站數 "+d.num+"</p>";
+			str += "<p>時間 "+d.t+" </p>";
 			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
 			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
 			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
@@ -31,8 +33,6 @@ class MapWaterLevel extends MapLayer{
 			str += "<p>三級警戒數 "+d.alertL3+"</p>";
 			str += "<p>二級警戒數 "+d.alertL2+"</p>";
 			str += "<p>一級警戒數 "+d.alertL1+"</p>";
-			str += "<p>測站數 "+d.num+"</p>";
-			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}
 		else{
@@ -237,7 +237,7 @@ class MapWaterLevel extends MapLayer{
 		if(!this.map) return;
 		if(!data || !g_APP.waterLevelOption.showRiver) return;
 
-		var cluster = this.GetDisplayData(data,"StationIdentifier","WaterLevel","RecordTime","lat","lon");
+		var cluster = this.GetDisplayData(data,"StationIdentifier","WaterLevel","RecordTime","lat","lon",true);
 		
 		var bound = this.map.getBounds();
 		if(cluster.isCluster){

@@ -71,14 +71,14 @@ class MapWaterLevelAgri extends MapWaterLevel{
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
 			str = "<p>水利會水位</p>";
+			str += "<p>測站數 "+d.num+"</p>";
+			str += "<p>時間 "+d.t+" </p>";
 			for(var key in d.diff){
 				str += "<p>最大"+key+"變化 "+d.maxDiff[key].toFixed(2)+" m</p>";
 				str += "<p>最小"+key+"變化 "+d.minDiff[key].toFixed(2)+" m</p>";
 			}
 			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
 			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
-			str += "<p>測站數 "+d.num+"</p>";
-			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}
 		else{
@@ -103,7 +103,7 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		if(!this.map) return;
 		if(!data || !g_APP.waterLevelOption.showAgri) return;
 
-		var cluster = this.GetDisplayData(data,"stationID","value","time","lat","lng");
+		var cluster = this.GetDisplayData(data,"stationID","value","time","lat","lng",true);
 		var color = "#0073FF";
 		if(cluster.isCluster){
 			for(var i=0;i<cluster.data.length;i++){
