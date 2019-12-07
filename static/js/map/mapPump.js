@@ -154,10 +154,12 @@ class MapPump extends MapLayer{
 		if(!pumpData) return;
 
 		var baseSize = this.GetBaseScale()*g_APP.waterLevelOption.scale;
+		var bound = this.map.getBounds();
 		for(var i=0;i<pumpData.length;i++){
 			var sID = pumpData[i].stationNo;
 			var s = this.data.site[sID];
 			if(!s) continue;
+			if(!bound.contains({lat:s.lat,lng:s.lng})) continue;
 
 			var d = pumpData[i];
 			var clickFn = this.GenClickFn(pumpData,i,"stationNo");
