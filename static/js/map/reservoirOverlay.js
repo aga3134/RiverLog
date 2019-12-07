@@ -36,7 +36,9 @@ class ReservoirOverlay extends SvgOverlay{
         }
         if(this.color){
             var rgb = g_Util.HexToRGB(this.color);
-            waveColor = "rgba("+rgb.r+","+rgb.g+","+rgb.b+","+this.opacity+")";
+            if(rgb){
+                waveColor = "rgba("+rgb.r+","+rgb.g+","+rgb.b+","+this.opacity+")";
+            }
         }
         var config = {
             circleColor: circleColor,
