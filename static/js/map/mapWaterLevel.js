@@ -102,6 +102,7 @@ class MapWaterLevel extends MapLayer{
 	}
 
 	ComputeDiff(preValue,curValue){
+		if(preValue < -99 || curValue < -99) return 0;
 		return curValue - preValue;
 	}
 
