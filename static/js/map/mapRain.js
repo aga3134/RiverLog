@@ -92,11 +92,13 @@ class MapRain extends MapLayer{
   }
 
   ComputeRainDataAcc(pos){
+  	var data = this.data.data[pos];
+  	if(g_APP.rainOption.type != "custom") return this.DrawLayer(data);
+  	
   	var accHour = g_APP.rainOption.accHour;
-
   	var preHash = this.dataHash.preData[pos];
   	var curHash = this.dataHash.curData[pos];
-  	var data = this.data.data[pos];
+  	
   	var endT = "23:50:00";
   	for(var time in data){
   		var dataArr = data[time];
@@ -188,12 +190,13 @@ class MapRain extends MapLayer{
   }
 
   ComputeRainGridAcc(level,pos){
-  	var accHour = g_APP.rainOption.accHour;
+  	var data = this.grid[level][pos];
+  	if(g_APP.rainOption.type != "custom") return this.DrawGrid(data);
 
+  	var accHour = g_APP.rainOption.accHour;
   	var preHash = this.dataHash.preGrid[level][pos];
   	var curHash = this.dataHash.curGrid[level][pos];
-
-  	var data = this.grid[level][pos];
+  	
   	var endT = "23:50:00";
   	for(var time in data){
   		var dataArr = data[time];

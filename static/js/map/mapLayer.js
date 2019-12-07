@@ -177,9 +177,13 @@ class MapLayer{
       if(!time){
         time = "2019-1-1 00:00:00";
       }
-      var t = dayjs(time);
-      var m = t.minute()-t.minute()%10;
-      t = t.minute(m).second(0).format("HH:mm:ss");
+      //var t = dayjs(time);
+      //var m = t.minute()-t.minute()%10;
+      //t = t.minute(m).second(0).format("HH:mm:ss");
+      var t = new Date(time);
+      var m = t.getMinutes();
+      m = m-m%10;
+      t = g_Util.PadLeft(t.getHours(),2)+":"+g_Util.PadLeft(m,2)+":00";
       return t;
     }
 
