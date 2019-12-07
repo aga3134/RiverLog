@@ -38,8 +38,16 @@ class ReservoirOverlay extends SvgOverlay{
             var rgb = g_Util.HexToRGB(this.color);
             waveColor = "rgba("+rgb.r+","+rgb.g+","+rgb.b+","+this.opacity+")";
         }
-
         var config = {
+            circleColor: circleColor,
+            waveColor: waveColor,
+            textColor: textColor,
+            waveTextColor: waveTextColor,
+            backgroundColor: backgroundColor
+        };
+        this.DrawReservoir(config);
+
+        /*var config = {
             minValue: 0, maxValue: 100,
             circleThickness: 0.05, circleFillGap: 0,
             circleColor: circleColor,
@@ -57,6 +65,71 @@ class ReservoirOverlay extends SvgOverlay{
         if(svg.length > 0){
             svg.html("");
             loadLiquidFillGauge(this.svgID, this.percent, config);
+        }*/
+    }
+
+    DrawReservoir(config){
+        var svg = d3.select("#"+this.svgID);
+        svg.selectAll("*").remove();
+        svg.append('circle').attr({
+            "cx": this.size*0.5,
+            "cy": this.size*0.5,
+            "r": this.size*0.47,
+            "stroke":config.circleColor,
+            "stroke-width":this.size*0.03,
+            "fill":config.backgroundColor
+        });
+        svg.append('text').attr({
+            "x": this.size*0.5,
+            "y": this.size*0.5,
+            "text-anchor": "middle",
+            "alignment-baseline":"middle",
+            "font-size": this.size*0.25,
+            "fill":config.textColor
+        }).text(this.percent+"%");
+
+        //draw wave
+        var amp = 0.03*this.size;
+        var freq = Math.PI*2;
+        var dataNum = 40;
+        var data = [];
+        for(var i=0;i<dataNum;i++){
+            data.push(i/(dataNum-1));
         }
+
+        var clipArea = d3.svg.area()
+            .x(function(d){
+                return d*this.size;
+            }.bind(this))
+            .y0(function(d){
+                return this.size*(1-this.percent*0.01)+Math.sin(d*freq)*amp;
+            }.bind(this))
+            .y1(function(d){
+                return this.size;
+            }.bind(this));
+        var waveGroup = svg.append("defs")
+            .append("clipPath")
+            .attr("id", "clipWave"+this.svgID);
+        var wave = waveGroup.append("path")
+            .attr("d", clipArea(data))
+            .attr("T", 0);
+
+        var fillCircleGroup = svg.append("g")
+            .attr("clip-path", "url(#clipWave"+this.svgID+")");
+        fillCircleGroup.append('circle').attr({
+            "cx": this.size*0.5,
+            "cy": this.size*0.5,
+            "r": this.size*0.46,
+            "stroke-width":0,
+            "fill":config.waveColor
+        });
+        fillCircleGroup.append('text').attr({
+            "x": this.size*0.5,
+            "y": this.size*0.5,
+            "text-anchor": "middle",
+            "alignment-baseline":"middle",
+            "font-size": this.size*0.25,
+            "fill":config.waveTextColor
+        }).text(this.percent+"%");
     }
 }
