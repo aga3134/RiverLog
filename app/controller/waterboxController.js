@@ -1,21 +1,29 @@
 var mongoose = require('mongoose');
-var PumpStation = require('../../db/pumpStation');
+var WaterboxDevice = require('../../db/waterboxDevice');
+var WaterboxLatest = require('../../db/waterboxLatest');
 var Util = require("../util");
 
 //一天的data存成一個collection，避免資料太大存取很慢
-var PumpSchema = require('../../db/pumpSchema');
+var WaterboxSchema = require('../../db/waterboxSchema');
 
 
-var pc = {};
+var wbc = {};
 
-pc.GetStation = function(param){
-	PumpStation.find({}, {_id: 0, __v:0}).lean().exec(function(err, sites){
+wbc.GetStation = function(param){
+	WaterboxDevice.find({}, {__v:0}).lean().exec(function(err, sites){
 		if(err) return param.failFunc({err:err});
 		else return param.succFunc(sites);
 	});
 }
 
-pc.GetData = function(param){
+wbc.GetLatestData = function(param){
+	WaterboxLatest.find({}, {__v:0}).lean().exec(function(err, sites){
+		if(err) return param.failFunc({err:err});
+		else return param.succFunc(sites);
+	});
+}
+
+wbc.GetData = function(param){
 	if(!param.date) return param.failFunc({err:"no date"});
 
 	var condition = [];
@@ -26,30 +34,30 @@ pc.GetData = function(param){
 
 	var date = new Date(param.date);
 	var t = Util.DateToDateString(date,"");
-	var Pump = mongoose.model("pump"+t, PumpSchema);
+	var Waterbox = mongoose.model("waterbox"+t, WaterboxSchema);
 
 	var query = {};
 	if(condition.length > 0){
 		query.$and = condition;
-		PumpStation.find(query, {_id:0,  __v:0}).lean().exec(function(err, sites){
+		WaterboxDevice.find(query, { __v:0}).lean().exec(function(err, sites){
 			if(err) return param.failFunc({err:err});
 			
 			var idArr = [];
 			for(var i=0;i<sites.length;i++){
-				idArr.push(sites[i].id);
+				idArr.push(sites[i]._id);
 			}
 
 			var condition = [];
-			condition.push({stationNo: {$in:idArr}});
+			condition.push({stationID: {$in:idArr}});
 			var query   = {$and: condition};
-			Pump.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
+			Waterbox.find(query, {_id: 0, __v: 0}).lean().exec(function(err, data){
 				if(err) return param.failFunc({err:err});
 				param.succFunc(data);
 			});
 		});
 	}
 	else{
-		Pump.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
+		Waterbox.find({}, {_id: 0, __v: 0}).lean().exec(function(err, data){
 			if(err) return param.failFunc({err:err});
 			param.succFunc(data);
 		});
@@ -58,4 +66,4 @@ pc.GetData = function(param){
 	
 }
 
-module.exports = pc;
+module.exports = wbc;

@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var WaterLevelStation = require('../../db/waterLevelStation');
 var Util = require("../util");
 
-//一天的data存成一個collection，必免資料太大存取很慢
+//一天的data存成一個collection，避免資料太大存取很慢
 var WaterLevelSchema = require('../../db/waterLevelSchema');
 var WaterLevelGridSchema = require("../../db/waterLevelGridSchema");
 

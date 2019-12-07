@@ -8,6 +8,7 @@ var g_WaterUse = new Vue({
     url: "/waterUse",
     opUrl: [
       {name: "水事件地圖", url:"/"},
+      {name: "水環境地圖", url:"/env"},
       {name: "用水統計", url:"/waterUse"},
     ],
     loading: true

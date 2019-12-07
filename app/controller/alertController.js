@@ -3,7 +3,7 @@ var Util = require("../util");
 var Typhoon = require("../../db/typhoon");
 var AlertStatistic = require("../../db/alertStatistic");
 
-//一天的data存成一個collection，必免資料太大存取很慢
+//一天的data存成一個collection，避免資料太大存取很慢
 var AlertSchema = require("../../db/alertSchema");
 
 var ac = {};

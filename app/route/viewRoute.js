@@ -21,5 +21,12 @@ router.get('/waterUse', function(req, res) {
 	res.render("view/waterUse.ejs",{meta: meta});
 });
 
+router.get('/env', function(req, res) {
+	meta.title = "山河事件簿";
+	meta.path = req.originalUrl;
+	meta.desc = Config.desc;
+	res.render("view/env.ejs",{meta: meta});
+});
+
 
 module.exports = router;

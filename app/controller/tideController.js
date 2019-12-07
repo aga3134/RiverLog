@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var TideStation = require('../../db/tideStation');
 var Util = require("../util");
 
-//一天的data存成一個collection，必免資料太大存取很慢
+//一天的data存成一個collection，避免資料太大存取很慢
 var TideSchema = require('../../db/tideSchema');
 
 

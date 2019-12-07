@@ -17,6 +17,7 @@ var AlertRoute = require("./app/route/alertRoute.js");
 var FloodRoute = require("./app/route/floodRoute.js");
 var StatisticRoute = require("./app/route/statisticRoute.js");
 var ElevRoute = require("./app/route/elevRoute.js");
+var WaterboxRoute = require("./app/route/waterboxRoute.js");
 
 mongoose.connect("mongodb://localhost/RiverLog", {useNewUrlParser:true,useUnifiedTopology:true});
 mongoose.Promise = global.Promise;
@@ -43,6 +44,7 @@ app.use("/alert", AlertRoute);
 app.use("/flood", FloodRoute);
 app.use("/statistic", StatisticRoute);
 app.use("/elev", ElevRoute);
+app.use("/waterbox", WaterboxRoute);
 
 process.on('exit',function(code){
 	mongoose.disconnect();
