@@ -230,6 +230,29 @@ class MapLayer{
           if(!daily[s]) daily[s] = [];
           daily[s].push(d);
         }
+
+        //expend data to later 10min
+        if(param.expendData){
+          var prev = {};
+          for(var i=0;i<24*6;i++){
+            var t = g_APP.OffsetToTime(i)+":00";
+            if(!data[pos][t]) continue;
+            var hasData = {};
+            for(var j=0;j<data[pos][t].length;j++){
+              var d = data[pos][t][j];
+              if(d){
+                prev[d[this.dataSiteKey]] = d;
+                hasData[d[this.dataSiteKey]] = true;
+              }
+            }
+            for(var key in prev){
+              if(!hasData[key]){
+                data[pos][t].push(prev[key]);
+              }
+            }
+          }
+        }
+        
         this.DrawLayer(data[pos]);
       }.bind(this));
     }
@@ -266,6 +289,7 @@ class MapLayer{
           grid[pos][t].push(d);
         }
         this.DrawGrid(grid[pos]);
+
       }.bind(this));
     }
 

@@ -10,6 +10,7 @@ class MapFlood extends MapLayer{
 	LoadLayer(param){
 		if(!this.map) return;
 		if(!g_APP.floodOption.show) return;
+		param.expendData = true;
 		MapLayer.prototype.LoadLayer.call(this,param);
     }
 

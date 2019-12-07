@@ -11,6 +11,7 @@ class MapWaterLevel extends MapLayer{
     LoadLayer(param){
 		if(!this.map) return;
 		if(!g_APP.waterLevelOption.showRiver) return;
+		param.expendData = true;
 		MapLayer.prototype.LoadLayer.call(this,param);
 	}
 
@@ -338,67 +339,4 @@ class MapWaterLevel extends MapLayer{
 
 		}
     }
-
-    LoadLayer(param){
-      if(!this.dataUrl || !this.date) return;
-      var url = this.dataUrl;
-      url += "?date="+this.date;
-      if(this.divideLatLng){
-        url += "&minLat="+param.minLat;
-        url += "&minLng="+param.minLng;
-        url += "&maxLat="+param.maxLat;
-        url += "&maxLng="+param.maxLng;
-      }
-      //console.log(url);
-
-      var data = this.data.data;
-      var daily = this.data.daily;
-      
-      $.get(url, function(result){
-        if(result.status != "ok") return;
-        var pos = "";
-        if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
-        else pos = "0-0";
-        if(!data[pos]) data[pos] = {};
-        for(var i=0;i<result.data.length;i++){
-          var d = result.data[i];
-          if(!d[this.timeKey]){
-            d[this.timeKey] = "2019-1-1 00:00:00";
-          }
-          var t = dayjs(d[this.timeKey]);
-          var m = t.minute()-t.minute()%10;
-          t = t.minute(m).second(0).format("HH:mm:ss");
-          d[this.timeKey] = t;
-          
-          if(!data[pos][t]) data[pos][t] = [];
-          data[pos][t].push(d);
-          var s = d[this.dataSiteKey];
-          if(!daily[s]) daily[s] = [];
-          daily[s].push(d);
-        }
-
-        //expend data to later 10min
-        var prev = {};
-        for(var i=0;i<24*6;i++){
-          var t = g_APP.OffsetToTime(i)+":00";
-          if(!data[pos][t]) continue;
-          var hasData = {};
-          for(var j=0;j<data[pos][t].length;j++){
-            var r = data[pos][t][j];
-            if(r){
-              prev[r[this.dataSiteKey]] = r;
-              hasData[r[this.dataSiteKey]] = true;
-            }
-          }
-          for(var key in prev){
-            if(!hasData[key]){
-              data[pos][t].push(prev[key]);
-            }
-          }
-        }
-
-        this.DrawLayer(data[pos]);
-      }.bind(this));
-    }
-
 }

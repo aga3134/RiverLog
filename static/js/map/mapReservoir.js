@@ -11,6 +11,7 @@ class MapReservoir extends MapLayer{
     LoadLayer(param){
       if(!this.map) return;
       if(!g_APP.reservoirOption.show) return;
+      param.expendData = true;
       MapLayer.prototype.LoadLayer.call(this,param);
     }
 
@@ -86,54 +87,6 @@ class MapReservoir extends MapLayer{
 		      this.layer[sID] = overlay;
 		    }
 		  }
-    }
-
-    LoadLayer(param){
-      var url = this.dataUrl;
-      url += "?date="+this.date;
-      var data = this.data.data;
-      var daily = this.data.daily;
-      
-      $.get(url, function(result){
-        if(result.status != "ok") return;
-        if(result.data.length == 0) return;
-        var pos = "0-0";
-        if(!data[pos]) data[pos] = {};
-
-        for(var i=0;i<result.data.length;i++){
-          var d = result.data[i];
-          var t = dayjs(d[this.timeKey]).format("HH:mm:ss");
-          d[this.timeKey] = t;
-          if(!data[pos][t]) data[pos][t] = [];
-          data[pos][t].push(d);
-
-          var s = d[this.dataSiteKey];
-          if(!daily[s]) daily[s] = [];
-          daily[s].push(d);
-        }
-
-        //expend data to later hours
-        var prev = {};
-        for(var i=0;i<24;i++){
-          var t = g_Util.PadLeft(i,2)+":00:00";
-          if(!this.data.data[pos][t]) continue;
-          var hasData = {};
-          for(var j=0;j<this.data.data[pos][t].length;j++){
-            var r = this.data.data[pos][t][j];
-            if(r){
-              prev[r[this.dataSiteKey]] = r;
-              hasData[r[this.dataSiteKey]] = true;
-            }
-          }
-          for(var key in prev){
-            if(!hasData[key]){
-              this.data.data[pos][t].push(prev[key]);
-            }
-          }
-        }
-
-        this.DrawLayer(data[pos]);
-      }.bind(this));
     }
 
 }
