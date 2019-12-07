@@ -54,7 +54,10 @@ class MapWaterLevelAgri extends MapWaterLevel{
 			for(var key in data.diff){
 				acc["sum"][key] += value[key];
 				acc.diff[key] += data.diff[key];
-				if(data.diff[key] < acc.minDiff[key]) acc.minDiff[key] = data.diff[key];
+				if(acc.minDiff[key] == null) acc.minDiff[key] = data.diff[key];
+				else if(data.diff[key] < acc.minDiff[key]) acc.minDiff[key] = data.diff[key];
+				
+				if(acc.maxDiff[key] == null) acc.maxDiff[key] = data.diff[key];
 				if(data.diff[key] > acc.maxDiff[key]) acc.maxDiff[key] = data.diff[key];
 			}
 			acc.num += 1;
