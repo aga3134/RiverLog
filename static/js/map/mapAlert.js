@@ -481,15 +481,39 @@ class MapAlert extends MapLayer{
 
 	ClearMap(){
 		if(!this.map) return;
-			this.map.data.forEach(function(feature){
-			feature.setProperty("Flood",[]);
-			feature.setProperty("ReservoirDis",[]);
-			feature.setProperty("rainfall",[]);
-			feature.setProperty("highWater",[]);
-			feature.setProperty("water",[]);
-			feature.setProperty("debrisFlow",[]);
-			feature.setProperty("thunderstorm",[]);
-			feature.setProperty("typhoon",[]);
+		this.map.data.forEach(function(feature){
+			var arr = feature.getProperty("Flood");
+			if(arr && arr.length > 0){
+				feature.setProperty("Flood",[]);
+			}
+			arr = feature.getProperty("ReservoirDis");
+			if(arr && arr.length > 0){
+				feature.setProperty("ReservoirDis",[]);
+			}
+			arr = feature.getProperty("rainfall");
+			if(arr && arr.length > 0){
+				feature.setProperty("rainfall",[]);
+			}
+			arr = feature.getProperty("highWater");
+			if(arr && arr.length > 0){
+				feature.setProperty("highWater",[]);
+			}
+			arr = feature.getProperty("water");
+			if(arr && arr.length > 0){
+				feature.setProperty("water",[]);
+			}
+			arr = feature.getProperty("debrisFlow");
+			if(arr && arr.length > 0){
+				feature.setProperty("debrisFlow",[]);
+			}
+			arr = feature.getProperty("thunderstorm");
+			if(arr && arr.length > 0){
+				feature.setProperty("thunderstorm",[]);
+			}
+			arr = feature.getProperty("typhoon");
+			if(arr && arr.length > 0){
+				feature.setProperty("typhoon",[]);
+			}
 		});
 		for(var key in this.layer){
 			this.layer[key].setMap(null);
