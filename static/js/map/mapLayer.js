@@ -41,7 +41,7 @@ class MapLayer{
       if(!this.gridUrl) return -1;
       if(!this.map) return this.levelNum-1;
       var zoom = this.map.getZoom();
-      var level = 6+this.levelNum-zoom;
+      var level = 7+this.levelNum-zoom;
       if(level >= this.levelNum) level = this.levelNum-1;
       if(level < 0) level = -1;
       return level;

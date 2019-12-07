@@ -141,9 +141,9 @@ class MapWaterLevel extends MapLayer{
 			acc.num += 1;
 			acc.latSum += s[latKey];
 			acc.lngSum += s[lngKey];
-			if(s.AlertLevel1 && value > s.AlertLevel1) d.alertL1++;
-			else if(s.AlertLevel2 && value > s.AlertLevel2) d.alertL2++;
-			else if(s.AlertLevel3 && value > s.AlertLevel3) d.alertL3++;
+			if(s.AlertLevel1 && value > s.AlertLevel1) acc.alertL1++;
+			else if(s.AlertLevel2 && value > s.AlertLevel2) acc.alertL2++;
+			else if(s.AlertLevel3 && value > s.AlertLevel3) acc.alertL3++;
 		}
 		return acc;
 	}
