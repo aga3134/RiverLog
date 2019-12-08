@@ -21,18 +21,18 @@ class MapWaterLevel extends MapLayer{
 		if(d.num){	//cluster
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
-			var value = d.valueSum/d.num;
+			var value = d.WaterLevelSum/d.num;
 			var diff = d.diff || (d.diffSum/d.num);
-			str = "<p>河川水位</p>";
+			str = "<p>平均河川水位</p>";
 			str += "<p>測站數 "+d.num+"</p>";
-			str += "<p>時間 "+d.t+" </p>";
-			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
-			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
-			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
-			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			//str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
+			//str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
+			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
 			str += "<p>三級警戒數 "+d.alertL3+"</p>";
 			str += "<p>二級警戒數 "+d.alertL2+"</p>";
 			str += "<p>一級警戒數 "+d.alertL1+"</p>";
+			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}
 		else{
@@ -261,7 +261,7 @@ class MapWaterLevel extends MapLayer{
 				var diff = d.diffSum/d.num;
 
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
-				this.DrawWaterLevel(sID,[d.minDiff,d.maxDiff],color,lat,lng,clickFn);
+				this.DrawWaterLevel(sID,[diff],color,lat,lng,clickFn);
 			}
 		}
 		else{

@@ -73,15 +73,15 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		if(d.num){	//cluster
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
-			str = "<p>水利會水位</p>";
+			str = "<p>平均水利會水位</p>";
 			str += "<p>測站數 "+d.num+"</p>";
-			str += "<p>時間 "+d.t+" </p>";
 			for(var key in d.diff){
-				str += "<p>最大"+key+"變化 "+d.maxDiff[key].toFixed(2)+" m</p>";
-				str += "<p>最小"+key+"變化 "+d.minDiff[key].toFixed(2)+" m</p>";
+				//str += "<p>最大"+key+"變化 "+d.maxDiff[key].toFixed(2)+" m</p>";
+				//str += "<p>最小"+key+"變化 "+d.minDiff[key].toFixed(2)+" m</p>";
+				str += "<p>平均"+key+" "+(d.sum[key]/d.num).toFixed(2)+" m</p>";
+				str += "<p>平均"+key+"變化 "+(d.diff[key]/d.num).toFixed(2)+" m</p>";
 			}
-			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
-			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
+			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}
 		else{
@@ -118,14 +118,16 @@ class MapWaterLevelAgri extends MapWaterLevel{
 				}
 				var lat = d.latSum/d.num;
 				var lng = d.lngSum/d.num;
-				var maxDiff = 0, minDiff = 0;
+				var maxDiff = 0, minDiff = 0, diff = 0, num = 0;
 				for(var key in d.diff){
+					diff += d.diff[key]/d.num;
+					num++;
 					if(maxDiff < d.maxDiff[key]) maxDiff = d.maxDiff[key];
 					if(minDiff > d.minDiff[key]) minDiff = d.minDiff[key];
 				}
-				var diff = d.diffSum/d.num;
+				diff = diff/num;
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
-				this.DrawWaterLevel(sID,[minDiff,maxDiff],color,lat,lng,clickFn);
+				this.DrawWaterLevel(sID,[diff],color,lat,lng,clickFn);
 			}
 		}
 		else{
@@ -139,12 +141,15 @@ class MapWaterLevelAgri extends MapWaterLevel{
 					this.UpdateInfoWindow(d);
 				}
 				var clickFn = this.GenClickFn(cluster.data,i,"stationID");
-				var maxDiff = 0, minDiff = 0;
+				var maxDiff = 0, minDiff = 0, diff = 0, num = 0;
 				for(var key in d.diff){
+					diff += d.diff[key];
+					num++;
 					if(maxDiff < d.diff[key]) maxDiff = d.diff[key];
 					if(minDiff > d.diff[key]) minDiff = d.diff[key];
 				}
-				this.DrawWaterLevel(sID,[minDiff,maxDiff],color,s.lat,s.lng,clickFn);
+				diff = diff/num;
+				this.DrawWaterLevel(sID,[diff],color,s.lat,s.lng,clickFn);
 			}
 		}
 	}

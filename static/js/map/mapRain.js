@@ -234,7 +234,8 @@ class MapRain extends MapLayer{
 		if(d.num){
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
-			str = "<p>雨量</p>";
+			str = "<p>平均雨量</p>";
+			str += "<p>測站數 "+d.num+"</p>";
 			switch(g_APP.rainOption.type){
 				case "daily":
 					var now = d.now || (d.nowSum/d.num);
@@ -248,7 +249,6 @@ class MapRain extends MapLayer{
 					str += "<p>平均"+accHour+"小時累積雨量 "+d.acc.toFixed(2)+" mm</p>";
 					break;
 			}
-			str += "<p>測站數 "+d.num+"</p>";
 			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}

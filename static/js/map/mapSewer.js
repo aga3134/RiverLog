@@ -22,13 +22,13 @@ class MapSewer extends MapWaterLevel{
 			var lng = d.lngSum/d.num;
 			var value = d.valueSum/d.num;
 			var diff = d.diffSum/d.num;
-			str = "<p>下水道水位</p>";
+			str = "<p>平均下水道水位</p>";
 			str += "<p>測站數 "+d.num+"</p>";
+			//str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
+			//str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
+			str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
+			str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
 			str += "<p>時間 "+d.t+" </p>";
-			str += "<p>最大水位變化 "+d.maxDiff.toFixed(2)+" m</p>";
-			str += "<p>最小水位變化 "+d.minDiff.toFixed(2)+" m</p>";
-			//str += "<p>平均水位 "+value.toFixed(2)+" m</p>";
-			//str += "<p>平均水位變化 "+diff.toFixed(2)+" m</p>";
 			loc = new google.maps.LatLng(lat,lng);
 		}
 		else{
@@ -64,7 +64,7 @@ class MapSewer extends MapWaterLevel{
 				var lng = d.lngSum/d.num;
 				var diff = d.diffSum/d.num;
 				var clickFn = this.GenClickFn(cluster.data,i,"key");
-				this.DrawWaterLevel(sID,[d.minDiff,d.maxDiff],color,lat,lng,clickFn);
+				this.DrawWaterLevel(sID,[diff],color,lat,lng,clickFn);
 			}
 		}
 		else{
