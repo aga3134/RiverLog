@@ -52,8 +52,10 @@ class MapWaterLevelAgri extends MapWaterLevel{
 		}
 		else{
 			for(var key in data.diff){
-				acc["sum"][key] += value[key];
-				acc.diff[key] += data.diff[key];
+				if(acc.sum[key] == null) acc.sum[key] = value[key];
+				else acc.sum[key] += value[key];
+				if(acc.diff[key] == null) acc.diff[key] = data.diff[key];
+				else acc.diff[key] += data.diff[key];
 				if(acc.minDiff[key] == null) acc.minDiff[key] = data.diff[key];
 				else if(data.diff[key] < acc.minDiff[key]) acc.minDiff[key] = data.diff[key];
 				
@@ -78,8 +80,10 @@ class MapWaterLevelAgri extends MapWaterLevel{
 			for(var key in d.diff){
 				//str += "<p>最大"+key+"變化 "+d.maxDiff[key].toFixed(2)+" m</p>";
 				//str += "<p>最小"+key+"變化 "+d.minDiff[key].toFixed(2)+" m</p>";
-				str += "<p>平均"+key+" "+(d.sum[key]/d.num).toFixed(2)+" m</p>";
-				str += "<p>平均"+key+"變化 "+(d.diff[key]/d.num).toFixed(2)+" m</p>";
+				str += "<p>平均"+key+" "+(d.sum[key]/d.num).toFixed(2)+" m (";
+				var diff = d.diff[key]/d.num;
+				if(diff >= 0) str += "+";
+			    str += diff.toFixed(2)+" m)</p>";
 			}
 			str += "<p>時間 "+d.t+" </p>";
 			loc = new google.maps.LatLng(lat,lng);
