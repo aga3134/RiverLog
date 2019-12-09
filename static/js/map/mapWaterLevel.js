@@ -318,6 +318,7 @@ class MapWaterLevel extends MapLayer{
 			if(!bound.contains({lat:lat,lng:lng})) continue;
 
 			var key = d.x+"-"+d.y;
+			d.key = key;
 			d.diff = 0;
 			if(preDataHash[key]){
 				if(preDataHash[key].WaterLevelSum && d.WaterLevelSum){
@@ -332,7 +333,7 @@ class MapWaterLevel extends MapLayer{
 				this.UpdateInfoWindow(d);
 			}
 
-			var clickFn = this.GenClickFn(waterLevelData,i,key);
+			var clickFn = this.GenClickFn(waterLevelData,i,"key");
 			var color = "#37cc00";
 			if(d.alertL3 > 0) color = "#ffcc00";
 			if(d.alertL2 > 0) color = "#ff6600";

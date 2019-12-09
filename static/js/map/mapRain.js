@@ -332,6 +332,11 @@ class MapRain extends MapLayer{
 	  			}
 			}
 
+			//info window有打開，更新資訊
+			if(this.infoWindow.getMap() && this.infoTarget == sID){
+				this.UpdateInfoWindow(d);
+			}
+
 			var clickFn = this.GenClickFn(rainData,i,"stationID");
 			this.DrawRain(sID,rainData[i],s.lat,s.lon,clickFn);
 		}
@@ -370,6 +375,7 @@ class MapRain extends MapLayer{
 			if(!bound.contains({lat:lat,lng:lng})) continue;
 
 			var key = d.x+"-"+d.y;
+			d.key = key;
 			d.now = d.nowSum/d.num;
 			d.diff = 0;
 			if(preDataHash[key]){
@@ -398,8 +404,13 @@ class MapRain extends MapLayer{
 	  				d.acc = d.nowSum/d.num - accBegin;
 	  			}
 			}
+
+			//info window有打開，更新資訊
+			if(this.map && this.infoTarget == key){
+				this.UpdateInfoWindow(d);
+			}
 			
-			var clickFn = this.GenClickFn(rainData,i,rainData[i].x+"-"+rainData[i].y);
+			var clickFn = this.GenClickFn(rainData,i,"key");
 			this.DrawRain(key,rainData[i],lat,lng,clickFn);
 		}
   }
