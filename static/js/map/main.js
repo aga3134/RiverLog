@@ -575,10 +575,7 @@ var g_APP = new Vue({
     UpdateRainType: function(){
       this.UpdateUrl();
       if(!this.mapControl) return;
-      if(this.rainOption.type == "custom"){
-        this.mapControl.UpdateRainAcc();
-      }
-      else this.mapControl.UpdateMapRain();
+      this.mapControl.UpdateMapRain();
     },
     UpdateMapRain: function(){
       this.UpdateUrl();

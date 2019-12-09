@@ -13,218 +13,130 @@ class MapRain extends MapLayer{
 		}
 	}
 
-	UpdateRainAcc(){
-		if(this.level == -1){
-			for(var pos in this.data.data){
-				this.ComputeRainDataAcc(pos);
-			}
-		}
-		else{
-			for(var pos in this.grid[this.level]){
-				this.ComputeRainGridAcc(this.level,pos);
-			}
-		}
-	}
-
 	LoadLayer(param){
 		if(!this.map) return;
 		if(!g_APP.rainOption.show) return;
 		if(!this.dataUrl || !this.date) return;
 
 		var pos = "";
-    if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
-    else pos = "0-0";
+	    if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
+	    else pos = "0-0";
 
-    var url = this.dataUrl;
-    url += "?date="+this.date;
-    if(this.divideLatLng){
-      url += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
-    }
+	    var url = this.dataUrl;
+	    url += "?date="+this.date;
+	    if(this.divideLatLng){
+	      url += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
+	    }
 
-    var preDayUrl = this.dataUrl;
-  	var preDay = dayjs(this.date,"YYYY-MM-DD").add(-1,"day").format("YYYY-MM-DD");
-  	preDayUrl += "?date="+preDay;
-  	if(this.divideLatLng){
-  		preDayUrl += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
-  	}
+	    var preDayUrl = this.dataUrl;
+	  	var preDay = dayjs(this.date,"YYYY-MM-DD").add(-1,"day").format("YYYY-MM-DD");
+	  	preDayUrl += "?date="+preDay;
+	  	if(this.divideLatLng){
+	  		preDayUrl += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
+	  	}
 
-  	var data = this.data.data;
-  	var daily = this.data.daily;
-  	var preHash = this.dataHash.preData;
-  	var curHash = this.dataHash.curData;
+	  	var data = this.data.data;
+	  	var daily = this.data.daily;
+	  	var preHash = this.dataHash.preData;
+	  	var curHash = this.dataHash.curData;
 
-  	$.get(url, function(result){
-      if(result.status != "ok") return;   
-      if(!data[pos]) data[pos] = {};
-      if(!curHash[pos]) curHash[pos] = {};
-      for(var i=0;i<result.data.length;i++){
-        var d = result.data[i];
-        var t = this.SetupTime(d[this.timeKey]);
-        d[this.timeKey] = t;
-        
-        if(!data[pos][t]) data[pos][t] = [];
-        data[pos][t].push(d);
-        var s = d[this.dataSiteKey];
+		$.get(url, function(result){
+			if(result.status != "ok") return;   
+			if(!data[pos]) data[pos] = {};
+			for(var i=0;i<result.data.length;i++){
+				var d = result.data[i];
+				var t = this.SetupTime(d[this.timeKey]);
+				d[this.timeKey] = t;
 
-        if(!curHash[pos][t]) curHash[pos][t] = {};
-        curHash[pos][t][s] = d;
-        
-        if(!daily[s]) daily[s] = [];
-        daily[s].push(d);
-      }
+				if(!data[pos][t]) data[pos][t] = [];
+				data[pos][t].push(d);
+				var s = d[this.dataSiteKey];
 
-    	$.get(preDayUrl, function(result){
-	      if(result.status != "ok") return;      
-	      if(!preHash[pos]) preHash[pos] = {};
-	      for(var i=0;i<result.data.length;i++){
-	        var d = result.data[i];
-	        var t = this.SetupTime(d[this.timeKey]);
-      		d[this.timeKey] = t;
-	        
-	        if(!preHash[pos][t]) preHash[pos][t] = {};
-	        var s = d[this.dataSiteKey];
-	        preHash[pos][t][s] = d;
-	      }
-	      this.ComputeRainDataAcc(pos);
-	    }.bind(this));
-	    
-    }.bind(this));
-  }
+				if(!curHash[t]) curHash[t] = {};
+				curHash[t][s] = d;
 
-  ComputeRainDataAcc(pos){
-  	var data = this.data.data[pos];
-  	if(g_APP.rainOption.type != "custom") return this.DrawLayer(data);
-  	
-  	var accHour = g_APP.rainOption.accHour;
-  	var preHash = this.dataHash.preData[pos];
-  	var curHash = this.dataHash.curData[pos];
-  	
-  	var endT = "23:50:00";
-  	for(var time in data){
-  		var dataArr = data[time];
-  		for(var i=0;i<dataArr.length;i++){
-  			var d = dataArr[i];
-  			var s = d[this.dataSiteKey];
-  			var t = d[this.timeKey].split(":");
-  			var curHour = parseInt(t[0]);
-  			if(accHour > curHour){	//要加到前一天的值
-  				var accT = g_Util.PadLeft(24-accHour+curHour,2)+":"+t[1]+":"+t[2];
-  				if(!preHash[endT] || !preHash[endT][s]) continue;
-  				if(!preHash[accT] || !preHash[accT][s]) continue;
-	  			var accBegin = preHash[endT][s].now-preHash[accT][s].now;
-	  			d.acc = d.now + accBegin;
-  			}
-  			else{
-  				var accT = g_Util.PadLeft(curHour-accHour,2)+":"+t[1]+":"+t[2];
-  				if(!curHash[accT] || !curHash[accT][s]) continue;
-  				var accBegin = curHash[accT][s].now;
-  				d.acc = d.now - accBegin;
-  			}
-  		}
-  	}
-  	this.DrawLayer(data);
-  }
+				if(!daily[s]) daily[s] = [];
+				daily[s].push(d);
+			}
 
-  LoadGrid(param){
-  	if(!this.gridUrl || !this.date) return;
+			$.get(preDayUrl, function(result){
+				if(result.status != "ok") return;      
+				for(var i=0;i<result.data.length;i++){
+					var d = result.data[i];
+					var t = this.SetupTime(d[this.timeKey]);
+					d[this.timeKey] = t;
 
-    var url = this.gridUrl;
-    url += "?date="+this.date;
-    url += "&level="+param.level;
-    if(this.divideLatLng){
-      url += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
-    }
+					if(!preHash[t]) preHash[t] = {};
+					var s = d[this.dataSiteKey];
+					preHash[t][s] = d;
+				}
+				this.DrawLayer(data[pos]);
+			}.bind(this));
 
-    var preDayUrl = this.gridUrl;
-  	var preDay = dayjs(this.date,"YYYY-MM-DD").add(-1,"day").format("YYYY-MM-DD");
-  	preDayUrl += "?date="+preDay;
-  	preDayUrl += "&level="+param.level;
-  	if(this.divideLatLng){
-  		preDayUrl += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
-  	}
+		}.bind(this));
+	}
 
-  	var pos = "";
-    if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
-    else pos = "0-0";
+	LoadGrid(param){
+		if(!this.gridUrl || !this.date) return;
 
-    var level = parseInt(param.level);
-    var grid = this.grid[level];
-    var preGrid = this.dataHash.preGrid[level];
-  	var curGrid = this.dataHash.curGrid[level];
+		var url = this.gridUrl;
+		url += "?date="+this.date;
+		url += "&level="+param.level;
+		if(this.divideLatLng){
+			url += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
+		}
 
-    $.get(url, function(result){
-      if(result.status != "ok") return;
-      var data = result.data.data;
-      if(!grid[pos]) grid[pos] = {};
-      if(!curGrid[pos]) curGrid[pos] = {};
-      for(var i=0;i<data.length;i++){
-        var d = data[i];
-        var t = this.SetupTime(d[this.gridTimeKey]);
-        d[this.gridTimeKey] = t;
-        var key = d.x+"-"+d.y;
-       
-        if(!grid[pos][t]) grid[pos][t] = [];
-        grid[pos][t].push(d);
+		var preDayUrl = this.gridUrl;
+		var preDay = dayjs(this.date,"YYYY-MM-DD").add(-1,"day").format("YYYY-MM-DD");
+		preDayUrl += "?date="+preDay;
+		preDayUrl += "&level="+param.level;
+		if(this.divideLatLng){
+			preDayUrl += "&minLat="+param.minLat+"&minLng="+param.minLng+"&maxLat="+param.maxLat+"&maxLng="+param.maxLng;
+		}
 
-        if(!curGrid[pos][t]) curGrid[pos][t] = {};
-        curGrid[pos][t][key] = d;
-      }
+		var pos = "";
+		if(this.divideLatLng) pos = param.minLat+"-"+param.minLng;
+		else pos = "0-0";
 
-    	$.get(preDayUrl, function(result){
-	      if(result.status != "ok") return;      
-	      if(!preGrid[pos]) preGrid[pos] = {};
-	      var data = result.data.data;
-	      for(var i=0;i<data.length;i++){
-	        var d = data[i];
-	        var t = this.SetupTime(d[this.gridTimeKey]);
-      		d[this.gridTimeKey] = t;
-      		var key = d.x+"-"+d.y;
-	        
-	        if(!preGrid[pos][t]) preGrid[pos][t] = {};
-	        preGrid[pos][t][key] = d;
-	      }
-	      this.ComputeRainGridAcc(level,pos);
-	    }.bind(this));
-	    
-    }.bind(this));
-  }
+		var level = parseInt(param.level);
+		var grid = this.grid[level];
+		var preGrid = this.dataHash.preGrid[level];
+		var curGrid = this.dataHash.curGrid[level];
 
-  ComputeRainGridAcc(level,pos){
-  	var data = this.grid[level][pos];
-  	if(g_APP.rainOption.type != "custom") return this.DrawGrid(data);
+		$.get(url, function(result){
+			if(result.status != "ok") return;
+			var data = result.data.data;
+			if(!grid[pos]) grid[pos] = {};
+			for(var i=0;i<data.length;i++){
+				var d = data[i];
+				var t = this.SetupTime(d[this.gridTimeKey]);
+				d[this.gridTimeKey] = t;
+				var key = d.x+"-"+d.y;
 
-  	var accHour = g_APP.rainOption.accHour;
-  	var preHash = this.dataHash.preGrid[level][pos];
-  	var curHash = this.dataHash.curGrid[level][pos];
-  	
-  	var endT = "23:50:00";
-  	for(var time in data){
-  		var dataArr = data[time];
-  		for(var i=0;i<dataArr.length;i++){
-  			var d = dataArr[i];
-  			var t = d[this.gridTimeKey].split(":");
-  			var key = d.x+"-"+d.y;
+				if(!grid[pos][t]) grid[pos][t] = [];
+				grid[pos][t].push(d);
 
-  			var curHour = parseInt(t[0]);
-  			if(accHour > curHour){	//要加到前一天的值
-  				var accT = g_Util.PadLeft(24-accHour+curHour,2)+":"+t[1]+":"+t[2];
-  				if(!preHash[endT] || !preHash[endT][key]) continue;
-  				if(!preHash[accT] || !preHash[accT][key]) continue;
-  				var endV = preHash[endT][key].nowSum/preHash[endT][key].num;
-  				var accV = preHash[accT][key].nowSum/preHash[accT][key].num;
-	  			var accBegin = endV-accV;
-	  			d.acc = d.nowSum/d.num + accBegin;
-  			}
-  			else{
-  				var accT = g_Util.PadLeft(curHour-accHour,2)+":"+t[1]+":"+t[2];
-  				if(!curHash[accT] || !curHash[accT][key]) continue;
-  				var accBegin = curHash[accT][key].nowSum/curHash[accT][key].num;
-  				d.acc = d.nowSum/d.num - accBegin;
-  			}
-  		}
-  	}
-  	this.DrawGrid(data);
-  }
+				if(!curGrid[t]) curGrid[t] = {};
+				curGrid[t][key] = d;
+			}
+
+			$.get(preDayUrl, function(result){
+				if(result.status != "ok") return;      
+				var data = result.data.data;
+				for(var i=0;i<data.length;i++){
+					var d = data[i];
+					var t = this.SetupTime(d[this.gridTimeKey]);
+					d[this.gridTimeKey] = t;
+					var key = d.x+"-"+d.y;
+					
+					if(!preGrid[t]) preGrid[t] = {};
+					preGrid[t][key] = d;
+				}
+				this.DrawGrid(grid[pos]);
+			}.bind(this));
+
+		}.bind(this));
+	}
 
 	UpdateInfoWindow(d){
 		var str = "";
@@ -285,12 +197,10 @@ class MapRain extends MapLayer{
 		switch(g_APP.rainOption.type){
 			case "daily":
 				value = data.now;
-				if(data.now == null) value = data.nowSum/data.num;
 				scaleH = 0.0005*baseScale;
 			break;
 			case "diff":
 				value = data.diff;
-				if(data.diff == null) value = data.diffSum/data.num;
 				scaleH = 0.005*baseScale;
 			break;
 			case "custom":
@@ -383,6 +293,11 @@ class MapRain extends MapLayer{
 			}
 		}
 
+		var preDayHash = this.dataHash.preData;
+  		var curDayHash = this.dataHash.curData;
+  		var endT = "23:50:00";
+  		var accHour = g_APP.rainOption.accHour;
+
 		var bound = this.map.getBounds();
 		for(var i=0;i<rainData.length;i++){
 			var d = rainData[i];
@@ -399,12 +314,30 @@ class MapRain extends MapLayer{
 			}
 			rainData[i].diff = value;
 
+			if(g_APP.rainOption.type == "custom"){
+				var t = d[this.timeKey].split(":");
+	  			var curHour = parseInt(t[0]);
+	  			if(accHour > curHour){	//要加到前一天的值
+	  				var accT = g_Util.PadLeft(24-accHour+curHour,2)+":"+t[1]+":"+t[2];
+	  				if(!preDayHash[endT] || !preDayHash[endT][sID]) continue;
+	  				if(!preDayHash[accT] || !preDayHash[accT][sID]) continue;
+		  			var accBegin = preDayHash[endT][sID].now-preDayHash[accT][sID].now;
+		  			d.acc = d.now + accBegin;
+	  			}
+	  			else{
+	  				var accT = g_Util.PadLeft(curHour-accHour,2)+":"+t[1]+":"+t[2];
+	  				if(!curDayHash[accT] || !curDayHash[accT][sID]) continue;
+	  				var accBegin = curDayHash[accT][sID].now;
+	  				d.acc = d.now - accBegin;
+	  			}
+			}
+
 			var clickFn = this.GenClickFn(rainData,i,"stationID");
 			this.DrawRain(sID,rainData[i],s.lat,s.lon,clickFn);
 		}
-  }
+	}
 
-  DrawGrid(data){
+	DrawGrid(data){
 		if(!this.map) return;
 		if(!data || !g_APP.rainOption.show) return;
 
@@ -423,21 +356,47 @@ class MapRain extends MapLayer{
 			}
 		}
 
+		var preDayHash = this.dataHash.preGrid[this.level];
+  		var curDayHash = this.dataHash.curGrid[this.level];
+  		var endT = "23:50:00";
+  		var accHour = g_APP.rainOption.accHour;
+
 		var bound = this.map.getBounds();
 		for(var i=0;i<rainData.length;i++){
-			if(rainData[i].nowSum <= 0) continue;
-			var lat = rainData[i].latSum/rainData[i].num;
-			var lng = rainData[i].lngSum/rainData[i].num;
+			var d = rainData[i];
+			if(d.nowSum <= 0) continue;
+			var lat = d.latSum/d.num;
+			var lng = d.lngSum/d.num;
 			if(!bound.contains({lat:lat,lng:lng})) continue;
 
-			var key = rainData[i].x+"-"+rainData[i].y;
-			rainData[i].diff = 0;
+			var key = d.x+"-"+d.y;
+			d.now = d.nowSum/d.num;
+			d.diff = 0;
 			if(preDataHash[key]){
-				if(preDataHash[key].nowSum && rainData[i].nowSum){
-					var now = rainData[i].nowSum/rainData[i].num;
+				if(preDataHash[key].nowSum && d.nowSum){
+					var now = d.nowSum/d.num;
 					var preNow = preDataHash[key].nowSum/preDataHash[key].num;
-					rainData[i].diff = now-preNow;
+					d.diff = now-preNow;
 				}
+			}
+
+			if(g_APP.rainOption.type == "custom"){
+				var t = d.t.split(":");
+	  			var curHour = parseInt(t[0]);
+	  			if(accHour > curHour){	//要加到前一天的值
+	  				var accT = g_Util.PadLeft(24-accHour+curHour,2)+":"+t[1]+":"+t[2];
+	  				if(!preDayHash[endT] || !preDayHash[endT][key]) continue;
+	  				if(!preDayHash[accT] || !preDayHash[accT][key]) continue;
+		  			var accBegin = preDayHash[endT][key].nowSum/preDayHash[endT][key].num-
+		  				preDayHash[accT][key].nowSum/preDayHash[accT][key].num;
+		  			d.acc = d.nowSum/d.num + accBegin;
+	  			}
+	  			else{
+	  				var accT = g_Util.PadLeft(curHour-accHour,2)+":"+t[1]+":"+t[2];
+	  				if(!curDayHash[accT] || !curDayHash[accT][key]) continue;
+	  				var accBegin = curDayHash[accT][key].nowSum/curDayHash[accT][key].num;
+	  				d.acc = d.nowSum/d.num - accBegin;
+	  			}
 			}
 			
 			var clickFn = this.GenClickFn(rainData,i,rainData[i].x+"-"+rainData[i].y);
