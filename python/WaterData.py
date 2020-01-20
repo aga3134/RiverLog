@@ -547,7 +547,7 @@ class WaterData:
                 siteHash[site["id"]] = site
                 
             r = requests.get(url,verify=False)
-            #r.encoding = "utf-8"
+            r.encoding = "utf-8-sig"
             if r.status_code == requests.codes.all_okay:
                 reservoir = r.json()
                 ops = {}
