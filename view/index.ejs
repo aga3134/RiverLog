@@ -79,7 +79,7 @@
 						<div class="title">日期選擇</div>
 					</div>
 				</div>
-				<select v-model="curYear">
+				<select v-model="curYear" v-on:click="ChangeYear(curYear);">
 					<option v-for="y in yearArr" v-bind:value="y">{{y}}年</option>
 				</select>
 				
