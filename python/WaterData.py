@@ -509,6 +509,8 @@ class WaterData:
                 #add data
                 ops = {}
                 for d in data:
+                    if d["name"] != "淹水深度":
+                        continue
                     if len(d["Observations"]) == 0:
                         continue
                     f = {}
@@ -679,6 +681,8 @@ class WaterData:
                 ops = {}
                 gridArr = {}
                 for d in data:
+                    if not "水位" in d["name"]:
+                        continue
                     if len(d["Observations"]) == 0:
                         continue
                     f = {}
