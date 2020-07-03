@@ -232,12 +232,13 @@ class MapRain extends MapLayer{
 				}
 			break;
 		}
-		if(!value) return;
+		//if(!value) return;
 
 		var rectW = scaleW*g_APP.rainOption.scale;
 		var rectH = scaleH*g_APP.rainOption.scale;
+		var circleR = rectW*50000;	//circle單位是m，rectW單位是經度
 		if(this.layer[id]){
-			var rect = this.layer[id];
+			var rect = this.layer[id].rect;
 			rect.setOptions({
 				map: this.map,
 				strokeWeight: warn?2:0,
@@ -253,6 +254,14 @@ class MapRain extends MapLayer{
 			});
 			google.maps.event.clearListeners(rect,"click");
 			rect.addListener('click', clickFn);
+
+			var circle = this.layer[id].circle;
+			circle.setOptions({
+				map: this.map,
+				radius: circleR
+			});
+			google.maps.event.clearListeners(circle,"click");
+			circle.addListener('click', clickFn);
 		}
 		else{
 			var rect = new google.maps.Rectangle({
@@ -270,9 +279,31 @@ class MapRain extends MapLayer{
 				}
 			});
 			rect.addListener('click', clickFn);
-			this.layer[id] = rect;
+
+			var circle = new google.maps.Circle({
+				strokeColor: "#3333cc",
+				strokeWeight: 2,
+				fillOpacity: 0,
+				zIndex: 2,
+				map: this.map,
+				center: {lat:lat,lng:lng},
+				radius: circleR
+			});
+			circle.addListener('click', clickFn);
+
+			this.layer[id] = {
+				rect: rect,
+				circle: circle
+			};
 		}
 	}
+
+	ClearMap(){
+      for(var key in this.layer){
+        this.layer[key].rect.setMap(null);
+        this.layer[key].circle.setMap(null);
+      }
+    }
 
 	DrawLayer(data){
 		if(!this.map) return;
@@ -369,7 +400,7 @@ class MapRain extends MapLayer{
 		var bound = this.map.getBounds();
 		for(var i=0;i<rainData.length;i++){
 			var d = rainData[i];
-			if(d.nowSum <= 0) continue;
+			if(d.nowSum < 0) continue;
 			var lat = d.latSum/d.num;
 			var lng = d.lngSum/d.num;
 			if(!bound.contains({lat:lat,lng:lng})) continue;

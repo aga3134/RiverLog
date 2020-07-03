@@ -383,6 +383,10 @@ var g_APP = new Vue({
       }
       else{
         this.playTimer = setInterval(function(){
+          //播放超出目前時間就停止
+          var t = this.curYear+"/"+this.curDate+" "+this.curTime;
+          if(dayjs().isBefore(t)) return this.TogglePlay();
+
           if(!this.NextTime()){
             this.TogglePlay();
           }
@@ -395,6 +399,10 @@ var g_APP = new Vue({
       if(this.playTimer){
         clearInterval(this.playTimer);
         this.playTimer = setInterval(function(){
+          //播放超出目前時間就停止
+          var t = this.curYear+"/"+this.curDate+" "+this.curTime;
+          if(dayjs().isBefore(t)) return this.TogglePlay();
+          
           if(!this.NextTime()){
             this.TogglePlay();
           }

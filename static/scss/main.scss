@@ -353,10 +353,12 @@ a{
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			overflow-x: auto;
 			.time-label{
-				padding: 0px 3px;
-				margin: 0px 5px;
+				font-size: 0.9em;
+				margin: 0px 3px;
 				cursor: pointer;
+				flex-shrink: 0;
 				&:hover{
 					border: 1px solid #ff0000;
 				}
@@ -367,8 +369,10 @@ a{
 				cursor: pointer;
 			}
 			.bt{
+				flex-shrink: 0;
+				font-size: 0.9em;
 				margin: 0px 5px;
-				padding: 2px 7px;
+				padding: 2px 5px;
 				background-color: #716242;
 				border-radius: 3px;
 				color: #ffffff;

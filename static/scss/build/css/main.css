@@ -263,11 +263,13 @@ a {
     .riverlog .playbar .play-control {
       display: flex;
       justify-content: center;
-      align-items: center; }
+      align-items: center;
+      overflow-x: auto; }
       .riverlog .playbar .play-control .time-label {
-        padding: 0px 3px;
-        margin: 0px 5px;
-        cursor: pointer; }
+        font-size: 0.9em;
+        margin: 0px 3px;
+        cursor: pointer;
+        flex-shrink: 0; }
         .riverlog .playbar .play-control .time-label:hover {
           border: 1px solid #ff0000; }
       .riverlog .playbar .play-control .icon {
@@ -275,8 +277,10 @@ a {
         height: 30px;
         cursor: pointer; }
       .riverlog .playbar .play-control .bt {
+        flex-shrink: 0;
+        font-size: 0.9em;
         margin: 0px 5px;
-        padding: 2px 7px;
+        padding: 2px 5px;
         background-color: #716242;
         border-radius: 3px;
         color: #ffffff;

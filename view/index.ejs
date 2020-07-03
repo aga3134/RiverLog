@@ -57,12 +57,12 @@
 					</div>
 				</div>
 				<div class="play-control">
-					<div class="bt" v-on:click="PrevDay();">昨天</div>
+					<div class="bt" v-on:click="PrevDay();">前一天</div>
 					<div class="time-label" v-on:click="openDateSelect=true;">{{timeStr}}</div>
 					<img class="icon" src="/static/Image/icon-prev.png" v-on:click="PrevTime();">
 					<img class="icon" v-bind:src="playIcon" v-on:click="TogglePlay();">
 					<img class="icon" src="/static/Image/icon-next.png" v-on:click="NextTime();">
-					<div class="bt" v-on:click="NextDay();">明天</div>
+					<div class="bt" v-on:click="NextDay();">後一天</div>
 				</div>
 			</div>
 
