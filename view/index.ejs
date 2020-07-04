@@ -354,6 +354,10 @@
 							<input type="checkbox" v-model="mapOption.showBasin" v-on:change="UpdateMapBasin()">
 						</div>
 						<div class="option-item">
+							<div class="option-label">顯示風向</div>
+							<input type="checkbox" v-model="mapOption.showWind" v-on:change="UpdateMapWind()">
+						</div>
+						<div class="option-item">
 							<input type="range" min="1" max="10" step="1" v-model="mapOption.playSpeed" v-on:change="UpdatePlaySpeed();">
 							<div class="option-label">播放速度</div>
 						</div>
@@ -647,6 +651,7 @@
 		<script src="/static/js/map/mapAlert.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapElev.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapBasin.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/map/mapWind.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapControl.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/main.js?v=<%=meta.version%>"></script>
 	</body>

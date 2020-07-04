@@ -16,6 +16,7 @@ function MapControl(){
   this.mapAlert = new MapAlert({"dataUrl":"/alert/alertData"});
   this.mapElev = new MapElev({"gridUrl":"/elev/gridData"});
   this.mapBasin = new MapBasin({});
+  this.mapWind = new MapWind({"siteUrl":"/wind/station", "dataUrl":"/wind/windData"});
   
   this.openDailyChart = false;
   this.dailyChartTitle = "";
@@ -113,6 +114,7 @@ MapControl.prototype.InitMap = function(param){
     this.mapBasin.map = this.map;
     this.mapBasin.InitMapInfo();
     this.mapElev.map = this.map;
+    this.mapWind.map = this.map;
     param.succFunc();
 
   }.bind(this));
@@ -134,6 +136,7 @@ MapControl.prototype.ChangeDate = function(){
   this.mapTyphoon.ChangeDate(date);
   this.mapAlert.ChangeDate(date);
   this.mapElev.ChangeDate(date);
+  this.mapWind.ChangeDate(date);
 }
 
 MapControl.prototype.ToggleSatellite = function(useSatellite){
@@ -206,6 +209,11 @@ MapControl.prototype.UpdateMapBasin = function(){
   this.mapBasin.Update();
 };
 
+MapControl.prototype.UpdateMapWind = function(){
+  if(!this.mapWind) return;
+  this.mapWind.Update();
+};
+
 MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
@@ -221,6 +229,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapAlert.ClearMap();
   this.mapElev.ClearMap();
   this.mapBasin.ClearMap();
+  this.mapWind.ClearMap();
 };
 
 

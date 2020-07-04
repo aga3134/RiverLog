@@ -60,6 +60,7 @@ var g_APP = new Vue({
       waterHighlight: false,
       showBasin: false,
       playSpeed: 5,
+      showWind: false
     },
     dateInfo: {date: "", alert: ""},
     url: "/",
@@ -556,6 +557,7 @@ var g_APP = new Vue({
       this.UpdateMapAlert();
       this.UpdateMapTyphoon();
       this.UpdateMapElev();
+      this.UpdateMapWind();
       this.mapControl.UpdateLineChart();
     },
     GetDataFromTime: function(data,time){
@@ -624,6 +626,11 @@ var g_APP = new Vue({
       this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.UpdateMapBasin();
+    },
+    UpdateMapWind: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.UpdateMapWind();
     },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;
@@ -759,6 +766,7 @@ var g_APP = new Vue({
 
       //v2
       arr.push({value: Math.round(this.rainOption.accHour),bitNum: 8});
+      arr.push({value: this.mapOption.showWind,bitNum: 1});
       
       return g_OptionCodec.Encode(arr);
     },
@@ -848,6 +856,7 @@ var g_APP = new Vue({
     GetBitNumV2: function(){
       var bitNumArr = this.GetBitNumV1();
       bitNumArr.push({name:"rainAccHour",bitNum:8});
+      bitNumArr.push({name:"mapShowWind",bitNum:1});
       return bitNumArr;
     },
     ApplyOptionV1: function(valueArr){
@@ -912,6 +921,7 @@ var g_APP = new Vue({
     ApplyOptionV2: function(valueArr){
       this.ApplyOptionV1(valueArr);
       this.rainOption.accHour = valueArr["rainAccHour"];
+      this.mapOption.showWind = valueArr["mapShowWind"]
     }
   }
 });

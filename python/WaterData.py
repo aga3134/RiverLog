@@ -328,12 +328,12 @@ class WaterData:
                     if len(d["Thing"]["Locations"]) == 0:
                         continue
                     prop = d["Thing"]["properties"]
-                    basin = prop["basin"]
+                    #basin = prop["basin"]
                     site = {}
-                    site["BasinIdentifier"] = prop["stationID"]
-                    site["AffiliatedBasin"] = basin["AffiliatedBasin"]
-                    site["AffiliatedSubsidiaryBasin"] = basin["AffiliatedSubsidiaryBasin"]
-                    site["AffiliatedSubSubsidiaryBasin"] = basin["AffiliatedSubSubsidiaryBasin"]
+                    site["BasinIdentifier"] = prop["stationCode"]
+                    #site["AffiliatedBasin"] = basin["AffiliatedBasin"]
+                    #site["AffiliatedSubsidiaryBasin"] = basin["AffiliatedSubsidiaryBasin"]
+                    #site["AffiliatedSubSubsidiaryBasin"] = basin["AffiliatedSubSubsidiaryBasin"]
                     if "AlertLevel1" in prop:
                         site["AlertLevel1"] = util.ToFloat(prop["AlertLevel1"])
                     if "AlertLevel2" in prop:
@@ -344,8 +344,9 @@ class WaterData:
                     site["lat"] = loc[1]
                     site["lon"] = loc[0]
                     site["ObservatoryName"] = d["Thing"]["name"]
-                    site["RiverName"] = prop["RiverName"]
-                    site["TownIdentifier"] = prop["TownIdentifier"]
+                    #site["RiverName"] = prop["RiverName"]
+                    site["stationName"] = prop["stationName"]
+                    #site["TownIdentifier"] = prop["TownIdentifier"]
                     
                     key = {"BasinIdentifier":site["BasinIdentifier"]}
                     #self.db["waterLevelStation"].update(key,site,upsert=True)
@@ -361,7 +362,7 @@ class WaterData:
                         continue
                     prop = d["Thing"]["properties"]
                     w = {}
-                    w["StationIdentifier"] = prop["stationID"]
+                    w["StationIdentifier"] = prop["stationCode"]
                     t = datetime.datetime.strptime(d["Observations"][0]["phenomenonTime"],'%Y-%m-%dT%H:%M:%S.%fZ')
                     t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
                     t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)

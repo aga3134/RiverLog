@@ -54,6 +54,7 @@ class WeatherData:
             #typhoon trajectory
             self.ProcessTyphoon("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key)
             self.ProcessTide("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0017-001?format=JSON&Authorization="+self.key)
+            self.ProcessWind("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0001-001?format=JSON&Authorization="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -185,6 +186,76 @@ class WeatherData:
 
                 for key in gridArr:
                     self.grid.AddGridBatch("rainGrid"+key,gridArr[key],"time",["now"],"lat","lon")
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWind(self,url):
+        print("process wind url: %s" % url)
+        try:
+            r = requests.get(url)
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                result = r.json()
+                locArr = result["cwbopendata"]["location"]
+                stationArr = []
+                dataArr = []
+                for loc in locArr:
+                    station = {}
+                    station["stationID"] = loc["stationId"]
+                    station["name"] = loc["locationName"]
+                    station["lat"] = util.ToFloat(loc["lat"])
+                    station["lon"] = util.ToFloat(loc["lon"])
+                    for param in loc["parameter"]:
+                        if(param["parameterName"] == "CITY"):
+                            station["city"] = param["parameterValue"]
+                        elif(param["parameterName"] == "TOWN"):
+                            station["town"] = param["parameterValue"]
+                    stationArr.append(station)
+                
+                    data = {}
+                    t = loc["time"]["obsTime"].replace(":","")
+                    t = datetime.datetime.strptime(t,'%Y-%m-%dT%H%M%S%z')
+                    data["time"] = t
+                    data["stationID"] = station["stationID"]
+                    for elem in loc["weatherElement"]:
+                        if(elem["elementName"] == "ELEV"):
+                            data["ELEV"] = util.ToFloat(elem["elementValue"]["value"])
+                        elif(elem["elementName"] == "WDIR"):
+                            data["WDIR"] = util.ToFloat(elem["elementValue"]["value"])
+                        elif(elem["elementName"] == "WDSD"):
+                            data["WDSD"] = util.ToFloat(elem["elementValue"]["value"])
+                        elif(elem["elementName"] == "TEMP"):
+                            data["TEMP"] = util.ToFloat(elem["elementValue"]["value"])
+                        elif(elem["elementName"] == "HUMD"):
+                            data["HUMD"] = util.ToFloat(elem["elementValue"]["value"])
+                        elif(elem["elementName"] == "PRES"):
+                            data["PRES"] = util.ToFloat(elem["elementValue"]["value"])
+                    key = {"stationID":data["stationID"],"time":data["time"]}
+                    dataArr.append(data)
+                
+                opSite = []
+                for s in stationArr:
+                    key = {"stationID":s["stationID"]}
+                    opSite.append((pymongo.UpdateOne(key, {"$set": s}, upsert=True)))
+                if len(opSite) > 0:
+                    self.db["windStation"].bulk_write(opSite,ordered=False)
+
+                opData = {}
+                for d in dataArr:
+                    dayStr = d["time"].strftime('%Y%m%d')
+                    if dayStr not in opData:
+                        opData[dayStr] = []
+
+                    key = {"stationID":d["stationID"],"time":d["time"]}
+                    opData[dayStr].append(pymongo.UpdateOne(key, {"$set": d}, upsert=True))
+
+                for key in opData:
+                    self.db["wind"+key].create_index("stationID")
+                    self.db["wind"+key].create_index("time")
+                    if len(opData[key]) > 0:
+                        self.db["wind"+key].bulk_write(opData[key],ordered=False)
+
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()

@@ -53,7 +53,7 @@ class MapReservoir extends MapLayer{
 		    var percent = (100*d.EffectiveWaterStorageCapacity/s.EffectiveCapacity).toFixed(2);
 		    if(isNaN(percent)) continue;
 		    var size = Math.min(200,s.EffectiveCapacity*baseSize);
-        var clickFn = this.GenClickFn(reservoirData,i,"ReservoirIdentifier");
+        	var clickFn = this.GenClickFn(reservoirData,i,"ReservoirIdentifier");
 
 		    //info window有打開，更新資訊
 		    if(this.infoWindow.getMap() && this.infoTarget == sID){

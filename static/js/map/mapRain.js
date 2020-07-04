@@ -258,6 +258,7 @@ class MapRain extends MapLayer{
 			var circle = this.layer[id].circle;
 			circle.setOptions({
 				map: this.map,
+				strokeOpacity: g_APP.rainOption.opacity,
 				radius: circleR
 			});
 			google.maps.event.clearListeners(circle,"click");
@@ -283,6 +284,7 @@ class MapRain extends MapLayer{
 			var circle = new google.maps.Circle({
 				strokeColor: "#3333cc",
 				strokeWeight: 2,
+				strokeOpacity: g_APP.rainOption.opacity,
 				fillOpacity: 0,
 				zIndex: 2,
 				map: this.map,
