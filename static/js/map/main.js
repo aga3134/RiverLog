@@ -62,6 +62,13 @@ var g_APP = new Vue({
       playSpeed: 5,
       showWind: false
     },
+    waterboxOption: {
+      collapse:false,
+      opacity:0.5,
+      scale:1,
+      show:true,
+      targetItem: "s_t0"
+    },
     dateInfo: {date: "", alert: ""},
     url: "/",
     opUrl: [
@@ -88,6 +95,15 @@ var g_APP = new Vue({
       {name: "可能有威脅", value:"Moderate"},
       {name: "不太有威脅", value:"Minor"},
       {name: "未知", value:"Unknown"},
+    ],
+    opWaterboxItem: [
+      {name: "水溫", value:"s_t0", unit:"度C"},
+      {name: "酸鹼度", value:"s_ph", unit:""},
+      {name: "導電度", value:"s_ec", unit:"uS/cm"},
+      {name: "濁度", value:"s_Tb", unit:"NTU"},
+      {name: "水位", value:"s_Lv", unit:"M"},
+      {name: "溶氧", value:"s_DO", unit:"mg/L"},
+      {name: "氧化還原電位", value:"s_orp", unit:"mV"},
     ],
     searchBox: null,
     loading: true
@@ -149,6 +165,59 @@ var g_APP = new Vue({
       this.color.elev = d3.scale.linear()
         .domain(this.color.elevDomain)
         .range(this.color.elevRange);
+
+      var wbColor = {};
+      //水溫
+      wbColor.s_t0 = {};
+      wbColor.s_t0.domain = [0,100];
+      wbColor.s_t0.range = ["#0000ff","#ff0000"];
+      wbColor.s_t0.color = d3.scale.linear()
+        .domain(wbColor.s_t0.domain)
+        .range(wbColor.s_t0.range);
+      //酸鹼度
+      wbColor.s_ph = {};
+      wbColor.s_ph.domain = [0,14];
+      wbColor.s_ph.range = ["#0000ff","#ff0000"];
+      wbColor.s_ph.color = d3.scale.linear()
+        .domain(wbColor.s_ph.domain)
+        .range(wbColor.s_ph.range);
+      //導電度
+      wbColor.s_ec = {};
+      wbColor.s_ec.domain = [0,100];
+      wbColor.s_ec.range = ["#0000ff","#ff0000"];
+      wbColor.s_ec.color = d3.scale.linear()
+        .domain(wbColor.s_ec.domain)
+        .range(wbColor.s_ec.range);
+      //濁度
+      wbColor.s_Tb = {};
+      wbColor.s_Tb.domain = [0,100];
+      wbColor.s_Tb.range = ["#0000ff","#ff0000"];
+      wbColor.s_Tb.color = d3.scale.linear()
+        .domain(wbColor.s_Tb.domain)
+        .range(wbColor.s_Tb.range);
+      //水位
+      wbColor.s_Lv = {};
+      wbColor.s_Lv.domain = [0,100];
+      wbColor.s_Lv.range = ["#0000ff","#ff0000"];
+      wbColor.s_Lv.color = d3.scale.linear()
+        .domain(wbColor.s_Lv.domain)
+        .range(wbColor.s_Lv.range);
+      //溶氧
+      wbColor.s_DO = {};
+      wbColor.s_DO.domain = [0,100];
+      wbColor.s_DO.range = ["#0000ff","#ff0000"];
+      wbColor.s_DO.color = d3.scale.linear()
+        .domain(wbColor.s_DO.domain)
+        .range(wbColor.s_DO.range);
+      //氧化還原電位
+      wbColor.s_orp = {};
+      wbColor.s_orp.domain = [0,100];
+      wbColor.s_orp.range = ["#0000ff","#ff0000"];
+      wbColor.s_orp.color = d3.scale.linear()
+        .domain(wbColor.s_orp.domain)
+        .range(wbColor.s_orp.range);
+
+      this.color.waterbox = wbColor;
     },
     ChangeUrl: function(){
       window.location.href = this.url;
@@ -225,6 +294,9 @@ var g_APP = new Vue({
           break;
         case "map":
           this.mapOption.collapse = !this.mapOption.collapse;
+          break;
+        case "waterbox":
+          this.waterboxOption.collapse = !this.waterboxOption.collapse;
           break;
       }
       this.UpdateUrl();
@@ -558,6 +630,7 @@ var g_APP = new Vue({
       this.UpdateMapTyphoon();
       this.UpdateMapElev();
       this.UpdateMapWind();
+      this.UpdateMapWaterbox();
       this.mapControl.UpdateLineChart();
     },
     GetDataFromTime: function(data,time){
@@ -632,6 +705,11 @@ var g_APP = new Vue({
       if(!this.mapControl) return;
       this.mapControl.UpdateMapWind();
     },
+    UpdateMapWaterbox: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.UpdateMapWaterbox();
+    },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;
       this.dateInfo.northValue = d.northValue;
@@ -677,6 +755,11 @@ var g_APP = new Vue({
       if(param.zoom){
         this.initLoc.zoom = parseInt(param.zoom);
       }
+      if(param.marker){
+        var pos = param.marker.split(",");
+        this.initLoc.markerLat = parseFloat(pos[0]);
+        this.initLoc.markerLng = parseFloat(pos[1]);
+      }
       if(param.option && param.v){
         this.DecodeOptionString(param.option,param.v);
       }
@@ -698,6 +781,19 @@ var g_APP = new Vue({
       history.replaceState(undefined, undefined, hash);
     },
     EncodeOptionString: function(){
+      /*var option = {};
+      option.rainOption = this.rainOption;
+      option.waterLevelOption = this.waterLevelOption;
+      option.reservoirOption = this.reservoirOption;
+      option.floodOption = this.floodOption;
+      option.typhoonTrajectoryOption = this.typhoonTrajectoryOption;
+      option.alertOption = this.alertOption;
+      option.elevOption = this.elevOption;
+      option.mapOption = this.mapOption;
+      var s = btoa(JSON.stringify(option));
+      console.log(s);
+      console.log(s.length);*/
+
       var arr = [];
       //rain option
       arr.push({value: (this.rainOption.collapse?1:0),bitNum: 1});

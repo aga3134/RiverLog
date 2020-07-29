@@ -17,19 +17,25 @@ function MapControl(){
   this.mapElev = new MapElev({"gridUrl":"/elev/gridData"});
   this.mapBasin = new MapBasin({});
   this.mapWind = new MapWind({"siteUrl":"/wind/station", "dataUrl":"/wind/windData"});
+  this.mapWaterbox = new MapWaterbox({"dataUrl":"/waterbox/waterboxData"});
   
   this.openDailyChart = false;
   this.dailyChartTitle = "";
   this.lineChartType = "";
   this.mapStyle = "";
+  this.marker = null;
 };
 
 MapControl.prototype.InitMap = function(param){
 	var loc = {lat: 23.682094, lng: 120.7764642, zoom: 7};
+  var marker = null;
   if(param.initLoc){
     if(param.initLoc.lat) loc.lat = param.initLoc.lat;
     if(param.initLoc.lng) loc.lng = param.initLoc.lng;
     if(param.initLoc.zoom) loc.zoom = param.initLoc.zoom;
+    if(param.initLoc.markerLat && param.initLoc.markerLng){
+      marker = {lat:param.initLoc.markerLat,lng:param.initLoc.markerLng};
+    }
   }
   var taiwan = new google.maps.LatLng(loc.lat,loc.lng);
 
@@ -43,6 +49,13 @@ MapControl.prototype.InitMap = function(param){
       styles: style,
       mapTypeControl: false
     });
+
+    if(marker){
+      this.marker = new google.maps.Marker({
+        position: marker,
+        map: this.map,
+      });
+    }
 
     google.maps.event.addListener(this.map, 'click', function(event) {
       
@@ -115,6 +128,7 @@ MapControl.prototype.InitMap = function(param){
     this.mapBasin.InitMapInfo();
     this.mapElev.map = this.map;
     this.mapWind.map = this.map;
+    this.mapWaterbox.map = this.map;
     param.succFunc();
 
   }.bind(this));
@@ -137,6 +151,7 @@ MapControl.prototype.ChangeDate = function(){
   this.mapAlert.ChangeDate(date);
   this.mapElev.ChangeDate(date);
   this.mapWind.ChangeDate(date);
+  this.mapWaterbox.ChangeDate(date);
 }
 
 MapControl.prototype.ToggleSatellite = function(useSatellite){
@@ -214,6 +229,12 @@ MapControl.prototype.UpdateMapWind = function(){
   this.mapWind.Update();
 };
 
+MapControl.prototype.UpdateMapWaterbox = function(){
+  if(!this.mapWaterbox) return;
+  this.mapWaterbox.Update();
+  this.UpdateLineChart();
+};
+
 MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
@@ -230,6 +251,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapElev.ClearMap();
   this.mapBasin.ClearMap();
   this.mapWind.ClearMap();
+  this.mapWaterbox.ClearMap();
 };
 
 
@@ -352,6 +374,29 @@ MapControl.prototype.UpdateLineChart = function(){
         data.push({
           x: new Date(day+" "+arr[i].time),
           y: Math.max(0,arr[i].value)
+        });
+      }
+      break;
+    case "waterbox":
+      var targetItem = {};
+      for(var i=0;i<g_APP.opWaterboxItem.length;i++){
+        var item = g_APP.opWaterboxItem[i];
+        if(item.value == g_APP.waterboxOption.targetItem){
+          targetItem = item;
+          break;
+        }
+      }
+      title = targetItem.name;
+      unitY = targetItem.unit;
+      this.dailyChartTitle = this.mapWaterbox.infoTarget+" 今日變化";
+      var arr = this.mapWaterbox.data.daily[this.mapWaterbox.infoTarget];
+      for(var i=0;i<arr.length;i++){
+        var value = arr[i][targetItem.value];
+        if(value > maxY) maxY = value;
+        if(value < minY) minY = value;
+        data.push({
+          x: new Date(day+" "+arr[i].time),
+          y: value
         });
       }
       break;
