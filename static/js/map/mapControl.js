@@ -388,7 +388,7 @@ MapControl.prototype.UpdateLineChart = function(){
       }
       title = targetItem.name;
       unitY = targetItem.unit;
-      this.dailyChartTitle = this.mapWaterbox.infoTarget+" 今日變化";
+      this.dailyChartTitle = this.mapWaterbox.infoTarget+" "+targetItem.name+" 今日變化";
       var arr = this.mapWaterbox.data.daily[this.mapWaterbox.infoTarget];
       for(var i=0;i<arr.length;i++){
         var value = arr[i][targetItem.value];

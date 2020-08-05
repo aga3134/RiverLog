@@ -19,10 +19,11 @@ class WaterboxOverlay extends SvgOverlay{
         var svg = d3.select("#"+this.svgID);
         svg.selectAll("*").remove();
 
-        svg.append('circle').attr({
-            "cx": this.size*0.5,
-            "cy": this.size*0.5,
-            "r": this.size*0.5,
+        svg.append('rect').attr({
+            "x": 0,
+            "y": 0,
+            "width": this.size,
+            "height": this.size,
             "stroke":"#ffffff",
             "stroke-width":"1",
             "fill-opacity":this.opacity,
