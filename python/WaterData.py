@@ -65,7 +65,7 @@ class WaterData:
             self.ProcessWaterLevelDrain("https://sta.ci.taiwan.gov.tw/STA_WaterResource_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=Thing/properties/authority_type%20eq%20%27%E6%B0%B4%E5%88%A9%E7%BD%B2%EF%BC%88%E8%88%87%E7%B8%A3%E5%B8%82%E6%94%BF%E5%BA%9C%E5%90%88%E5%BB%BA%EF%BC%89%27%20%20and%20substringof(%27Datastream_Category_type=%E5%8D%80%E5%9F%9F%E6%8E%92%E6%B0%B4%E6%B0%B4%E4%BD%8D%E7%AB%99%27,Datastreams/description)&$count=true")
             self.ProcessWaterLevelAgri("https://sta.ci.taiwan.gov.tw/STA_WaterResource_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=Thing/properties/authority_type%20eq%20%27%E8%BE%B2%E5%A7%94%E6%9C%83%27%20%20and%20substringof(%27Datastream_Category_type=%E8%BE%B2%E7%94%B0%E7%81%8C%E6%BA%89%E5%9C%B3%E8%B7%AF%E6%B0%B4%E4%BD%8D%E7%AB%99%27,Datastreams/description)&$count=true")
             self.ProcessWaterLevelAgri("https://sta.ci.taiwan.gov.tw/STA_WaterResource_v2/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=Thing/properties/authority_type%20eq%20%27%E8%BE%B2%E5%A7%94%E6%9C%83%27%20%20and%20substringof(%27Datastream_Category_type=%E5%9F%A4%E5%A1%98%E6%B0%B4%E4%BD%8D%E7%AB%99%27,Datastreams/description)&$count=true")
-            #self.ProcessWaterLevelGate("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E9%96%98%E9%96%80%27,Thing/properties/StationType)%20&$count=true")
+            self.ProcessWaterLevelGate("https://sta.ci.taiwan.gov.tw/STA_WaterResource/v1.0/Datastreams?$expand=Thing,Thing/Locations,Observations($orderby=phenomenonTime%20desc;$top=1)%20&$filter=substringof(%27%E9%96%98%E9%96%80%27,Thing/properties/StationType)%20&$count=true")
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -499,11 +499,19 @@ class WaterData:
                     s = {}
                     s["_id"] = d["Thing"]["name"]
                     s["stationName"] = d["Thing"]["properties"]["stationName"]
-                    coord = d["Thing"]["Locations"][0]["location"]["coordinates"]
-                    s["lat"] = coord[1]
-                    s["lng"] = coord[0]
-                    #self.db["floodSite"].update({"_id":s["_id"]},s,upsert=True)
-                    ops.append(pymongo.UpdateOne({"_id":s["_id"]}, {"$set": s}, upsert=True))
+                    
+                    #有些站有多個location，某些location裡面沒座標
+                    hasLoc = False
+                    for loc in d["Thing"]["Locations"]:
+                        if loc["location"]["type"] == "Point":
+                            coord = loc["location"]["coordinates"]
+                            s["lat"] = coord[1]
+                            s["lng"] = coord[0]
+                            hasLoc = True
+                            break
+                    if hasLoc:
+                        #self.db["floodSite"].update({"_id":s["_id"]},s,upsert=True)
+                        ops.append(pymongo.UpdateOne({"_id":s["_id"]}, {"$set": s}, upsert=True))
                 if len(ops) > 0:
                     self.db["floodSite"].bulk_write(ops,ordered=False)
 
@@ -529,7 +537,6 @@ class WaterData:
                         if not day in ops:
                             ops[day] = []
                         ops[day].append(pymongo.UpdateOne(key, {"$set": f}, upsert=True))
-                
                 for key in ops:
                     if len(ops[key]) > 0:
                         self.db["flood"+key].bulk_write(ops[key],ordered=False)
