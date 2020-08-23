@@ -775,6 +775,10 @@ var g_APP = new Vue({
       hash += "&lat="+loc.lat.toFixed(6);
       hash += "&lng="+loc.lng.toFixed(6);
       hash += "&zoom="+loc.zoom;
+      var param = g_Util.GetUrlHash();
+      if(param.marker){
+        hash += "&marker="+param.marker;
+      }
       hash += "&v="+version;
       hash += "&option="+this.EncodeOptionString();
       //location.hash = hash;
