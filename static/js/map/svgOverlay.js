@@ -33,17 +33,18 @@ class SvgOverlay extends google.maps.OverlayView {
             event.stopPropagation();
             google.maps.event.trigger(this, 'click');
         }.bind(this));
+
+	this.Update();
     }
 
     UpdateDivSize(){
-        this.setMap(this.map);
+        if(!this.div) return this.setMap(this.map);
         var overlayProjection = this.getProjection();
         if(!overlayProjection) return;
         var pos = new google.maps.LatLng(this.lat, this.lng);
         var center = overlayProjection.fromLatLngToDivPixel(pos);
         var halfSize = this.size*0.5;
         var div = this.div;
-        if(!this.div) return;
         div.style.left = (center.x-halfSize) + 'px';
         div.style.top = (center.y-halfSize) + 'px';
         div.style.width = this.size + 'px';
