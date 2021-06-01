@@ -22,7 +22,7 @@ class MapReservoir extends MapLayer{
 	    str += "<p>蓄水百分比 "+percent+" %</p>";
 	    str += "<p>水位/滿水位/死水位: </p>"
 	    str += d.WaterLevel+" / "+s.FullWaterLevel+" / "+s.DeadStorageLevel+" m</p>";
-	    str += "<p>有效總容量 "+s.EffectiveCapacity+" m3</p>";
+	    str += "<p>有效總容量 "+s.EffectiveCapacity+" 萬立方公尺</p>";
 	    str += "<p>時間 "+d.ObservationTime+" </p>";
 	    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"reservoir\");'>今日變化</div></div>";
 	    var loc = new google.maps.LatLng(s.lat, s.lng);
