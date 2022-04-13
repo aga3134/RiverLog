@@ -41,7 +41,7 @@ class WeatherData:
             now = now.replace(minute=(now.minute-now.minute%10))
             t = now.strftime("%Y-%m-%d_%H-%M")
             #rain data
-            self.ProcessRain("https://opendata.cwb.gov.tw/opendataapi?dataid=O-A0002-001&authorizationkey="+self.key)
+            self.ProcessRain("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0002-001?format=XML&Authorization="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -296,11 +296,17 @@ class WeatherData:
                         latlng = pos.coordinate.string.split(",")
                         data["lat"] = util.ToFloat(latlng[1])
                         data["lng"] = util.ToFloat(latlng[0])
-                        data["max_wind_speed"] = util.ToFloat(pos.max_wind_speed.string)
-                        data["max_gust_speed"] = util.ToFloat(pos.max_gust_speed.string)
-                        data["pressure"] = util.ToFloat(pos.pressure.string)
-                        data["circle_of_15ms"] = util.ToFloat(pos.circle_of_15ms.radius.string)
-                        data["circle_of_25ms"] = util.ToFloat(pos.circle_of_25ms.radius.string)
+                        if pos.max_wind_speed is not None:
+                            data["max_wind_speed"] = util.ToFloat(pos.max_wind_speed.string)
+                        if pos.max_gust_speed is not None:
+                            data["max_gust_speed"] = util.ToFloat(pos.max_gust_speed.string)
+                        if pos.pressure is not None:
+                            data["pressure"] = util.ToFloat(pos.pressure.string)
+                        
+                        if pos.circle_of_15ms.radius is not None:
+                            data["circle_of_15ms"] = util.ToFloat(pos.circle_of_15ms.radius.string)
+                        if pos.circle_of_25ms.radius is not None:
+                            data["circle_of_25ms"] = util.ToFloat(pos.circle_of_25ms.radius.string)
                         key = {"_id":data["_id"]}
                         #self.db["typhoon"].update(key,data,upsert=True)
                         ops.append(pymongo.UpdateOne(key, {"$set": data}, upsert=True))

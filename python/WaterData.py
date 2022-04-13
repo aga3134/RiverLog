@@ -317,7 +317,7 @@ class WaterData:
     def ProcessWaterLevel(self, url):
         print("process water level url: "+url)
         try:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -486,7 +486,7 @@ class WaterData:
     def ProcessFlood(self, url):
         print("process flood url: "+url)
         try:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -664,7 +664,7 @@ class WaterData:
     def ProcessWaterLevelDrain(self, url):
         print("process water level drain url: "+url)
         try:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -734,7 +734,7 @@ class WaterData:
     def ProcessWaterLevelAgri(self, url):
         print("process water level agriculture url: "+url)
         try:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -803,7 +803,7 @@ class WaterData:
     def ProcessWaterLevelGate(self, url):
         print("process water level gate url: "+url)
         try:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -857,7 +857,7 @@ class WaterData:
     def ProcessSewerData(self):
         print("process sewer data")
         try:
-            r = requests.get("http://117.56.59.17/OpenData/API/Sewer/Get?stationNo=&loginId=sewer01&dataKey=BD3E513A")
+            r = requests.get("https://wic.heo.taipei/OpenData/API/Sewer/Get?stationNo=&loginId=sewer01&dataKey=BD3E513A")
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
@@ -911,7 +911,7 @@ class WaterData:
     def ProcessPumpData(self):
         print("process pump data")
         try:
-            r = requests.get("http://117.56.59.17/OpenData/API/Pump/Get?stationNo=&loginId=pumping&dataKey=3D9A9570")
+            r = requests.get("https://wic.heo.taipei/OpenData/API/Pump/Get?stationNo=&loginId=pumping&dataKey=3D9A9570")
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 result = r.json()
