@@ -67,7 +67,7 @@ var g_APP = new Vue({
       opacity:0.5,
       scale:1,
       show:true,
-      targetItem: "s_t0"
+      targetItem: "s_do2"
     },
     dateInfo: {date: "", alert: ""},
     url: "/",
@@ -95,15 +95,6 @@ var g_APP = new Vue({
       {name: "可能有威脅", value:"Moderate"},
       {name: "不太有威脅", value:"Minor"},
       {name: "未知", value:"Unknown"},
-    ],
-    opWaterboxItem: [
-      {name: "水溫", value:"s_t0", unit:"度C"},
-      {name: "酸鹼度", value:"s_ph", unit:""},
-      {name: "導電度", value:"s_ec", unit:"uS/cm"},
-      {name: "濁度", value:"s_Tb", unit:"NTU"},
-      {name: "水位", value:"s_Lv", unit:"M"},
-      {name: "溶氧", value:"s_DO", unit:"mg/L"},
-      {name: "氧化還原電位", value:"s_orp", unit:"mV"},
     ],
     searchBox: null,
     loading: true

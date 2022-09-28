@@ -4,6 +4,33 @@ class MapWaterbox extends MapLayer{
 		if(option.dataSiteKey == null) option.dataSiteKey = "device_id";
 		if(option.divideLatLng == null) option.divideLatLng = false;
 		super(option);
+
+		this.itemArr = [
+			//sy
+			{"name": "溶氧", "value": "s_do2", "unit":"mg/L"},
+			{"name": "導電度", "value": "s_ec2", "unit":"uS/cm"},
+			{"name": "酸鹼度", "value": "s_ph3", "unit":""},
+			{"name": "溫度(水體)", "value": "s_t8.1", "unit":"度C"},
+			{"name": "溫度(設備機內)", "value": "s_t8.2", "unit":"度C"},
+			{"name": "濕度(設備機內)", "value": "s_h6", "unit":"%"},
+			{"name": "電壓", "value": "s_v1", "unit":"V"},
+			{"name": "電流", "value": "s_v1", "unit":"mA"},
+			{"name": "訊號強度", "value": "s_rssi1", "unit":""},
+			//lass
+			/*{"name": "水質-pH", "value": "s_ph1", "unit":""},
+			{"name": "水質-EC", "value": "s_ec1", "unit":"uS/cm"},
+			{"name": "水質-濁度", "value": "s_Tb", "unit":"NTU"},
+			{"name": "水溫", "value": "s_t6", "unit":"度C"},
+			{"name": "Atlas-pH", "value": "s_ph2", "unit":""},
+			{"name": "Atlas-EC", "value": "s_ec2", "unit":"uS/cm"},
+			{"name": "Atlas-水溫", "value": "s_t7", "unit":"度C"},
+			{"name": "Atlas-DO", "value": "s_do2", "unit":"mg/L"},
+			{"name": "Atlas-ORP", "value": "s_orp2", "unit":"mV"},
+			{"name": "ISE電極-氨離子", "value": "s_ise1", "unit":"mV"},
+			{"name": "ISE電極-硝酸鹽離子", "value": "s_ise2", "unit":"mV"},
+			{"name": "電壓", "value": "s_v1", "unit":"V"},
+			{"name": "電流", "value": "s_v1", "unit":"mA"},*/
+		];
 	}
 
 	LoadLayer(param){
@@ -15,13 +42,12 @@ class MapWaterbox extends MapLayer{
 
 	UpdateInfoWindow(d){
 		var str = "<p>"+d.device_id+"</p>";
-		str += "<p>水溫 "+d.s_t0+" 度C</p>";
-		str += "<p>酸鹼度 "+d.s_ph+"</p>";
-		str += "<p>導電度 "+d.s_ec+" uS/cm</p>";
-		str += "<p>濁度 "+d.s_Tb+" NTU</p>";
-		str += "<p>水位 "+d.s_Lv+" M</p>";
-		str += "<p>溶氧 "+d.s_DO+" mg/L</p>";
-		str += "<p>氧化還原電位 "+d.s_orp+" mV</p>";
+		for(var i=0;i<this.itemArr.length;i++){
+			var item = this.itemArr[i];
+			if(d[item.value]){
+				str += "<p>"+item.name+" "+d[item.value]+" "+item.unit+"</p>";
+			}
+		}
 		str += "<p>時間 "+d.time+" </p>";
 		str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterbox\");'>今日變化</div></div>";
 		var loc = new google.maps.LatLng(d.lat, d.lng);
@@ -66,6 +92,15 @@ class MapWaterbox extends MapLayer{
 				overlay.addListener('click', clickFn);
 			}
 			else{
+				var itemColor = g_APP.color.waterbox[targetItem];
+				if(!itemColor){
+					itemColor = {};
+					itemColor.domain = [0,100];
+					itemColor.range = ["#0000ff","#ff0000"];
+					itemColor.color = d3.scale.linear()
+						.domain(itemColor.domain)
+						.range(itemColor.range);
+				}
 				var overlay = new WaterboxOverlay({
 					map: this.map,
 					lat: d.lat,
@@ -74,7 +109,7 @@ class MapWaterbox extends MapLayer{
 					svgID: "svg_"+d.device_id,
 					value: d[targetItem],
 					opacity: g_APP.waterboxOption.opacity,
-					color: g_APP.color.waterbox[targetItem].color
+					color: itemColor.color
 				});
 				overlay.addListener('click', clickFn);
 				this.layer[d.device_id] = overlay;
