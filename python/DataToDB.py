@@ -10,6 +10,7 @@ from WeatherData import WeatherData
 from WaterData import WaterData
 from StatisticData import StatisticData
 from ElevationData import ElevationData
+from CCTVData import CCTVData
 from pymongo import MongoClient
 import json
 import requests
@@ -22,6 +23,7 @@ if __name__ == "__main__":
     weather = WeatherData(db)
     statistic = StatisticData(db)
     elevation = ElevationData(db)
+    cctv = CCTVData(db)
         
     #weather.ProcessRain("data/rain.xml")
     #water.Init()
@@ -33,6 +35,7 @@ if __name__ == "__main__":
         weather.Init()
         water.Init()
         alert.Init()
+        cctv.Init()
         
     if "collect10min" in args:
         weather.CollectData10min()
