@@ -33,9 +33,11 @@ class WaterData:
             
     def Init(self):
         self.AddWaterLevelSite()
+        self.AddWaterLevelSiteTaipei()
         self.AddReservoirSite()
         self.AddSewerSite()
         self.AddPumpSite()
+        
             
     def CollectData10min(self):
         try:
@@ -56,6 +58,7 @@ class WaterData:
 
             #collect water level from fhy website for more real time data
             self.ProcessWaterLevelFromWebsite()
+            self.ProcessWaterLevelTaipei()
             self.ProcessSewerData()
             self.ProcessPumpData()
 
@@ -131,7 +134,32 @@ class WaterData:
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
-            
+
+    def AddWaterLevelSiteTaipei(self):
+        try:
+            print("add water level sites taipei")
+            #water level sites
+            url = "https://data.taipei/api/v1/dataset/98fce0a1-66f9-4b10-b384-1e80a7999e27?scope=resourceAquire&limit=100"
+            r = requests.get(url)
+            if r.status_code == requests.codes.all_okay:
+                data = r.json()["result"]
+                ops = []
+                for d in data["results"]:
+                    site = {}
+                    site["BasinIdentifier"] = d["站碼"].zfill(3)
+                    site["lat"] = util.ToFloat(d["Y座標"])
+                    site["lon"] = util.ToFloat(d["X座標"])
+                    site["ObservatoryName"] = d["站名"]
+                    site["stationName"] = d["站名"]
+                    key = {"BasinIdentifier":d["站碼"]}
+                    print(site)
+                    ops.append(pymongo.UpdateOne(key, {"$set": site}, upsert=True))
+                if len(ops) > 0:
+                    self.db["waterLevelStation"].bulk_write(ops,ordered=False)
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()   
+
     def AddReservoirSite(self):
         try:
             print("add reservoir sites")
@@ -406,40 +434,29 @@ class WaterData:
             cursor = self.db["waterLevelStation"].find({},attr)
             siteHash = {}
             for site in cursor:
-                name = site["ObservatoryName"]
-                arr = name.split("-")
-                if len(arr) == 3:
-                    siteHash[arr[1]] = site
-                else:
-                    siteHash[name] = site
+                id = site["BasinIdentifier"]
+                siteHash[id] = site
 
-            now = datetime.datetime.now()
-            utcnow = datetime.datetime.utcnow()
-            tday = datetime.datetime.strftime(utcnow, "%Y%m%d")
-            t10min = utcnow.replace(minute=(utcnow.minute-utcnow.minute%10),second=0,microsecond=0)
-
-            r = requests.post("http://fhy.wra.gov.tw/fhy/Monitor/WaterInfo")
+            r = requests.get("https://fhyv.wra.gov.tw/FhyWeb/v1/Api/WaterLevel/RealTimeInfo/Basin/%E5%85%A8%E6%B5%81%E5%9F%9F?$format=JSON")
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 #print(r.text)
-                soup = BeautifulSoup(r.text, 'html.parser')
-                tr = soup.find_all('tr')
                 ops = {}
                 gridArr = {}
-                for i in range(2,len(tr)):
-                    td = tr[i].find_all("td")
-                    name = td[2].string
-                    if name not in siteHash:
-                        continue
-                    stationID = siteHash[name]["BasinIdentifier"]
+                for d in r.json():
                     w = {}
-                    w["WaterLevel"] = util.ToFloat(td[4].string)
+                    if "WaterLevel" not in d:
+                        continue
+                    w["WaterLevel"] = util.ToFloat(d["WaterLevel"])
                     if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
                         continue
-                    w["RecordTime"] = t10min
-                    w["StationIdentifier"] = stationID
-                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t10min}
-                    day = datetime.datetime.strftime(now, "%Y%m%d")
+                    t = datetime.datetime.strptime(d["Time"],'%Y-%m-%dT%H:%M:%S+00:00')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
+                    t = t.replace(tzinfo=pytz.utc).astimezone(taiwan)
+                    w["RecordTime"] = t
+                    w["StationIdentifier"] = d["StationNo"]
+                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t}
+                    day = datetime.datetime.strftime(t, "%Y%m%d")
 
                     query = self.db["waterLevel"+day].find_one(key)
                     if query is None:
@@ -448,7 +465,9 @@ class WaterData:
                             ops[day] = []
                         ops[day].append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
 
-                        loc = siteHash[name]
+                        if d["StationNo"] not in siteHash:
+                            continue
+                        loc = siteHash[d["StationNo"]]
                         grid = w.copy()
                         grid["lat"] = loc["lat"]
                         grid["lon"] = loc["lon"]
@@ -473,6 +492,65 @@ class WaterData:
                         
                         self.db["waterLevelDailySum"].update({"time":tday},{"$inc":inc},upsert=True)
                         self.db["waterLevel10minSum"].update({"time":t10min},{"$inc":inc},upsert=True)"""
+                for key in ops:
+                    self.db["waterLevel"+key].create_index("RecordTime")
+                    self.db["waterLevel"+key].create_index("StationIdentifier")
+                    if len(ops[key]) > 0:
+                        self.db["waterLevel"+key].bulk_write(ops[key],ordered=False)
+                    #self.grid.AddGridBatch("waterLevelGrid"+key,gridArr[key],"RecordTime",["WaterLevel"],"lat","lon")
+        except:
+            print(sys.exc_info()[0])
+            traceback.print_exc()
+
+    def ProcessWaterLevelTaipei(self):
+        try:
+            #map site info from name
+            attr = {"BasinIdentifier":1,"ObservatoryName":1,"lat":1,"lon":1,"AlertLevel1":1,"AlertLevel2":1,"AlertLevel3":1}
+            cursor = self.db["waterLevelStation"].find({},attr)
+            siteHash = {}
+            for site in cursor:
+                id = site["BasinIdentifier"]
+                siteHash[id] = site
+
+            r = requests.get("https://wic.heo.taipei/OpenData/API/Water/Get?stationNo=&loginId=river&dataKey=9E2648AA")
+            #r.encoding = "utf-8"
+            if r.status_code == requests.codes.all_okay:
+                #print(r.text)
+                ops = {}
+                gridArr = {}
+                for d in r.json()["data"]:
+                    w = {}
+                    if "levelOut" not in d:
+                        continue
+                    w["WaterLevel"] = util.ToFloat(d["levelOut"])
+                    if math.isnan(w["WaterLevel"]) or w["WaterLevel"] < 0:
+                        continue
+                    t = datetime.datetime.strptime(d["recTime"],'%Y%m%d%H%M')
+                    t = t.replace(minute=(t.minute-t.minute%10),second=0,microsecond=0)
+                    t = t.replace(tzinfo=taiwan)
+                    w["RecordTime"] = t
+                    w["StationIdentifier"] = d["stationNo"]
+                    key = {"StationIdentifier":w["StationIdentifier"],"RecordTime":t}
+                    day = datetime.datetime.strftime(t, "%Y%m%d")
+                    print(w)
+
+                    query = self.db["waterLevel"+day].find_one(key)
+                    if query is None:
+                        #self.db["waterLevel"+day].insert_one(w)
+                        if not day in ops:
+                            ops[day] = []
+                        ops[day].append(pymongo.UpdateOne(key, {"$set": w}, upsert=True))
+
+                        if d["stationNo"] not in siteHash:
+                            continue
+                        loc = siteHash[d["stationNo"]]
+                        grid = w.copy()
+                        grid["lat"] = loc["lat"]
+                        grid["lon"] = loc["lon"]
+                        #self.grid.AddGridWaterLevel(w)
+                        if not day in gridArr:
+                            gridArr[day] = []
+                        gridArr[day].append(grid)
                 for key in ops:
                     self.db["waterLevel"+key].create_index("RecordTime")
                     self.db["waterLevel"+key].create_index("StationIdentifier")

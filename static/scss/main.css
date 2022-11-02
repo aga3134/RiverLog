@@ -1,0 +1,878 @@
+@charset "UTF-8";
+::-webkit-scrollbar {
+  height: 8px;
+  background-color: #ccbe95;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background-color: #8d7950;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #6464c8;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #c89696;
+}
+
+* {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  font-family: "微軟正黑體", "Microsoft JhengHei";
+}
+
+.center {
+  display: block;
+  margin: auto;
+  clear: both;
+  text-align: center;
+}
+
+.h-scroll {
+  margin: 0px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.riverlog {
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  background-color: #e1cbaa;
+}
+
+.riverlog select {
+  padding: 3px;
+  border-radius: 3px;
+  margin: 5px;
+}
+
+.riverlog .main-content {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.riverlog .main-content .icon-container {
+  width: 40px;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  border-right: 1px solid #c0b492;
+}
+
+.riverlog .main-content .icon-container .icon {
+  width: 30px;
+  height: 30px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+.riverlog .main-content .map-container {
+  position: relative;
+  width: calc(100% - 40px);
+  height: 100%;
+}
+
+.riverlog .main-content .map-container #map {
+  width: 100%;
+  height: 100%;
+}
+
+.riverlog .main-content .map-container .logo {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  width: 100px;
+  border-radius: 3px;
+}
+
+.riverlog .main-content .overlay-container {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+.riverlog .main-content .overlay-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.riverlog .main-content .info-title {
+  font-weight: bold;
+}
+
+.riverlog .main-content .info-bt-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.riverlog .main-content .info-bt {
+  text-align: center;
+  border: 1px solid #888888;
+  color: #555555;
+  font-weight: bold;
+  border-radius: 5px;
+  padding: 3px 5px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.riverlog .main-content .info-bt:hover {
+  color: #ff5555;
+  border: 1px solid #ff8888;
+}
+
+.riverlog .main-content .graph-content {
+  position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  width: calc(100% - 40px);
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 10px 50px 10px;
+}
+
+.riverlog .main-content .graph-content select {
+  margin: 0px 10px;
+}
+
+.riverlog .main-content .graph-content .graph-container {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.riverlog .main-content .graph-content .graph-container .full-w {
+  width: calc(100% - 20px);
+}
+
+.riverlog .main-content .graph-content .graph-container .half-w {
+  width: calc(100% - 20px);
+}
+
+@media only screen and (min-width: 640px) {
+  .riverlog .main-content .graph-content .graph-container .half-w {
+    width: calc(50% - 20px);
+  }
+}
+
+.riverlog .main-content .graph-content .graph-container .graph-title {
+  margin: 10px;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.riverlog .main-content .graph-content .graph-container .graph-border {
+  border-radius: 5px;
+  border: 1px solid #ffffff;
+}
+
+.riverlog .main-content .graph-content .graph-container .graph {
+  margin: 10px;
+  height: 320px;
+}
+
+.riverlog .main-content .graph-content .graph-container .graph.border {
+  border-radius: 5px;
+  border: 1px solid #a59b9b;
+}
+
+.riverlog .main-content .graph-content .graph-container .graph svg {
+  width: 100%;
+  height: 100%;
+}
+
+.riverlog .main-content .graph-content .graph-container .graph-info {
+  margin: 10px;
+  text-align: center;
+}
+
+.riverlog .main-content .graph-content .fix-bottom {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 12;
+}
+
+.riverlog .main-content .graph-content .time-bar {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 5px;
+}
+
+.riverlog .main-content .graph-content .time-bar .label {
+  font-weight: bold;
+}
+
+.riverlog .main-content .graph-content .time-bar .control-icon {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 640px) {
+  .riverlog .main-content .graph-content .time-bar .control-icon {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.riverlog .main-content .graph-content .time-bar .slider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+       appearance: none;
+  margin: 10px;
+  height: 10px;
+  background: #999999;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: opacity .2s;
+  transition: opacity .2s;
+}
+
+.riverlog .main-content .graph-content .time-bar .slider:hover {
+  opacity: 1;
+}
+
+.riverlog .main-content .graph-content .time-bar .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 20px;
+  background: #333333;
+  cursor: pointer;
+}
+
+.riverlog .main-content .graph-content .time-bar .slider::-moz-range-thumb {
+  width: 10px;
+  height: 20px;
+  background: #333333;
+  cursor: pointer;
+}
+
+.riverlog .detail-panel {
+  position: fixed;
+  left: 100%;
+  padding: 40px 10px;
+  -webkit-transition: left .5s;
+  transition: left .5s;
+  top: 0px;
+  width: calc(100% - 40px);
+  height: calc(100% - 70px);
+  background-color: #feffe8;
+  -webkit-box-shadow: 0px 0px 10px #888888;
+          box-shadow: 0px 0px 10px #888888;
+  z-index: 10;
+}
+
+.riverlog .detail-panel.open {
+  left: 40px;
+}
+
+.riverlog .topbar {
+  width: 100%;
+  padding: 5px 10px;
+  border-bottom: 1px solid #c0b492;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  font-size: 1.5em;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  background-color: #d6c1a2;
+}
+
+.riverlog .topbar .logo {
+  display: none;
+  height: 40px;
+}
+
+@media only screen and (min-width: 640px) {
+  .riverlog .topbar .logo {
+    display: block;
+  }
+}
+
+.riverlog .topbar .logo-mobile {
+  display: block;
+  height: 40px;
+}
+
+@media only screen and (min-width: 640px) {
+  .riverlog .topbar .logo-mobile {
+    display: none;
+  }
+}
+
+.riverlog .playbar {
+  width: 100%;
+  border-top: 1px solid #c0b492;
+  padding: 5px;
+}
+
+.riverlog .playbar .timebar {
+  position: relative;
+  margin: auto;
+  width: 1152px;
+  height: 20px;
+}
+
+.riverlog .playbar .timebar .element {
+  position: absolute;
+  width: 8px;
+  height: 20px;
+  cursor: pointer;
+  background-color: #b4a17c;
+}
+
+.riverlog .playbar .timebar .select-element {
+  position: absolute;
+  width: 8px;
+  height: 20px;
+  cursor: pointer;
+  border: 2px solid #8c4e4e;
+}
+
+.riverlog .playbar .play-control {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  overflow-x: auto;
+}
+
+.riverlog .playbar .play-control .time-label {
+  font-size: 0.9em;
+  margin: 0px 3px;
+  cursor: pointer;
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+}
+
+.riverlog .playbar .play-control .time-label:hover {
+  border: 1px solid #ff0000;
+}
+
+.riverlog .playbar .play-control .icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.riverlog .playbar .play-control .bt {
+  -ms-flex-negative: 0;
+      flex-shrink: 0;
+  font-size: 0.9em;
+  margin: 0px 5px;
+  padding: 2px 5px;
+  background-color: #716242;
+  border-radius: 3px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.riverlog .close-bt {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+}
+
+.riverlog .close-bt:hover {
+  -webkit-filter: contrast(0.5);
+          filter: contrast(0.5);
+}
+
+.riverlog .side-panel {
+  position: fixed;
+  left: -250px;
+  bottom: 0px;
+  z-index: 15;
+  width: 250px;
+  max-width: 100%;
+  max-height: 100%;
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #e1ceaa;
+  -webkit-box-shadow: 5px 0px 15px #8b6951;
+          box-shadow: 5px 0px 15px #8b6951;
+  -webkit-transition: left 0.5s ease;
+  transition: left 0.5s ease;
+  border-radius: 5px;
+}
+
+.riverlog .side-panel.full-h {
+  height: 100%;
+}
+
+.riverlog .side-panel .panel-switch {
+  position: fixed;
+  left: -50px;
+  -webkit-transition: left 0.5s ease;
+  transition: left 0.5s ease;
+  z-index: 5;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+}
+
+.riverlog .side-panel .panel-switch .bt {
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  margin: 5px 0px;
+}
+
+.riverlog .side-panel .panel-switch .bt:hover {
+  -webkit-filter: contrast(0.5);
+          filter: contrast(0.5);
+}
+
+.riverlog .side-panel.open {
+  left: 0px;
+}
+
+.riverlog .side-panel.open .panel-switch {
+  left: 200px;
+}
+
+.riverlog .side-panel .option-container {
+  width: calc(100% - 40px);
+}
+
+.riverlog .side-panel .option-category {
+  width: 100%;
+  padding: 5px;
+  border-bottom: 1px solid #9e8669;
+  margin-top: 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.riverlog .side-panel .option-category .title {
+  font-size: 1.2em;
+}
+
+.riverlog .side-panel .option-category .collapse-bt {
+  width: 20px;
+  height: 20px;
+  margin: 0px 10px 0px 0px;
+  cursor: pointer;
+}
+
+.riverlog .side-panel .option-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.riverlog .side-panel .option-item input[type="text"] {
+  margin: 5px;
+  padding: 5px;
+}
+
+.riverlog .side-panel .option-item input[type="number"] {
+  padding: 0px 5px;
+  width: 60px;
+}
+
+.riverlog .side-panel .option-item input[type="range"] {
+  width: 100px;
+}
+
+.riverlog .side-panel .option-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.riverlog .side-panel .option-item select {
+  margin: 0px;
+  padding: 2px;
+  font-size: 0.8em;
+  border-radius: 3px;
+}
+
+.riverlog .side-panel .option-item .action-bt {
+  margin: 5px;
+  padding: 5px 10px;
+  background-color: #716242;
+  border-radius: 3px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.riverlog .side-panel .option-label {
+  padding: 5px;
+}
+
+.riverlog .side-panel .full-w-label {
+  width: 100%;
+}
+
+.riverlog .side-panel .date-selection {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.riverlog .side-panel .date-selection .week-label {
+  position: absolute;
+}
+
+.riverlog .side-panel .date-selection .month-label {
+  position: absolute;
+  -webkit-writing-mode: tb;
+      -ms-writing-mode: tb;
+          writing-mode: tb;
+  height: 60px;
+}
+
+.riverlog .side-panel .date-selection .date-bt {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #9c9c9c;
+  cursor: pointer;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.riverlog .side-panel .date-selection .select-date {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border: 2px solid #ff0000;
+  pointer-events: none;
+}
+
+.riverlog .side-panel .date-selection .float-window {
+  position: absolute;
+  padding: 5px;
+  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8em;
+  display: none;
+}
+
+.riverlog .side-panel .date-selection .float-window .title {
+  font-weight: bold;
+}
+
+.riverlog .full-panel {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  padding: 40px 20px 20px 20px;
+  background-color: #e1cbaa;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.riverlog .full-panel .content-area {
+  background-color: #feffe8;
+  border-radius: 5px;
+  padding: 5px 10px 40px 5px;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.riverlog .full-panel .content-area .content-title {
+  font-size: 1.5em;
+  padding: 10px;
+}
+
+.riverlog .full-panel .content-area .content-subtitle {
+  font-size: 1.2em;
+  padding: 10px;
+}
+
+.riverlog .full-panel .content-area .sponsor-container {
+  padding: 5px 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.riverlog .full-panel .content-area .sponsor-container .sponsor-logo-long {
+  max-width: calc(100% - 20px);
+  border-radius: 5px;
+  max-height: 60px;
+  margin: 10px;
+}
+
+.riverlog .full-panel .content-area .sponsor-container .sponsor-logo-mid {
+  max-width: calc(100% - 20px);
+  border-radius: 5px;
+  max-height: 80px;
+  margin: 10px;
+}
+
+.riverlog .full-panel .content-area .content-icon {
+  text-align: center;
+  height: 30px;
+  margin: 10px 5px;
+}
+
+.riverlog .full-panel .content-area ul {
+  margin: 0px;
+  padding-left: 30px;
+}
+
+.riverlog .full-panel .content-area li {
+  padding: 5px;
+}
+
+.riverlog .full-panel .content-area li .content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+      -ms-flex-pack: start;
+          justify-content: flex-start;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  line-height: 1.8em;
+}
+
+.riverlog .full-panel .content-area .logo {
+  width: 200px;
+  border-radius: 5px;
+}
+
+.riverlog .full-panel .content-area .time-block {
+  display: inline;
+  margin: 0px 5px;
+  padding: 5px 10px;
+  background: -webkit-gradient(linear, left top, left bottom, from(#00ff00), color-stop(#ffff00), to(#ff0000));
+  background: linear-gradient(#00ff00, #ffff00, #ff0000);
+}
+
+.riverlog .full-panel .content-area .color-block {
+  width: 100px;
+  text-align: center;
+  font-size: 0.7em;
+}
+
+.riverlog .full-panel .content-area .info-table {
+  text-align: center;
+}
+
+.riverlog .full-panel .content-area .info-table th {
+  padding: 5px 10px;
+  background-color: #c1a286;
+}
+
+.riverlog .full-panel .content-area .info-table td {
+  padding: 5px 10px;
+}
+
+.riverlog .full-panel .content-area .info-table tr:nth-child(even) {
+  background: #f5e8d5;
+}
+
+.riverlog .full-panel .content-area .info-table tr:nth-child(odd) {
+  background: #fffbf4;
+}
+
+.riverlog .welcome-page {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-color: #ebe4cb;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  z-index: 100;
+}
+
+.riverlog .welcome-page .logo {
+  width: 100px;
+}
+
+.riverlog .welcome-page .logo-text {
+  width: 200px;
+}
+
+.fade-enter-active, .fade-leave-active {
+  -webkit-transition: opacity 0.5s;
+  transition: opacity 0.5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+.create-enter-active {
+  -webkit-transition: opacity 0.5s;
+  transition: opacity 0.5s;
+}
+
+.create-enter {
+  opacity: 0;
+}
+/*# sourceMappingURL=main.css.map */

@@ -38,16 +38,23 @@ class MapWaterLevel extends MapLayer{
 		}
 		else{
 			var s = this.data.site[d.StationIdentifier];
-		    str = "<p>"+s.ObservatoryName+" 河川水位</p>";
-		    str += "<p>溪流 "+s.RiverName+"</p>";
-		    str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
-		    if(d.diff >= 0) str += "+";
-		    str += d.diff.toFixed(2)+" m)</p>";
-		    str += "<p>警戒水位(三級/二級/一級):</p>";
-		    str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
-		    str += "<p>時間 "+d.RecordTime+" </p>";
-		    str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
-		    loc = new google.maps.LatLng(s.lat, s.lon);
+			if(s.stationName){
+				str = "<p>"+s.stationName+" 河川水位</p>";
+			}
+			else{
+				str = "<p>"+s.ObservatoryName+" 河川水位</p>";
+			}
+		  if(s.RiverName){
+				str += "<p>溪流 "+s.RiverName+"</p>";
+			}
+			str += "<p>水位 "+d.WaterLevel.toFixed(2)+" m (";
+			if(d.diff >= 0) str += "+";
+			str += d.diff.toFixed(2)+" m)</p>";
+			str += "<p>警戒水位(三級/二級/一級):</p>";
+			str += "<p>"+(s.AlertLevel3||"無")+" / "+(s.AlertLevel2||"無")+" / "+(s.AlertLevel1||"無")+" m</p>";
+			str += "<p>時間 "+d.RecordTime+" </p>";
+			str += "<div class='info-bt-container'><div class='info-bt' onclick='g_APP.mapControl.OpenLineChart(\"waterLevel\");'>今日變化</div></div>";
+			loc = new google.maps.LatLng(s.lat, s.lon);
 		}
 		this.infoWindow.setOptions({content: str, position: loc});
     }
