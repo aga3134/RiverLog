@@ -90,7 +90,7 @@ class MQTTReciever:
     def ProcessLassWaterBox(self,msg):
         try:
             message = msg.payload.decode("utf-8")
-            #print(message)
+            print(message)
             #parse message
             fieldArr = message.split("|")
             data = {}

@@ -1,1 +1,1 @@
-nohup python3 ./python/mqtt_waterbox.py &
+nohup python3 -u ./python/mqtt_waterbox.py &
