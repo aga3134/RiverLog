@@ -296,6 +296,9 @@ var g_APP = new Vue({
         case "waterbox":
           this.waterboxOption.collapse = !this.waterboxOption.collapse;
           break;
+        case "cctv":
+          this.cctvOption.collapse = !this.cctvOption.collapse;
+          break;
       }
       this.UpdateUrl();
     },

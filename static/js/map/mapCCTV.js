@@ -32,7 +32,6 @@ class MapCCTV extends MapLayer{
     for(var sID in this.data.site){
       var s = this.data.site[sID];
       var type = s.type;
-      console.log(type);
       var show = g_APP.cctvOption["show_"+type];
 			var clickFn = this.GenClickFn(s,"stationID");
 

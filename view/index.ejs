@@ -394,7 +394,7 @@
 						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="cctvOption.collapse" v-on:click="ToggleCollapse('cctv');">
 						<div class="title">即時影像</div>
 					</div>
-					<div v-show="waterboxOption.collapse == false">
+					<div v-show="cctvOption.collapse == false">
 						<div class="option-item">
 							<div class="option-label">水位</div>
 							<input type="checkbox" v-model="cctvOption.show_iow" v-on:change="UpdateMapCCTV();">
