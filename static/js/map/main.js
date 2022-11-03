@@ -69,6 +69,13 @@ var g_APP = new Vue({
       show:true,
       targetItem: "s_do2"
     },
+    cctvOption: {
+      collapse:false,
+      opacity:0.5,
+      scale:1,
+      show_iow:false,
+      show_coa_mudslide:false
+    },
     dateInfo: {date: "", alert: ""},
     url: "/",
     opUrl: [
@@ -700,6 +707,11 @@ var g_APP = new Vue({
       this.UpdateUrl();
       if(!this.mapControl) return;
       this.mapControl.UpdateMapWaterbox();
+    },
+    UpdateMapCCTV: function(){
+      this.UpdateUrl();
+      if(!this.mapControl) return;
+      this.mapControl.UpdateMapCCTV();
     },
     ShowDateInfo: function(d){
       this.dateInfo.date = d.date;

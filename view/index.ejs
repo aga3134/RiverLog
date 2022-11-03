@@ -364,8 +364,8 @@
 					</div>
 
 					<div class="option-category">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!reservoirOption.collapse" v-on:click="ToggleCollapse('waterbox');">
-						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="reservoirOption.collapse" v-on:click="ToggleCollapse('waterbox');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!waterboxOption.collapse" v-on:click="ToggleCollapse('waterbox');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="waterboxOption.collapse" v-on:click="ToggleCollapse('waterbox');">
 						<div class="title">水盒子</div>
 					</div>
 					<div v-show="waterboxOption.collapse == false">
@@ -387,6 +387,23 @@
 								<option v-for="op in mapControl.mapWaterbox.itemArr" v-bind:value="op.value">{{op.name}}</option>
 							</select>
 						</div>
+					</div>
+
+					<div class="option-category">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-off.png" v-show="!cctvOption.collapse" v-on:click="ToggleCollapse('cctv');">
+						<img class="collapse-bt" src="/static/Image/icon-collapse-on.png" v-show="cctvOption.collapse" v-on:click="ToggleCollapse('cctv');">
+						<div class="title">即時影像</div>
+					</div>
+					<div v-show="waterboxOption.collapse == false">
+						<div class="option-item">
+							<div class="option-label">水位</div>
+							<input type="checkbox" v-model="cctvOption.show_iow" v-on:change="UpdateMapCCTV();">
+						</div>
+						<div class="option-item">
+							<div class="option-label">土石流</div>
+							<input type="checkbox" v-model="cctvOption.show_coa_mudslide" v-on:change="UpdateMapCCTV();">
+						</div>
+						
 					</div>
 				</div>
 
@@ -680,6 +697,7 @@
 		<script src="/static/js/map/mapBasin.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapWind.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapWaterbox.js?v=<%=meta.version%>"></script>
+		<script src="/static/js/map/mapCCTV.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/mapControl.js?v=<%=meta.version%>"></script>
 		<script src="/static/js/map/main.js?v=<%=meta.version%>"></script>
 	</body>

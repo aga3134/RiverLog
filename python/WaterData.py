@@ -152,7 +152,7 @@ class WaterData:
                     site["ObservatoryName"] = d["站名"]
                     site["stationName"] = d["站名"]
                     key = {"BasinIdentifier":d["站碼"]}
-                    print(site)
+                    #print(site)
                     ops.append(pymongo.UpdateOne(key, {"$set": site}, upsert=True))
                 if len(ops) > 0:
                     self.db["waterLevelStation"].bulk_write(ops,ordered=False)

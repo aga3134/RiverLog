@@ -18,6 +18,7 @@ function MapControl(){
   this.mapBasin = new MapBasin({});
   this.mapWind = new MapWind({"siteUrl":"/wind/station", "dataUrl":"/wind/windData"});
   this.mapWaterbox = new MapWaterbox({"dataUrl":"/waterbox/waterboxData"});
+  this.mapCCTV = new MapCCTV({"siteUrl":"/cctv/station"});
   
   this.openDailyChart = false;
   this.dailyChartTitle = "";
@@ -129,6 +130,7 @@ MapControl.prototype.InitMap = function(param){
     this.mapElev.map = this.map;
     this.mapWind.map = this.map;
     this.mapWaterbox.map = this.map;
+    this.mapCCTV.map = this.map;
     param.succFunc();
 
   }.bind(this));
@@ -235,6 +237,11 @@ MapControl.prototype.UpdateMapWaterbox = function(){
   this.UpdateLineChart();
 };
 
+MapControl.prototype.UpdateMapCCTV = function(){
+  if(!this.mapCCTV) return;
+  this.mapCCTV.Update();
+};
+
 MapControl.prototype.ClearMap = function(){
   this.mapRain.ClearMap();
   this.mapReservoir.ClearMap();
@@ -252,6 +259,7 @@ MapControl.prototype.ClearMap = function(){
   this.mapBasin.ClearMap();
   this.mapWind.ClearMap();
   this.mapWaterbox.ClearMap();
+  this.mapCCTV.ClearMap();
 };
 
 
