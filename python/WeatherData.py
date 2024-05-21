@@ -41,7 +41,7 @@ class WeatherData:
             now = now.replace(minute=(now.minute-now.minute%10))
             t = now.strftime("%Y-%m-%d_%H-%M")
             #rain data
-            self.ProcessRain("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0002-001?format=XML&Authorization="+self.key)
+            self.ProcessRain("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0002-001?format=XML&Authorization="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
@@ -52,9 +52,9 @@ class WeatherData:
             now = datetime.datetime.now()
             t = now.strftime("%Y-%m-%d_%H")
             #typhoon trajectory
-            self.ProcessTyphoon("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key)
-            self.ProcessTide("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0017-001?format=JSON&Authorization="+self.key)
-            self.ProcessWind("https://opendata.cwb.gov.tw/fileapi/v1/opendataapi/O-A0001-001?format=JSON&Authorization="+self.key)
+            self.ProcessTyphoon("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/W-C0034-005?format=XML&Authorization="+self.key)
+            #self.ProcessTide("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0017-001?format=JSON&Authorization="+self.key)
+            self.ProcessWind("https://opendata.cwa.gov.tw/fileapi/v1/opendataapi/O-A0001-001?format=JSON&Authorization="+self.key)
         except:
             print(sys.exc_info()[0])
             traceback.print_exc()
