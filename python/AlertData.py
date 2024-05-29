@@ -96,6 +96,8 @@ class AlertData:
             #r.encoding = "utf-8"
             if r.status_code == requests.codes.all_okay:
                 soup = BeautifulSoup(r.text, 'html.parser')
+                if soup.status is None:
+                    return
                 if soup.status.string != "Actual":  #keep only actual alert
                     return
                 id = soup.identifier.string
@@ -124,13 +126,13 @@ class AlertData:
                         desc = {}
                         for section in info.description.find_all("section"):
                             if section["title"] == "颱風資訊":
-                                desc["typhoon_name"] = section.typhoon_name.string
-                                desc["cwb_typhoon_name"] = section.cwb_typhoon_name.string
+                                desc["typhoon_name"] = "" if section.typhoon_name is None else section.typhoon_name.string
+                                desc["cwb_typhoon_name"] = "" if section.cwb_typhoon_name is None else section.cwb_typhoon_name.string
                             else:
                                 desc[section["title"]] = section.string
                         data["description"] = desc
                     else:
-                        data["description"] = info.description.string
+                        data["description"] = "" if info.description is None else info.description.string
                     if not info.instruction is None:
                         data["instruction"] = info.instruction.string
                     if not info.responsetype is None:
