@@ -4,7 +4,7 @@
 		<% include head %>
 	</head>
 	<body>
-		<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.12/vue.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -429,11 +429,11 @@
 					</div>
 					<div class="option-category">外部連結</div>
 					<div class="option-item">
-						<div class="action-bt" v-on:click="window.open('https://fhy.wra.gov.tw/fhy/Disaster/AppAction','about:blank');">行動水情APP</div>
+						<div class="action-bt" v-on:click="window.open('https://fhy.wra.gov.tw/fhyv2/service/app','about:blank');">行動水情APP</div>
 						<div class="action-bt" v-on:click="window.open('http://eocdss.ncdr.nat.gov.tw/web/','about:blank');">災害情資網</div>
 						<div class="action-bt" v-on:click="window.open('https://dmap.ncdr.nat.gov.tw/%e4%b8%bb%e9%81%b8%e5%96%ae/%e5%9c%b0%e5%9c%96%e6%9f%a5%e8%a9%a2/gis%e6%9f%a5%e8%a9%a2/','about:blank');">災害潛勢地圖</div>
-						<div class="action-bt" v-on:click="window.open('https://gis3.moeacgs.gov.tw/gwh/gsb97-1/sys8/t3/index1.cfm','about:blank');">地質查詢</div>
-						<div class="action-bt" v-on:click="window.open('http://nsp.tcd.gov.tw/ngis/','about:blank');">國土規劃地圖</div>
+						<div class="action-bt" v-on:click="window.open('https://geomap.gsmma.gov.tw/gwh/gsb97-1/sys8a/t3/index1.cfm','about:blank');">地質查詢</div>
+						<div class="action-bt" v-on:click="window.open('https://nsp.tcd.gov.tw/ngis/','about:blank');">國土規劃地圖</div>
 					</div>
 				</div>
 			</div>
@@ -451,7 +451,7 @@
 									雨量: 可選擇日累積雨量、雨量變化、以及自訂累積時數，觀看不同時間區間內累積雨量。圖示以柱狀圖
 									<img class="content-icon" src="/static/Image/icon-rain.png">
 									高度表示雨量大小，越高代表雨量越多。
-									顏色依 <a href="https://www.cwb.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
+									顏色依 <a href="https://www.cwa.gov.tw/V8/C/P/Rainfall/Rainfall_QZJ.html" target="_blank">氣象局雨量圖</a>
 									顏色內插顯示(單位mm)：
 								</div>
 							</li>
@@ -618,33 +618,32 @@
 						</ul>
 						<div class="content-title">資料來源</div>
 						<ul>
-							<li>雨量: <a href="https://opendata.cwb.gov.tw/dataset/observation/O-A0002-001" target="_blank">氣象資料開放平台-雨量觀測資料</a></li>
-							<li>河川水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra.aspx" target="_blank">民生公共物聯網-河川水位資料</a>，<a href="http://fhy.wra.gov.tw/fhy/Monitor/Water" target="_blank">防災資訊服務網-即時水位</a></li>
-							<li>區域排水水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_regionaldrainage.aspx" target="_blank">民生公共物聯網-區域排水水位資料</a></li>
-							<li>水利會水位: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_pond_taoyuan.aspx" target="_blank">民生公共物聯網-桃園農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_kaohsiung.aspx" target="_blank">高雄農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_hsinchu.aspx" target="_blank">新竹農田水利會水位</a>，<a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_ia_chianan.aspx" target="_blank">嘉南農田水利會水位</a></li>
-							<li>水庫水位: <a href="http://wise.wra.gov.tw/dataset/reservoirconditiondata" target="_blank">水資料分享站-水庫水情資料</a></li>
-							<li>淹水深度: <a href="https://ci.taiwan.gov.tw/dsp/environmental_water_wra_flood.aspx" target="_blank">民生公共物聯網-淹水測站資料</a></li>
-							<li>颱風路徑: <a href="https://opendata.cwb.gov.tw/dataset/warning/W-C0034-005" target="_blank">氣象資料開放平台-熱帶氣旋路徑</a></li>
-							<li>災害警示: <a href="https://ci.taiwan.gov.tw/dsp/environmental_cap.aspx" target="_blank">民生公共物聯網-災害示警資料</a></li>
-							<li>河川水位測站位置: <a href="http://wise.wra.gov.tw/dataset/riverstageobservatoryprofile" target="_blank">水資料分享站-河川水位測站站況</a></li>
-							<li>水庫基本資料: <a href="http://wise.wra.gov.tw/dataset/reservoirsinformation" target="_blank">水資料分享站-水庫基本資料</a></li>
+							<li>雨量: <a href="https://opendata.cwa.gov.tw/dataset/observation/O-A0002-001" target="_blank">氣象資料開放平台-雨量觀測資料</a></li>
+							<li>河川水位: <a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail.aspx?id=water_1" target="_blank">民生公共物聯網-河川水位資料</a>，<a href="https://fhy.wra.gov.tw/fhyv2/monitor/water" target="_blank">防災資訊服務網-即時水位</a></li>
+							<li>區域排水水位: <a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail.aspx?id=water_11" target="_blank">民生公共物聯網-區域排水水位資料</a></li>
+							<li>水利會水位: <a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail.aspx?id=water_17" target="_blank">農田水利署_埤塘水位站</a>，<a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail.aspx?id=water_18" target="_blank">農田水利署_農田灌溉圳路水位站</a></li>
+							<li>水庫水位: <a href="https://fhy.wra.gov.tw/fhyv2/monitor/reservoir" target="_blank">水資料分享站-水庫水情資料</a></li>
+							<li>淹水深度: <a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail.aspx?id=water_4" target="_blank">民生公共物聯網-淹水測站資料</a></li>
+							<li>颱風路徑: <a href="https://opendata.cwa.gov.tw/dataset/warning/W-C0034-005" target="_blank">氣象資料開放平台-熱帶氣旋路徑</a></li>
+							<li>災害警示: <a href="https://ci.taiwan.gov.tw/dsp/Views/dataset/detail_f1.aspx?id=alert_1" target="_blank">民生公共物聯網-災害示警資料</a></li>
+							<li>河川水位測站位置: <a href="https://data.wra.gov.tw/WraStandardWrisp/Query/StandardDetail.aspx?DictID=55" target="_blank">水資料分享站-河川水位測站站況</a></li>
+							<li>水庫基本資料: <a href="https://data.gov.tw/dataset/32726" target="_blank">水資料分享站-水庫基本資料</a></li>
 							<li>縣市界線: <a href="https://data.gov.tw/dataset/7442" target="_blank">政府資料開放平台-直轄市、縣市界線(TWD97經緯度)</a></li>
 							<li>鄉鎮界線: <a href="https://data.gov.tw/dataset/7441" target="_blank">政府資料開放平台-鄉鎮市區界線(TWD97經緯度)</a></li>
-							<li>土石流潛勢溪流位置: <a href="https://246.swcb.gov.tw/Service/OpenData" target="_blank">土石流防災資訊網-土石流潛勢溪流基本資料</a></li>
+							<li>土石流潛勢溪流位置: <a href="https://246.ardswc.gov.tw/Info/Potential" target="_blank">土石流防災資訊網-土石流潛勢溪流基本資料</a></li>
 							<li>高程資料: <a href="https://data.gov.tw/dataset/7507" target="_blank">內政部100公尺網格數值地形模型資料</a></li>
-							<li>下水道測站位置: <a href="https://scidm.nchc.org.tw/fr/dataset/379730000a-001585" target="_blank">資料集平台-水利處雨水下水道水位監測站</a></li>
-							<li>下水道即時水位: <a href="http://163.29.157.32:8080/dataset/02ca0b3e-c922-4d29-a700-c959b0566c0b" target="_blank">雨水下水道即時水位資料</a></li>
-							<li>抽水站位置: <a href="https://data.gov.tw/dataset/73804" target="_blank">政府資料開放平台-臺北市水利處抽水站</a></li>
-							<li>抽水站即時水位: <a href="http://163.29.157.32:8080/dataset/3005657c-1fdf-4658-8c3e-8bc26d33a01f" target="_blank">水利處抽水站運轉狀態</a></li>
-							<li>潮位站位置: <a href="https://opendata.cwb.gov.tw/opendatadoc/MMC/A0017-001.pdf" target="_blank">氣象資料開放平台-潮位說明資料</a></li>
-							<li>即時潮位: <a href="https://opendata.cwb.gov.tw/dataset/observation/O-A0017-001" target="_blank">氣象資料開放平台-沿岸潮位站監測資料</a></li>
+							<li>下水道測站位置: <a href="https://data.taipei/dataset/detail?id=b3648c5d-15c8-416a-a603-fda7a9ac1b0d" target="_blank">資料集平台-水利處雨水下水道水位監測站</a></li>
+							<li>下水道即時水位: <a href="https://data.taipei/dataset/detail?id=cd444840-bbfb-4b0a-bdfa-2a36d49b3794" target="_blank">雨水下水道即時水位資料</a></li>
+							<li>抽水站位置: <a href="https://data.taipei/dataset/detail?id=026cc0fa-cecc-4c78-b986-ead3b0c8b95b" target="_blank">政府資料開放平台-臺北市水利處抽水站</a></li>
+							<li>抽水站即時水位: <a href="https://data.taipei/dataset/detail?id=2bbfb30e-de58-43bd-9cc9-b56e9a6b5369" target="_blank">水利處抽水站運轉狀態</a></li>
+							<li>潮位站位置: <a href="https://opendata.cwa.gov.tw/opendatadoc/MMC/A0017-001.pdf" target="_blank">氣象資料開放平台-潮位說明資料</a></li>
+							<li>即時潮位: <a href="https://opendata.cwa.gov.tw/dataset/forecast/O-B0076-001" target="_blank">氣象資料開放平台-沿岸潮位站監測資料</a></li>
 							<li>河川流域: <a href="https://data.gov.tw/dataset/9823" target="_blank">政府資料開放平台-河川流域範圍圖</a></li>
 						</ul>
 
 						<div class="content-title">參考資料</div>
 						<ul>
-							<li><a href="https://ci.taiwan.gov.tw/dsp/sta_guide.aspx" target="_blank">民生公共物聯網 - API說明</a></li>
-							<li><a href="https://ci.taiwan.gov.tw/creativity/index.aspx#relative-music" target="_blank">民生公共物聯網 - 相關影音</a></li>
+							<li><a href="https://ci.taiwan.gov.tw/dsp/Views/api_guide/documentation.aspx" target="_blank">民生公共物聯網 - API說明</a></li>
 							<li><a href="https://alerts.ncdr.nat.gov.tw/Document/%E6%B0%91%E7%94%9F%E7%A4%BA%E8%AD%A6%E5%85%AC%E9%96%8B%E8%B3%87%E6%96%99%E5%B9%B3%E5%8F%B0.pdf" target="_blank">民生示警公開資料平台簡介</a></li>
 							<li><a href="https://alerts.ncdr.nat.gov.tw/platformInfo.aspx" target="_blank">民生示警公開資料平台 - 示警簡介</a></li>
 							<li><a href="https://water.taiwanstat.com/" target="_blank">用數據看台灣 - 台灣水庫即時水情</a></li>
@@ -652,11 +651,10 @@
 							<li><a href="https://www.books.com.tw/products/0010829596" target="_blank">颱風：在下一次巨災來臨前</a></li>
 							<li><a href="https://www.books.com.tw/products/0010723018" target="_blank">台灣的十大地理議題</a></li>
 							<li><a href="https://www.youtube.com/watch?v=9BPCTHYlvv8" target="_blank">人文講堂 - 都市防洪</a></li>
-							<li><a href="http://epaper.wra.gov.tw/Article_Detail.aspx?s=35B8A5F6A2564630" target="_blank">水利署電子報 - 綜合治水措施及方案研擬</a></li>
 							<li><a href="https://g0v.hackpad.tw/yRRVlfb5oJg" target="_blank">g0v 水議題 hackpad</a></li>
 							<li><a href="https://drive.google.com/drive/folders/188eGVEp33AMeRjCJCU-K6beh0ZK4dfkg" target="_blank">LASS2019年會-公民科學與開放資料於水資源議題上的應用</a></li>
-							<li><a href="https://llc.dianalab.net/" target="_blank">水利災害應變學習中心</a></li>
-							<li><a href="https://www.youtube.com/watch?v=efyXH-wXZwA" target="_blank">流域公民系列講座</a></li>
+							<li><a href="https://web.wra.gov.tw/ferc/" target="_blank">水利災害應變學習中心</a></li>
+							<li><a href="https://www.twrna.org/post/20240106" target="_blank">流域公民系列講座</a></li>
 						</ul>
 						<% include about %>
 					</div>
