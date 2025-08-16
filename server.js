@@ -1,5 +1,6 @@
 var express = require("express");
 var ejs = require("ejs");
+const session = require('express-session');
 var mongoose = require("mongoose");
 var Config = require("./config");
 
@@ -31,6 +32,17 @@ app.set("views", __dirname);
 app.port = Config.serverPort;
 app.host = "0.0.0.0";
 app.use('/static',express.static(__dirname + '/static'));
+
+app.use(session({
+  secret: Config.session.secret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    sameSite: 'strict',
+    httpOnly: true,
+    secure: true
+  }
+}));
 
 app.use("/", ViewRoute);
 app.use("/rain", RainRoute);
